@@ -4,6 +4,10 @@
     import { t } from "svelte-intl-precompile";
 
     let results: Array<string> = [];
+    let search_results: Array<string> = [];
+    let selected_term: string | null = null;
+    let saved_search_results: Array<string> = [];
+
     const base = "";
     const CHARS = [
         "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
@@ -23,66 +27,58 @@
         return out.join("");
     }
 
-    function random_list() {
+    function random_list(n: number) {
         let res = [];
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < n; i++) {
             res.push(random_string(10));
         }
         return res;
     }
 
     function on_new_value() {
-        results = random_list();
+        search_results = random_list(10);
+    }
+
+    function on_select_term(term: string) {
+        saved_search_results = [...search_results];
+        selected_term = term;
+        search_results = [selected_term];
+    }
+
+    function reexpand() {
+        search_results = [...saved_search_results];
+        saved_search_results = [];
+        selected_term = null;
     }
 </script>
 
-<svelte:head>
-    <title>Giellatekno Metadictionary</title>
-</svelte:head>
-
-<div class="wrapper">
-    <div>
-        <LocaleSelector />
-    </div>
-    <header>
-        <a class="big" href="{base}/">Giellatekno Metadictionary</a>
-        <!--<a class="small" href="{base}/all">{$t("dictionaries")}</a>-->
-    </header>
-    <div class="line"></div>
-    <main>
-        <div class="content">
-            <slot></slot>
-        </div>
-    </main>
-</div>
 
 <main class="results">
-    <div class="search-wrapper">
-        <span>
-            <WordInput 
-                on:new-value={on_new_value}
-            />
-        </span>
-        <span>
-            <select>
-                <option>Nordsamisk</option>
-                <option>Lulesamisk</option>
-                <option>Sørsamisk</option>
-            </select>
-        </span>
-    </div>
-
-    <div class="left">
-        <ul>
-            {#each results as string, index}
-                <li>Item: {string} ({index})</li>
+    <div class="search-hits">
+        <ul class="clean">
+            {#each search_results as res}
+                <li>
+                    <a href="/sme/{res}">{res}</a>
+                </li>
             {/each}
+            <span on:click={reexpand}>Reexpand</span>
         </ul>
     </div>
 
-    <div class="right">
-        ARTIKKEL HER
-    </div>
+    {#if selected_term}
+        <div class="left">
+            <h3>{selected_term}</h3>
+            <ul>
+                {#each results as string, index}
+                    <li>Item: {string} ({index})</li>
+                {/each}
+            </ul>
+        </div>
+
+        <div class="right">
+            ARTIKKEL HER
+        </div>
+    {/if}
 </main>
 
 <style>
@@ -91,6 +87,7 @@
         display: grid;
         grid-template-areas:
             'search search search'
+            'results results results'
             'left right right';
     }
 
@@ -108,6 +105,14 @@
         margin-left: auto;
     }
 
+    div.search-hits {
+        grid-area: results;
+    }
+
+    ul.clean {
+        list-style: none;
+    }
+
     div.left {
         grid-area: left;
         border: 2px solid red;
@@ -121,46 +126,17 @@
         overflow-y: scroll;
     }
 
-    div.wrapper {
-        margin: 8px;
-        width: calc(100vw - 16px);
-    }
-
-    div.line {
-        border-bottom: 1px solid silver;
-        width: calc(100vw - 16px);
-    }
-
-    header {
-        padding-bottom: 8px;
-        margin: 5px 0 0 20px;
-    }
-
     a {
-        color: black;
         font-family: verdana;
     }
 
-    a.big {
-        text-decoration: none;
-        font-family: verdana;
-        font-size: 26px;
-        font-weight: 100;
+    a:visited {
+        color: blue;
     }
 
-    a.small {
-        font-size: 16px;
-        margin-left: 16px;
-    }
 
     main {
         display: flex;
         justify-content: center;
     }
-
-    div.content {
-        width: min(max(a, b), c);
-        /*width: 50%;*/
-    }
-
 </style>
