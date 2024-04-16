@@ -12,6 +12,7 @@ NAME LANG1 LANG2 AUTHOR
 import os
 import os.path
 import sys
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass, fields
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -78,7 +79,7 @@ class Dictionary:
 class Article:
     id: int
     lemma: str
-    dictionary: id
+    dictionary: int
     rendered: str
     pos: str | None = None
     lang: str | None = None
@@ -113,15 +114,16 @@ def main():
         d = Dictionary(id=i, name=f"gt-{name}", lang1=l1, lang2=l2)
         dictionaries.append(d)
 
-        with NamedTemporaryFile() as f:
-            try:
-                n_entries = merge_giella_dicts(directory / "src", f.name)
-            except FileNotFoundError:
-                print(f"no src files in dict {l1}-{l2}, skipping")
-            except NotADirectoryError:
-                print(f"no src directory in dict {l1}-{l2}, skipping")
-            else:
-                print(f"{l1}-{l2}: {n_entries}")
+        merged_file_path = f"merged/gt-{l1}-{l2}.xml"
+        try:
+            merged_xml = ET.parse(merged_file_path)
+        except Exception as e:
+            continue
+        else:
+            print(merged_file_path, "ok")
+
+        #for e in merged_xml.iter("e"):
+        #    print(e)
 
     lines = "\n".join(d.to_tsv_string() for d in dictionaries)
     with open("init/data_dictionaries.txt", "w") as f:
