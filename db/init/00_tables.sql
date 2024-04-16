@@ -24,15 +24,15 @@ CREATE TABLE dictionaries (
 CREATE TABLE articles (
     id SERIAL PRIMARY KEY,
     lemma text,
+    dictionary integer REFERENCES dictionaries (id),
+    -- rendered html of the article data
+    rendered text,
     pos text,
     lang text,
-    dictionary integer REFERENCES dictionaries (id),
     -- internal ordering in the dictionary, may be NULL
     article_number integer,
     -- additional properties, e.g. algu number, korp reference
     additional_properties json,
-    -- rendered html of the article data
-    rendered text
 );
 
 

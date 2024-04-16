@@ -11,8 +11,45 @@ NAME LANG1 LANG2 AUTHOR
 
 import os
 import os.path
+import sys
 from dataclasses import dataclass, fields
 from pathlib import Path
+from tempfile import NamedTemporaryFile
+
+
+def get_gut_root():
+    app_toml_path = os.path.expanduser("~/.config/gut/app.toml")
+    with open(app_toml_path) as f:
+        for line in f:
+            if line.startswith("#"):
+                continue
+            try:
+                k, v = line.split("=", maxsplit=1)
+            except IndexError:
+                continue
+            k = k.strip()
+            v = v.strip()
+            if k != "root":
+                continue
+
+            if v.startswith('"') and v.endswith('"'):
+                v = v[1:-1]
+
+            return v
+
+
+try:
+    # if GUTHOME (the gut directory) environment variable is set...
+    GUTROOT = get_gut_root()
+    script_directory = os.path.join(GUTROOT, "giellalt", "giella-core", "dicts", "scripts")
+    # ...and the scripts directory have been moved to git ...
+    if not os.path.isdir(script_directory):
+        raise KeyError
+finally:
+    sys.path.append(script_directory)
+    from merge_giella_dicts import merge_giella_dicts
+
+
 
 
 @dataclass
@@ -37,6 +74,18 @@ class Dictionary:
         return "\t".join(v)
 
 
+@dataclass
+class Article:
+    id: int
+    lemma: str
+    dictionary: id
+    rendered: str
+    pos: str | None = None
+    lang: str | None = None
+    article_number: int | None = None
+    additional_properties: str | None = None
+
+
 def pyobj_to_psql_data(obj):
     if obj is None:
         return "\\N"
@@ -48,32 +97,12 @@ def pyobj_to_psql_data(obj):
         raise TypeError("unhandled type of obj", type(obj))
 
 
-def get_gut_root():
-    app_toml_path = os.path.expanduser("~/.config/gut/app.toml")
-    with open(app_toml_path) as f:
-        for line in f:
-            if line.startswith("#"):
-                continue
-            try:
-                k, v = line.split("=", maxsplit=1)
-            except IndexError:
-                continue
-            k = k.strip()
-            v = v.strip()
-            if k != "root":
-                continue
-
-            if v.startswith('"') and v.endswith('"'):
-                v = v[1:-1]
-
-            return v
-
-
-if __name__ == "__main__":
+def main():
     gut_root = get_gut_root()
     p = Path(gut_root) / "giellalt"
 
     dictionaries = []
+    articles = []
     for i, directory in enumerate(p.glob("dict-*"), start=1):
         # strip away the "dict-" prefix
         name = directory.name[5:]
@@ -84,6 +113,20 @@ if __name__ == "__main__":
         d = Dictionary(id=i, name=f"gt-{name}", lang1=l1, lang2=l2)
         dictionaries.append(d)
 
+        with NamedTemporaryFile() as f:
+            try:
+                n_entries = merge_giella_dicts(directory / "src", f.name)
+            except FileNotFoundError:
+                print(f"no src files in dict {l1}-{l2}, skipping")
+            except NotADirectoryError:
+                print(f"no src directory in dict {l1}-{l2}, skipping")
+            else:
+                print(f"{l1}-{l2}: {n_entries}")
+
     lines = "\n".join(d.to_tsv_string() for d in dictionaries)
     with open("init/data_dictionaries.txt", "w") as f:
         f.write(lines)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
