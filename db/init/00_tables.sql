@@ -7,6 +7,10 @@ CREATE TABLE dictionaries (
     lang1 text,
     lang2 text,
 
+    -- Dictionary is closed to the public, and only logged in users can see
+    -- contents from it
+    closed boolean,
+
     -- Are the articles in the dictionary ordered, such that each article
     -- has a defined, numerical, id
     is_ordered boolean DEFAULT false,

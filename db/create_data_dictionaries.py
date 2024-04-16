@@ -77,6 +77,7 @@ class Dictionary:
     name: str
     lang1: str
     lang2: str
+    closed: bool = False
     is_ordered: bool = False
     author: str | None = None
     date_published: str | None = None
