@@ -15,7 +15,6 @@ import sys
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, fields
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 
 
 def get_gut_root():
@@ -51,6 +50,25 @@ finally:
     from merge_giella_dicts import merge_giella_dicts
 
 
+def pyobj_to_psql_data(obj):
+    if obj is None:
+        return "\\N"
+    elif isinstance(obj, str):
+        return obj
+    elif isinstance(obj, int):
+        return str(obj)
+    else:
+        raise TypeError("unhandled type of obj", type(obj))
+
+
+def dataclass_to_tsv_string(dcls_inst):
+    strings = []
+    for field in fields(dcls_inst):
+        value = getattr(dcls_inst, field.name)
+        stringified = pyobj_to_psql_data(value)
+        strings.append(stringified)
+
+    return "\t".join(strings)
 
 
 @dataclass
@@ -66,13 +84,7 @@ class Dictionary:
     source: str | None = None
 
     def to_tsv_string(self):
-        v = []
-        for field in fields(self):
-            value = getattr(self, field.name)
-            stringified = pyobj_to_psql_data(value)
-            v.append(stringified)
-
-        return "\t".join(v)
+        return dataclass_to_tsv_string(self)
 
 
 @dataclass
@@ -86,16 +98,26 @@ class Article:
     article_number: int | None = None
     additional_properties: str | None = None
 
+    def to_tsv_string(self):
+        return dataclass_to_tsv_string(self)
 
-def pyobj_to_psql_data(obj):
-    if obj is None:
-        return "\\N"
-    elif isinstance(obj, str):
-        return obj
-    elif isinstance(obj, int):
-        return str(obj)
-    else:
-        raise TypeError("unhandled type of obj", type(obj))
+
+def e_node_to_article(e_node, article_id, dictionary_id):
+    l_node = e_node.find("lg/l")
+    if l_node is None:
+        raise Exception("<e> node has no <lg><l>")
+
+    lemma = l_node.text.strip("\n\t ").replace("\n", " ")
+    mgs = e_node.findall("mg")
+    rendered = "<br>".join(ET.tostring(mg, encoding="unicode") for mg in mgs)
+    rendered = rendered.replace("\n", "<br>").replace("\t", " ")
+
+    return Article(
+        id=article_id,
+        dictionary=dictionary_id,
+        lemma=lemma,
+        rendered=rendered,
+    )
 
 
 def main():
@@ -104,30 +126,46 @@ def main():
 
     dictionaries = []
     articles = []
-    for i, directory in enumerate(p.glob("dict-*"), start=1):
+    for dictionary_id, directory in enumerate(p.glob("dict-*"), start=1):
         # strip away the "dict-" prefix
         name = directory.name[5:]
         if len(name) != 7:
             # skip ...-x-private  and other such dicts
             continue
         l1, l2 = name.split("-")
-        d = Dictionary(id=i, name=f"gt-{name}", lang1=l1, lang2=l2)
+        d = Dictionary(
+            id=dictionary_id,
+            name=f"gt-{name}",
+            lang1=l1,
+            lang2=l2,
+        )
         dictionaries.append(d)
 
         merged_file_path = f"merged/gt-{l1}-{l2}.xml"
         try:
             merged_xml = ET.parse(merged_file_path)
         except Exception as e:
+            print(e)
             continue
         else:
             print(merged_file_path, "ok")
 
-        #for e in merged_xml.iter("e"):
-        #    print(e)
+        for e in merged_xml.iter("e"):
+            article_id = len(articles) + 1
+            try:
+                article = e_node_to_article(e, article_id, dictionary_id)
+            except Exception as e:
+                print(e)
+                continue
+            articles.append(article)
 
     lines = "\n".join(d.to_tsv_string() for d in dictionaries)
     with open("init/data_dictionaries.txt", "w") as f:
         f.write(lines)
+
+    article_lines = "\n".join(d.to_tsv_string() for d in articles)
+    with open("init/data_articles.txt", "w") as f:
+        f.write(article_lines)
 
 
 if __name__ == "__main__":

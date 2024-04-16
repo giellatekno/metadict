@@ -32,7 +32,7 @@ CREATE TABLE articles (
     -- internal ordering in the dictionary, may be NULL
     article_number integer,
     -- additional properties, e.g. algu number, korp reference
-    additional_properties json,
+    additional_properties json
 );
 
 
@@ -41,5 +41,5 @@ COPY dictionaries FROM
     '/docker-entrypoint-initdb.d/data_dictionaries.txt';
 
 -- Generated data: Articles from all giellatekno dictionaries
---COPY articles FROM
---    '/docker-entrypoint-initdb.d/data_articles.txt';
+COPY articles FROM
+    '/docker-entrypoint-initdb.d/data_articles.txt';
