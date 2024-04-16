@@ -127,12 +127,10 @@ def main():
 
     dictionaries = []
     articles = []
-    for dictionary_id, directory in enumerate(p.glob("dict-*"), start=1):
-        # strip away the "dict-" prefix
-        name = directory.name[5:]
-        if len(name) != 7:
-            # skip ...-x-private  and other such dicts
-            continue
+    merged_dir = Path("merged")
+    for dictionary_id, dictionary in enumerate(merged_dir.iterdir(), start=1):
+        # strip away the "gt-" prefix and ".xml" suffix
+        name = dictionary.name[3:-4]
         l1, l2 = name.split("-")
         d = Dictionary(
             id=dictionary_id,
@@ -142,14 +140,13 @@ def main():
         )
         dictionaries.append(d)
 
-        merged_file_path = f"merged/gt-{l1}-{l2}.xml"
         try:
-            merged_xml = ET.parse(merged_file_path)
+            merged_xml = ET.parse(dictionary)
         except Exception as e:
             print(e)
             continue
         else:
-            print(merged_file_path, "ok")
+            print(dictionary, "ok")
 
         for e in merged_xml.iter("e"):
             article_id = len(articles) + 1
