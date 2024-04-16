@@ -12,13 +12,13 @@ CREATE TABLE dictionaries (
     is_ordered boolean DEFAULT false,
 
     -- other info about the dictionary
-    author text
+    author text,
     -- publishing date
     date_published text,
     -- If the dictionary is published as a book, this is the ISBN number
     isbn text,
     -- What is the source?
-    source text,
+    source text
 );
 
 CREATE TABLE articles (
@@ -37,9 +37,9 @@ CREATE TABLE articles (
 
 
 -- Generated data: Giellatekno dictionaries
-COPY dictionaries (name, lang1, lang2, author) FROM
+COPY dictionaries FROM
     '/docker-entrypoint-initdb.d/data_dictionaries.txt';
 
 -- Generated data: Articles from all giellatekno dictionaries
-COPY articles (lemma, pos, lang, dictionary) FROM
-    '/docker-entrypoint-initdb.d/data_articles.txt';
+--COPY articles FROM
+--    '/docker-entrypoint-initdb.d/data_articles.txt';
