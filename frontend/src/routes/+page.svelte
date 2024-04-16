@@ -3,7 +3,37 @@
     import LocaleSelector from "$lib/components/LocaleSelector.svelte";
     import { t } from "svelte-intl-precompile";
 
+    let results: Array<string> = [];
     const base = "";
+    const CHARS = [
+        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
+        "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
+        "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g",
+        "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r",
+        "s", "t", "u", "v", "w", "x", "y", "z",
+    ];
+
+    function random_string(length: number) {
+        let out = [];
+        for (let i = 0; i < length; i++) {
+            const index = Math.ceil(Math.random() * CHARS.length);
+            out.push(CHARS[index]);
+        }
+
+        return out.join("");
+    }
+
+    function random_list() {
+        let res = [];
+        for (let i = 0; i < 100; i++) {
+            res.push(random_string(10));
+        }
+        return res;
+    }
+
+    function on_new_value() {
+        results = random_list();
+    }
 </script>
 
 <svelte:head>
@@ -26,21 +56,74 @@
     </main>
 </div>
 
-<div class="centered">
-    <WordInput />
-</div>
+<main class="results">
+    <div class="search-wrapper">
+        <span>
+            <WordInput 
+                on:new-value={on_new_value}
+            />
+        </span>
+        <span>
+            <select>
+                <option>Nordsamisk</option>
+                <option>Lulesamisk</option>
+                <option>Sørsamisk</option>
+            </select>
+        </span>
+    </div>
 
+    <div class="left">
+        <ul>
+            {#each results as string, index}
+                <li>Item: {string} ({index})</li>
+            {/each}
+        </ul>
+    </div>
+
+    <div class="right">
+        ARTIKKEL HER
+    </div>
+</main>
 
 <style>
-    div.centered {
+    main.results {
         width: 100vw;
-        height: 40vh;
         display: grid;
-        place-items: center center;
+        grid-template-areas:
+            'search search search'
+            'left right right';
+    }
+
+    div.search-wrapper {
+        width: 100vw;
+        grid-area: search;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        justify-items: center;
+        align-items: center;
+    }
+
+    div.search-wrapper > span:nth-child(1) {
+        grid-column-start: 3;
+        margin-left: auto;
+    }
+
+    div.left {
+        grid-area: left;
+        border: 2px solid red;
+        overflow-y: scroll;
+        height: 60vh;
+    }
+
+    div.right {
+        grid-area: right;
+        border: 2px solid blue;
+        overflow-y: scroll;
     }
 
     div.wrapper {
-        width: calc(100vw - 6vw);
+        margin: 8px;
+        width: calc(100vw - 16px);
     }
 
     div.line {

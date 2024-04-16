@@ -102,7 +102,7 @@ class Article:
         return dataclass_to_tsv_string(self)
 
 
-def e_node_to_article(e_node, article_id, dictionary_id):
+def e_node_to_article(e_node, lang, article_id, dictionary_id):
     l_node = e_node.find("lg/l")
     if l_node is None:
         raise Exception("<e> node has no <lg><l>")
@@ -117,6 +117,7 @@ def e_node_to_article(e_node, article_id, dictionary_id):
         dictionary=dictionary_id,
         lemma=lemma,
         rendered=rendered,
+        lang=lang,
     )
 
 
@@ -153,7 +154,7 @@ def main():
         for e in merged_xml.iter("e"):
             article_id = len(articles) + 1
             try:
-                article = e_node_to_article(e, article_id, dictionary_id)
+                article = e_node_to_article(e, l1, article_id, dictionary_id)
             except Exception as e:
                 print(e)
                 continue
