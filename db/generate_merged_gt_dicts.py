@@ -1,3 +1,4 @@
+import argparse
 import os.path
 import sys
 import shutil
@@ -37,7 +38,16 @@ finally:
     from merge_giella_dicts import merge_giella_dicts
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-l", "--langs", nargs="+"
+    )
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
     gut_root = get_gut_root()
     p = Path(gut_root) / "giellalt"
 
@@ -51,6 +61,10 @@ def main():
             # skip ...-x-private  and other such dicts
             continue
         l1, l2 = name.split("-")
+
+        if args.langs:
+            if l1 not in args.langs and l2 not in args.langs:
+                continue
 
         output_filename = f"merged/gt-{l1}-{l2}.xml"
         try:
