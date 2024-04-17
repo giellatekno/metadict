@@ -1,0 +1,39 @@
+.PHONY: help
+help:
+	@echo "Available commands:"
+	@echo "dev - run development build locally"
+	@echo "build - just cargo build --release"
+	@echo "image - use podman to build the image"
+	@echo "runlocal - run the built image, using local settings"
+	@echo "stop - stop the locally running container"
+
+.PHONY: dev
+dev:
+	RUST_BACKTRACE=1 PG__PASSWORD=mysecretpassword systemfd --no-pid -s http::3000 -- cargo watch -x run
+
+.PHONY: run-release
+run-release:
+	RUST_BACKTRACE=1 PG__PASSWORD=mysecretpassword systemfd --no-pid -s http::3000 -- cargo run --release
+
+.PHONY: build
+build:
+	cargo build --release
+
+.PHONY: image
+image: target/release/metadict-api
+	podman build -t metadict-api -f Dockerfile .
+
+.PHONY: runlocal
+runlocal:
+	podman run \
+		--name metadict-api \
+		--detach \
+		--stop-signal=SIGINT \
+		--rm \
+		-p 8081:3000 \
+		metadict-api
+
+.PHONY: stop
+stop:
+	podman stop metadict-api
+

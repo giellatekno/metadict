@@ -1,0 +1,4 @@
+[pg]
+DBNAME = "postgres"
+user = "postgres"
+host = "localhost"

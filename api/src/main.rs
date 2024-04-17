@@ -1,53 +1,198 @@
-use tokio_postgres::{NoTls, Error};
-use axum::response::{IntoResponse, Response};
+mod pg_connection_pool;
+mod timing_middleware;
 
+use anyhow::anyhow;
 use axum::{
+    extract::{Path, State},
+    response::{IntoResponse, Response},
     routing::get,
-    Router,
+    Json, Router,
 };
+use listenfd::ListenFd;
+use serde_json::json;
+use std::sync::Arc;
+use tokio::net::TcpListener;
+use tokio_postgres::Error;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-async fn search_handler() -> Response {
-    "search".into_response()
+use crate::pg_connection_pool::ConnectionPool;
+use crate::timing_middleware::timing_middleware;
+
+#[derive(Clone)]
+struct AppState {
+    /// The connection pool to the PostgreSQL database.
+    connpool: std::sync::Arc<ConnectionPool>,
 }
 
-async fn lookup_handler() -> Response {
-    "lookup".into_response()
+struct AppError(anyhow::Error);
+
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        (
+            http::StatusCode::INTERNAL_SERVER_ERROR,
+            #[cfg(debug_assertions)]
+            format!("{}", self.0),
+            #[cfg(not(debug_assertions))]
+            "Something went wrong",
+        )
+            .into_response()
+    }
+}
+
+impl From<anyhow::Error> for AppError {
+    fn from(err: anyhow::Error) -> Self {
+        Self(err)
+    }
+}
+
+/// /search/:lang/:query
+/// Finds all matching lemmas to the :query, in all dictionaries.
+async fn search_handler(
+    Path((lang, query)): Path<(String, String)>,
+    State(AppState { connpool }): State<AppState>,
+) -> Result<Response, AppError> {
+    let client = connpool.get().await?;
+
+    // TODO is this injection safe?
+    let statement = r#"
+        SELECT DISTINCT
+            lemma
+        FROM
+            articles
+        WHERE
+            lang = $1
+            AND
+            lemma LIKE $2
+        ;
+    "#;
+    // TODO prepared statement cache? Is that a thing?
+    //let statement = match client.prepare(sql_query).await {
+    //    Ok(statement) => statement,
+    //    Err(e) => return format!("{}", e).into_response(),
+    //};
+    let rows = client
+        .query(statement, &[&lang, &query])
+        .await
+        .map_err(|e| anyhow!(e))?;
+    // rust: temporary value dropped while borrowed
+    let rows = rows
+        .iter()
+        .map(|row| {
+            // tuple of row.get(index), but have to tell which type for each
+            // column (and a (or the) correct rust type that the postgres type
+            // can be converted into. E.g. if field N had pg type TEXT, then
+            // it could not be converted to f32, but it can be converted to &str.
+            row.get::<usize, &str>(0)
+            //row.columns()
+            //    .iter()
+            //    .map(|column_info| row.get::<&str, column_info.type_()>(column_info.name()))
+            //    .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+    Ok(Json(json!(rows)).into_response())
+}
+
+/// /lookup/:lang/:lemma
+/// Return articles for a specific lemma (one that does NOT contain wildcard %)
+/// Return type:
+///   [ [lemma, dictionary_name, and article_id], ... ]
+async fn lookup_handler(
+    Path((lang, lemma)): Path<(String, String)>,
+    State(AppState { connpool }): State<AppState>,
+) -> Result<Response, AppError> {
+    let client = connpool.get().await?;
+
+    // TODO is this injection safe?
+    let statement = r#"
+        SELECT
+            articles.lemma,
+            dictionaries.name,
+            articles.id
+        FROM
+            articles
+        INNER JOIN
+            dictionaries
+        ON
+            articles.dictionary = dictionaries.id
+        WHERE
+            lang = $1
+            AND
+            lemma LIKE $2
+        ;
+    "#;
+    let rows = client
+        .query(statement, &[&lang, &lemma])
+        .await
+        .map_err(|e| anyhow!(e))?;
+    let rows = rows
+        .iter()
+        .map(|row| {
+            (
+                row.get::<usize, &str>(0),
+                row.get::<usize, &str>(1),
+                row.get::<usize, i32>(2),
+            )
+        })
+        .collect::<Vec<_>>();
+    Ok(Json(json!(rows)).into_response())
+}
+
+/// /article/:id
+async fn article_handler(
+    Path(id): Path<i32>,
+    State(AppState { connpool }): State<AppState>,
+) -> Result<Response, AppError> {
+    let client = connpool.get().await?;
+    let statement = "SELECT rendered FROM articles WHERE id = $1;";
+    let rows = client
+        .query(statement, &[&id])
+        .await
+        .map_err(|e| anyhow!(e))?;
+    let rows = rows
+        .iter()
+        .map(|row| row.get::<usize, &str>(0))
+        .collect::<Vec<_>>();
+    Ok(Json(json!(rows)).into_response())
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    // Connect to the database.
-    let (client, connection) =
-        tokio_postgres::connect("host=localhost user=postgres", NoTls).await?;
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                // axum logs rejections from built-in extractors with the `axum::rejection`
+                // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
+                "metadict-api=debug,tower_http=debug,axum::rejection=trace".into()
+            }),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
 
+    let state = AppState {
+        connpool: Arc::new(ConnectionPool::new()),
+    };
 
-    // The connection object performs the actual communication with the database,
-    // so spawn it off to run on its own.
-    tokio::spawn(async move {
-        if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
-        }
-    });
-
-    // Now we can execute a simple statement that just returns its parameter.
-    let rows = client
-        .query("SELECT $1::TEXT", &[&"hello world"])
-        .await?;
-
-    // And then check that we got back the same string we sent over.
-    let value: &str = rows[0].get(0);
-    assert_eq!(value, "hello world");
-
-
-    // build our application with a single route
     let app = Router::new()
-        .route("/", get(|| async { "metadictionary" }))
-        .route("/search", get(search_handler))
-        .route("/lookup", get(lookup_handler));
+        .route(
+            "/",
+            get(|| async { concat!(env!("CARGO_PKG_NAME"), " v", env!("CARGO_PKG_VERSION")) }),
+        )
+        .route("/search/:lang/:query", get(search_handler))
+        .route("/lookup/:lang/:lemma", get(lookup_handler))
+        .route("/article/:id", get(article_handler))
+        .layer(axum::middleware::from_fn(timing_middleware))
+        .with_state(state);
 
-    // run our app with hyper, listening globally on port 3000
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = match ListenFd::from_env().take_tcp_listener(0).unwrap() {
+        // if we are given a tcp listener on listen fd 0, we use that one
+        Some(listener) => {
+            listener.set_nonblocking(true).unwrap();
+            TcpListener::from_std(listener).unwrap()
+        }
+        // otherwise fall back to local listening
+        None => TcpListener::bind("0.0.0.0:3000").await.unwrap(),
+    };
+
     axum::serve(listener, app).await.unwrap();
-
     Ok(())
 }
