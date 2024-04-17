@@ -3,28 +3,7 @@ import os.path
 import sys
 import shutil
 from pathlib import Path
-
-
-def get_gut_root():
-    app_toml_path = os.path.expanduser("~/.config/gut/app.toml")
-    with open(app_toml_path) as f:
-        for line in f:
-            if line.startswith("#"):
-                continue
-            try:
-                k, v = line.split("=", maxsplit=1)
-            except IndexError:
-                continue
-            k = k.strip()
-            v = v.strip()
-            if k != "root":
-                continue
-
-            if v.startswith('"') and v.endswith('"'):
-                v = v[1:-1]
-
-            return v
-
+from utils.utils import get_gut_root
 
 try:
     # if GUTHOME (the gut directory) environment variable is set...

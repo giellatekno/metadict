@@ -8,84 +8,10 @@ The columns are
 NAME LANG1 LANG2 AUTHOR
 """
 
-import os
-import os.path
-import sys
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass, fields
 from pathlib import Path
+from utils.dataclasses import Dictionary, Article
 
-
-def pyobj_to_psql_data(obj):
-    if obj is None:
-        return "\\N"
-    elif isinstance(obj, str):
-        return obj
-    elif isinstance(obj, int):
-        return str(obj)
-    else:
-        raise TypeError("unhandled type of obj", type(obj), obj)
-
-
-def dataclass_to_tsv_string(dcls_inst):
-    strings = []
-    for field in fields(dcls_inst):
-        value = getattr(dcls_inst, field.name)
-        stringified = pyobj_to_psql_data(value)
-        strings.append(stringified)
-
-    return "\t".join(strings)
-
-
-@dataclass
-class Dictionary:
-    id: int
-    name: str
-    lang1: str
-    lang2: str
-    closed: bool = False
-    is_ordered: bool = False
-    author: str | None = None
-    date_published: str | None = None
-    isbn: str | None = None
-    source: str | None = None
-
-    def to_tsv_string(self):
-        return dataclass_to_tsv_string(self)
-
-
-@dataclass
-class Article:
-    id: int
-    lemma: str
-    dictionary: int
-    rendered: str
-    pos: str | None = None
-    lang: str | None = None
-    article_number: int | None = None
-    additional_properties: str | None = None
-
-    def to_tsv_string(self):
-        return dataclass_to_tsv_string(self)
-
-
-def e_node_to_article(e_node, lang, article_id, dictionary_id):
-    l_node = e_node.find("lg/l")
-    if l_node is None:
-        raise Exception("<e> node has no <lg><l>")
-
-    lemma = l_node.text.strip("\n\t ").replace("\n", " ")
-    mgs = e_node.findall("mg")
-    rendered = "<br>".join(ET.tostring(mg, encoding="unicode") for mg in mgs)
-    rendered = rendered.replace("\n", "<br>").replace("\t", " ")
-
-    return Article(
-        id=article_id,
-        dictionary=dictionary_id,
-        lemma=lemma,
-        rendered=rendered,
-        lang=lang,
-    )
 
 def row_node_to_article(row_node, lang, article_id, article_number, dictionary_id):
 
@@ -119,13 +45,14 @@ def main():
     dictionaries = []
     articles = []
     
+    target = "../db/init"
     filename = 'qvigstad/Qvigstad Kalfjord_kopi.xml'
     name='Qvigstad-Kalfjord-sme-nob'
 
-    with open("init/data_dictionaries.txt", "r") as f:
+    with open(Path(target) / "data_dictionaries.txt", "r") as f:
         dictionary_id = len(f.readlines()) + 1
     
-    with open("init/data_articles.txt", "r") as f:
+    with open(Path(target) / "data_articles.txt", "r") as f:
         article_id = len(f.readlines()) + 1
     
     d = Dictionary(
@@ -159,11 +86,11 @@ def main():
         article_id += 1   
         
     lines = "\n".join(d.to_tsv_string() for d in dictionaries)
-    with open("init/data_dictionaries.txt", "a") as f:
+    with open(Path(target) / "data_dictionaries.txt", "a") as f:
         f.write("\n" + lines)
 
     article_lines = "\n".join(d.to_tsv_string() for d in articles)
-    with open("init/data_articles.txt", "a") as f:
+    with open(Path(target) / "data_articles.txt", "a") as f:
         f.write("\n" + article_lines)
 
 
