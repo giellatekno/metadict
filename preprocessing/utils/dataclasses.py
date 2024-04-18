@@ -42,7 +42,7 @@ class Dictionary:
 
 @dataclass
 class Article:
-    id: int
+    # id: int
     lemma: str
     dictionary: int
     rendered: str

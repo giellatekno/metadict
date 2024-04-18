@@ -45,7 +45,7 @@ def main():
             if l1 not in args.langs and l2 not in args.langs:
                 continue
 
-        output_filename = f"merged/gt-{l1}-{l2}.xml"
+        output_filename = f"dicts/gt/gt-{l1}-{l2}.xml"
         try:
             n_entries = merge_giella_dicts(directory / "src", output_filename)
         except FileNotFoundError:
