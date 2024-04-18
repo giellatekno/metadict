@@ -41,4 +41,8 @@ impl ConnectionPool {
     pub async fn get(&self) -> Result<deadpool_postgres::Object, anyhow::Error> {
         self.pool.get().await.map_err(|e| anyhow!(e))
     }
+
+    pub fn inner_ref(&self) -> &deadpool_postgres::Pool {
+        &self.pool
+    }
 }

@@ -18,10 +18,17 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use crate::pg_connection_pool::ConnectionPool;
 use crate::timing_middleware::timing_middleware;
 
-#[derive(Clone)]
 struct AppState {
     /// The connection pool to the PostgreSQL database.
-    connpool: std::sync::Arc<ConnectionPool>,
+    connpool: Arc<ConnectionPool>,
+}
+
+impl Clone for AppState {
+    fn clone(&self) -> Self {
+        Self {
+            connpool: Arc::clone(&self.connpool),
+        }
+    }
 }
 
 struct AppError(anyhow::Error);
@@ -43,6 +50,19 @@ impl From<anyhow::Error> for AppError {
     fn from(err: anyhow::Error) -> Self {
         Self(err)
     }
+}
+
+fn internal_error<E>(err: E) -> (http::StatusCode, String)
+where
+    E: std::error::Error,
+{
+    (
+        http::StatusCode::INTERNAL_SERVER_ERROR,
+        #[cfg(debug_assertions)]
+        err.to_string(),
+        #[cfg(not(debug_assertions))]
+        "Something went wrong".to_string(),
+    )
 }
 
 /// /search/:lang/:query
@@ -155,6 +175,10 @@ async fn article_handler(
     Ok(Json(json!(rows)).into_response())
 }
 
+async fn handler_404() -> Response {
+    (http::StatusCode::NOT_FOUND, "Not found, see ... \n").into_response()
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     tracing_subscriber::registry()
@@ -168,8 +192,9 @@ async fn main() -> Result<(), Error> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    let connpool = ConnectionPool::new();
     let state = AppState {
-        connpool: Arc::new(ConnectionPool::new()),
+        connpool: Arc::new(connpool),
     };
 
     let app = Router::new()
@@ -180,6 +205,7 @@ async fn main() -> Result<(), Error> {
         .route("/search/:lang/:query", get(search_handler))
         .route("/lookup/:lang/:lemma", get(lookup_handler))
         .route("/article/:id", get(article_handler))
+        .fallback(handler_404)
         .layer(axum::middleware::from_fn(timing_middleware))
         .with_state(state);
 
