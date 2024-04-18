@@ -31,6 +31,9 @@ deadpool-postgres = { version = "0.13.0", features = ["serde"] }
 # other means. E.g. defaults in file, overriden by env vars.
 config = "0.14"
 
+# http specific middleware on top of tower (axum uses tower)
+tower-http = { version = "0.5.2", features = ["cors"] }
+
 # logging for async apps, core library
 tracing = "0.1.40"
 

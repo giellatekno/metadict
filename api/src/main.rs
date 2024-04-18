@@ -201,12 +201,17 @@ async fn main() -> Result<(), Error> {
         connpool: Arc::new(connpool),
     };
 
+    let cors_layer = tower_http::cors::CorsLayer::new()
+        .allow_origin(tower_http::cors::Any)
+        .allow_methods([http::Method::GET]);
+
     let app = Router::new()
         .route("/", get(handler_root))
         .route("/search/:lang/:query", get(handler_search))
         .route("/lookup/:lang/:lemma", get(handler_lookup))
         .route("/article/:id", get(handler_article))
         .fallback(handler_404)
+        .layer(cors_layer)
         .layer(axum::middleware::from_fn(timing_middleware))
         .with_state(state);
 
