@@ -65,9 +65,17 @@ where
     )
 }
 
+async fn handler_root() -> Response {
+    concat!(env!("CARGO_PKG_NAME"), " v", env!("CARGO_PKG_VERSION"), "\n").into_response()
+}
+
+async fn handler_404() -> Response {
+    (http::StatusCode::NOT_FOUND, "Not found\n").into_response()
+}
+
 /// /search/:lang/:query
 /// Finds all matching lemmas to the :query, in all dictionaries.
-async fn search_handler(
+async fn handler_search(
     Path((lang, query)): Path<(String, String)>,
     State(AppState { connpool }): State<AppState>,
 ) -> Result<Response, AppError> {
@@ -116,7 +124,7 @@ async fn search_handler(
 /// Return articles for a specific lemma (one that does NOT contain wildcard %)
 /// Return type:
 ///   [ [lemma, dictionary_name, and article_id], ... ]
-async fn lookup_handler(
+async fn handler_lookup(
     Path((lang, lemma)): Path<(String, String)>,
     State(AppState { connpool }): State<AppState>,
 ) -> Result<Response, AppError> {
@@ -158,7 +166,7 @@ async fn lookup_handler(
 }
 
 /// /article/:id
-async fn article_handler(
+async fn handler_article(
     Path(id): Path<i32>,
     State(AppState { connpool }): State<AppState>,
 ) -> Result<Response, AppError> {
@@ -173,10 +181,6 @@ async fn article_handler(
         .map(|row| row.get::<usize, &str>(0))
         .collect::<Vec<_>>();
     Ok(Json(json!(rows)).into_response())
-}
-
-async fn handler_404() -> Response {
-    (http::StatusCode::NOT_FOUND, "Not found, see ... \n").into_response()
 }
 
 #[tokio::main]
@@ -198,13 +202,10 @@ async fn main() -> Result<(), Error> {
     };
 
     let app = Router::new()
-        .route(
-            "/",
-            get(|| async { concat!(env!("CARGO_PKG_NAME"), " v", env!("CARGO_PKG_VERSION")) }),
-        )
-        .route("/search/:lang/:query", get(search_handler))
-        .route("/lookup/:lang/:lemma", get(lookup_handler))
-        .route("/article/:id", get(article_handler))
+        .route("/", get(handler_root))
+        .route("/search/:lang/:query", get(handler_search))
+        .route("/lookup/:lang/:lemma", get(handler_lookup))
+        .route("/article/:id", get(handler_article))
         .fallback(handler_404)
         .layer(axum::middleware::from_fn(timing_middleware))
         .with_state(state);
