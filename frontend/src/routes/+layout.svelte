@@ -6,9 +6,9 @@
 
     let base = "";
 
-    async function on_new_value({ detail }) {
-        const v = detail;
-        await goto(`/sme/${v}`);
+    async function on_new_value({ detail }: { detail: string }) {
+        const search_term = encodeURIComponent(detail);
+        await goto(`/search/sme/${search_term}`);
     }
 </script>
 
