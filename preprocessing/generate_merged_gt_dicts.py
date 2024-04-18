@@ -30,8 +30,8 @@ def main():
     gut_root = get_gut_root()
     p = Path(gut_root) / "giellalt"
 
-    shutil.rmtree("merged/", ignore_errors=True)
-    Path("merged/").mkdir(parents=True, exist_ok=True)
+    shutil.rmtree("dicts/gt/", ignore_errors=True)
+    Path("dicts/gt/").mkdir(parents=True, exist_ok=True)
 
     for i, directory in enumerate(p.glob("dict-*"), start=1):
         # strip away the "dict-" prefix
