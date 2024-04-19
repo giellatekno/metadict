@@ -22,6 +22,9 @@
     </div>
     <header>
         <a class="big" href="{base}/">Giellatekno Metadictionary</a>
+        <a class="small" href="https://github.com/login/oauth/authorize?client_id=Iv1.f208b6793cca35ec">
+            Login with GitHub
+        </a>
         <!--<a class="small" href="{base}/all">{$t("dictionaries")}</a>-->
     </header>
     <div class="line"></div>
