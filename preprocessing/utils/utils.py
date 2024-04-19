@@ -1,4 +1,5 @@
 import os.path
+from lxml.html import builder as E
 
 def get_gut_root():
     app_toml_path = os.path.expanduser("~/.config/gut/app.toml")
@@ -19,4 +20,3 @@ def get_gut_root():
                 v = v[1:-1]
 
             return v
-

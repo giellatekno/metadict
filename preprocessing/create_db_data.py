@@ -1,7 +1,19 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from utils.parsers import parse_dictionary
+from classes import QvigstadParser, GTParser
+
+def parse_dictionary(dir_name, file, dictionary_id):
+    match dir_name:
+        case 'gt':
+            parser = GTParser(dictionary_id, file)
+        case 'qvigstad':
+            parser = QvigstadParser(dictionary_id, file)
+        case _:
+            raise Exception(f"Parsing of \"{dir_name}\" dictionaries not implemented")
+            
+    return parser.get_parsed_data()
+
 
 def main():
     dictionaries = []
