@@ -27,5 +27,5 @@ function base64urldecode(input) {
       input += new Array(5-pad).join('=');
     }
 
-    return input;
+    return atob(input);
 }
