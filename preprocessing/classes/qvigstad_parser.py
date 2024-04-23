@@ -1,4 +1,6 @@
 from xml.etree import ElementTree as ET
+from lxml.html import builder as E
+from lxml.html import fromstring 
 from utils.dataclasses import Dictionary, Article
 
 class QvigstadParser:
@@ -26,37 +28,40 @@ class QvigstadParser:
 
         for index, row in enumerate(xml_file.iter("row"), 1):
 
-            lemma = row[1].text.strip().replace("\n", " ")
-            pos = row[2].text.strip()
-            translation = f"{row[0].text+row[3].text}".strip()
+            full_lemma = row[1].text.strip().replace("\n", " ")
 
-            explanation = f"{row[4].text.strip()}\n{row[5].text.strip()}"
+            for lemma in full_lemma.split(", "):
 
-            rendered = self.to_html(lemma, translation, pos, explanation)
+                pos = row[2].text.strip()
+                translation = f"{row[0].text+row[3].text}".strip()
+
+                explanation = f"{row[4].text.strip()}\n{row[5].text.strip()}"
+
+                rendered = self.to_html(full_lemma, translation, pos, explanation)
 
 
-            a = Article(
-                dictionary=self.dictionary.id,
-                lemma=lemma,
-                rendered=rendered,
-                lang=self.dictionary.lang1,
-                pos=pos,
-                article_number=index
-            )
+                a = Article(
+                    dictionary=self.dictionary.id,
+                    lemma=lemma,
+                    rendered=rendered,
+                    lang=self.dictionary.lang1,
+                    pos=pos,
+                    article_number=index
+                )
 
-            articles.append(a)
+                articles.append(a)
 
         return articles
 
 
     def to_html(self, lemma, translation, pos, explanation):
-        explanation = explanation.replace('\n', '<br>')
+        explanation = explanation.replace('\n', '<br/>')
 
-        return f"""
-                <div class="article">
-                    <p>
-                        <b>{lemma}</b> {pos} : {translation} <br>
-                        {explanation} 
-                    </p>
-                </div>
-            """.replace("\n", "")
+        html = E.DIV(E.CLASS("article"),
+                E.P(
+                    E.B(lemma), f" {pos} : {translation}", E.BR, 
+                    fromstring(explanation)
+                )         
+            )
+
+        return ET.tostring(html, "unicode")
