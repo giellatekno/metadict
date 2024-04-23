@@ -177,6 +177,7 @@ pub async fn check_restricted_access(gh_user: &GhUserResponse, access_token: &st
             let parsed = response.json::<TeamMembershipResponse>().await?;
             Ok(parsed.state == "active")
         }
+        reqwest::StatusCode::NOT_FOUND => Ok(false),
         _ => {
             Err(anyhow!("non 200"))
         }
@@ -185,7 +186,7 @@ pub async fn check_restricted_access(gh_user: &GhUserResponse, access_token: &st
 
 // Our jwt
 #[derive(Debug, Serialize, Deserialize)]
-struct Claims {
+pub struct Claims {
     aud: String,   // Optional. Audience
     exp: usize,    // Required (validate_exp defaults to true in validation). Expiration time (as UTC timestamp)
     iat: usize,    // Optional. Issued at (as UTC timestamp)
@@ -202,7 +203,7 @@ pub fn create_jwt(gh_user: &GhUserResponse, has_restricted_access: bool, jwt_key
     let iat = jsonwebtoken::get_current_timestamp();
     let exp = iat + 60 * 5;
     let claims = Claims {
-        aud: "".to_string(),
+        aud: "giellatekno".to_string(),
         exp: exp.try_into()?,
         iat: iat.try_into()?,
         iss: "Giellatekno".to_string(),
@@ -214,3 +215,4 @@ pub fn create_jwt(gh_user: &GhUserResponse, has_restricted_access: bool, jwt_key
     let key = jsonwebtoken::EncodingKey::from_secret(jwt_key);
     Ok(jsonwebtoken::encode(&header, &claims, &key)?)
 }
+

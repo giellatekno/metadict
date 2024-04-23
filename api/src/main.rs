@@ -112,19 +112,21 @@ async fn handler_auth_callback(
     let gh_user = crate::auth::gh_get_user(&obj.access_token).await?;
 
     // check if gh user is member of the team
-    let user_has_restricted_access = match crate::auth::check_restricted_access(&gh_user, &obj.access_token).await {
-        Ok(b) => b,
+    let cookie = match crate::auth::check_restricted_access(&gh_user, &obj.access_token).await {
+        Ok(user_has_restricted_access) => {
+            let jwt = crate::auth::create_jwt(&gh_user, user_has_restricted_access, JWT_SECRET.get().unwrap())?;
+            format!("metadict-creds={jwt}; Path=/")
+        },
         Err(e) => {
             println!("{}", e);
             return Err(e.into());
         }
     };
 
-    let jwt = crate::auth::create_jwt(&gh_user, user_has_restricted_access, JWT_SECRET.get().unwrap())?;
 
     Ok(
         (
-            [(http::header::SET_COOKIE, format!("metadict-creds={jwt}; Path=/"))],
+            [(http::header::SET_COOKIE, cookie)],
             Redirect::to("http://localhost:5173/"),
         )
         .into_response()
@@ -215,28 +217,54 @@ async fn handler_search(
 ///   [ [lemma, dictionary_name, and article_id], ... ]
 async fn handler_lookup(
     Path((lang, lemma)): Path<(String, String)>,
+    cookies: Cookies,
     State(AppState { connpool }): State<AppState>,
 ) -> Result<Response, AppError> {
     let client = connpool.get().await?;
 
+    let can_see_closed = crate::cookie_extractor::validate_jwt(cookies);
+    println!("handler_lookup: can_see_closed={}", can_see_closed);
+
     // TODO is this injection safe?
-    let statement = r#"
-        SELECT
-            articles.lemma,
-            dictionaries.name,
-            articles.id
-        FROM
-            articles
-        INNER JOIN
-            dictionaries
-        ON
-            articles.dictionary = dictionaries.id
-        WHERE
-            lang = $1
-            AND
-            lemma LIKE $2
-        ;
-    "#;
+    let statement = if can_see_closed {
+        r#"
+            SELECT
+                articles.lemma,
+                dictionaries.name,
+                articles.id
+            FROM
+                articles
+            INNER JOIN
+                dictionaries
+            ON
+                articles.dictionary = dictionaries.id
+            WHERE
+                lang = $1
+                AND
+                lemma LIKE $2
+            ;
+        "#
+    } else {
+        r#"
+            SELECT
+                articles.lemma,
+                dictionaries.name,
+                articles.id
+            FROM
+                articles
+            INNER JOIN
+                dictionaries
+            ON
+                articles.dictionary = dictionaries.id
+            WHERE
+                lang = $1
+                AND
+                lemma LIKE $2
+                AND
+                dictionaries.closed = FALSE
+            ;
+        "#
+    };
     let rows = client
         .query(statement, &[&lang, &lemma])
         .await
@@ -260,6 +288,8 @@ async fn handler_article(
     State(AppState { connpool }): State<AppState>,
 ) -> Result<Response, AppError> {
     let client = connpool.get().await?;
+
+    // TODO: Validate jwt, so it requires login to see closed articles!
     let statement = "SELECT rendered FROM articles WHERE id = $1;";
     let rows = client
         .query(statement, &[&id])
