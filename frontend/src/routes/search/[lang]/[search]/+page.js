@@ -10,7 +10,8 @@ export async function load({ fetch, params }) {
     console.log("original url", url);
     url = encodeURI(url);
     console.log("encoded url", url);
-    let resp = await fetch(url);
+
+    let resp = await fetch(url, { credentials: "include" });
 
     let objs = await resp.json();
     return {

@@ -1,22 +1,27 @@
 mod pg_connection_pool;
 mod timing_middleware;
+mod auth;
+mod cookie_extractor;
 
+use std::{collections::HashMap, sync::Arc};
+use std::sync::OnceLock;
 use anyhow::anyhow;
 use axum::{
-    extract::{Path, State},
-    response::{IntoResponse, Response},
+    extract::{Path, Query, State},
+    response::{IntoResponse, Response, Redirect},
     routing::get,
     Json, Router,
 };
 use listenfd::ListenFd;
 use serde_json::json;
-use std::sync::Arc;
 use tokio::net::TcpListener;
-use tokio_postgres::Error;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::pg_connection_pool::ConnectionPool;
 use crate::timing_middleware::timing_middleware;
+
+static GH_APP_CONFIG: OnceLock<crate::auth::GhAppConfig> = OnceLock::new();
+static JWT_SECRET: OnceLock<Vec<u8>> = OnceLock::new();
 
 struct AppState {
     /// The connection pool to the PostgreSQL database.
@@ -66,20 +71,104 @@ where
 }
 
 async fn handler_root() -> Response {
-    concat!(env!("CARGO_PKG_NAME"), " v", env!("CARGO_PKG_VERSION"), "\n").into_response()
+    concat!(
+        env!("CARGO_PKG_NAME"),
+        " v",
+        env!("CARGO_PKG_VERSION"),
+        "\n"
+    )
+    .into_response()
 }
 
 async fn handler_404() -> Response {
     (http::StatusCode::NOT_FOUND, "Not found\n").into_response()
 }
 
+/// /auth/callback
+/// After a user has authenticated with github - and accepted the installation
+/// of our github app (a one time thing, unless it gets revoked) - github will
+/// redirect the users browser to this route. It includes an authorization
+/// code that we will then send to github.
+async fn handler_auth_callback(
+    Query(params): Query<HashMap<String, String>>,
+) -> Result<Response, AppError> {
+    let Some(code) = params.get("code") else {
+        return Err(AppError(anyhow!("no 'code' in query params")));
+    };
+
+    let client_id = &GH_APP_CONFIG.get().unwrap().client_id;
+    let client_secret = &GH_APP_CONFIG.get().unwrap().client_secret;
+    let creds = crate::auth::exchange_code_for_access_token(
+        client_id,
+        client_secret,
+        code,
+    ).await?;
+
+    use base64::{engine::general_purpose::URL_SAFE, Engine as _};
+    let creds = URL_SAFE.encode(creds);
+    println!("got auth credentials from github: {:?}", creds);
+    let obj = crate::auth::AccessTokenResponse::from_urlencoded_string(creds.clone())?;
+    println!("decoded: {:?}", obj);
+    let gh_user = crate::auth::gh_get_user(&obj.access_token).await?;
+
+    // check if gh user is member of the team
+    let user_has_restricted_access = match crate::auth::check_restricted_access(&gh_user, &obj.access_token).await {
+        Ok(b) => b,
+        Err(e) => {
+            println!("{}", e);
+            return Err(e.into());
+        }
+    };
+
+    let jwt = crate::auth::create_jwt(&gh_user, user_has_restricted_access, JWT_SECRET.get().unwrap())?;
+
+    Ok(
+        (
+            [(http::header::SET_COOKIE, format!("metadict-creds={jwt}; Path=/"))],
+            Redirect::to("http://localhost:5173/"),
+        )
+        .into_response()
+    )
+}
+
+/// /auth/logout
+async fn handler_auth_logout(
+    Query(params): Query<HashMap<String, String>>
+) -> Response {
+    let redirect_url = match params.get("redirect") {
+        Some(v) => v,
+        None => "http://localhost:5173/",
+    };
+
+    (
+        [(http::header::SET_COOKIE, "metadict-creds=; Max-Age=0; Path=/")],
+        Redirect::to(redirect_url),
+    )
+    .into_response()
+}
+
+use crate::cookie_extractor::Cookies;
+
 /// /search/:lang/:query
 /// Finds all matching lemmas to the :query, in all dictionaries.
 async fn handler_search(
     Path((lang, query)): Path<(String, String)>,
+    cookies: Cookies,
     State(AppState { connpool }): State<AppState>,
 ) -> Result<Response, AppError> {
     let client = connpool.get().await?;
+    let creds: Option<String> = match cookies.to_cookies() {
+        None => None,
+        Some(cookies) => {
+            cookies.iter()
+                .find(|cookie| cookie.name() == "metadict-gh-creds")
+                .map(|cookie| cookie.value().to_string())
+        },
+    };
+    
+    let user_can_see_restricted = true;
+
+    //println!("creds in cookie: {:?}", creds);
 
     // TODO is this injection safe?
     let statement = r#"
@@ -184,7 +273,7 @@ async fn handler_article(
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Error> {
+async fn main() -> anyhow::Result<()> {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
@@ -196,13 +285,17 @@ async fn main() -> Result<(), Error> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    GH_APP_CONFIG.set(crate::auth::GhAppConfig::read_config()?).unwrap();
+    JWT_SECRET.set(std::fs::read("jwt_secret.txt")?).unwrap();
+
     let connpool = ConnectionPool::new();
     let state = AppState {
         connpool: Arc::new(connpool),
     };
 
     let cors_layer = tower_http::cors::CorsLayer::new()
-        .allow_origin(tower_http::cors::Any)
+        .allow_origin("http://localhost:5173".parse::<http::HeaderValue>().unwrap())
+        .allow_credentials(true)
         .allow_methods([http::Method::GET]);
 
     let app = Router::new()
@@ -210,6 +303,8 @@ async fn main() -> Result<(), Error> {
         .route("/search/:lang/:query", get(handler_search))
         .route("/lookup/:lang/:lemma", get(handler_lookup))
         .route("/article/:id", get(handler_article))
+        .route("/auth/callback", get(handler_auth_callback))
+        .route("/auth/logout", get(handler_auth_logout))
         .fallback(handler_404)
         .layer(cors_layer)
         .layer(axum::middleware::from_fn(timing_middleware))

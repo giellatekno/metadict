@@ -1,1 +1,7 @@
 target/
+
+# gh app credentials (client id, which is not secret, and client_secret, which is)
+gh_app.toml
+
+# jwt key. used for signing our own jwts
+jwt_secret.txt
