@@ -2,6 +2,8 @@ mod pg_connection_pool;
 mod timing_middleware;
 mod auth;
 mod cookie_extractor;
+mod ghapi;
+mod jwt;
 
 use std::{collections::HashMap, sync::Arc};
 use std::sync::OnceLock;
@@ -12,6 +14,7 @@ use axum::{
     routing::get,
     Json, Router,
 };
+use base64::{engine::general_purpose::URL_SAFE, Engine as _};
 use listenfd::ListenFd;
 use serde_json::json;
 use tokio::net::TcpListener;
@@ -19,6 +22,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::pg_connection_pool::ConnectionPool;
 use crate::timing_middleware::timing_middleware;
+use crate::cookie_extractor::Cookies;
 
 static GH_APP_CONFIG: OnceLock<crate::auth::GhAppConfig> = OnceLock::new();
 static JWT_SECRET: OnceLock<Vec<u8>> = OnceLock::new();
@@ -104,17 +108,14 @@ async fn handler_auth_callback(
         code,
     ).await?;
 
-    use base64::{engine::general_purpose::URL_SAFE, Engine as _};
     let creds = URL_SAFE.encode(creds);
-    println!("got auth credentials from github: {:?}", creds);
     let obj = crate::auth::AccessTokenResponse::from_urlencoded_string(creds.clone())?;
-    println!("decoded: {:?}", obj);
     let gh_user = crate::auth::gh_get_user(&obj.access_token).await?;
 
     // check if gh user is member of the team
-    let cookie = match crate::auth::check_restricted_access(&gh_user, &obj.access_token).await {
+    let cookie = match crate::ghapi::ghuser_in_our_team(&gh_user, &obj.access_token).await {
         Ok(user_has_restricted_access) => {
-            let jwt = crate::auth::create_jwt(&gh_user, user_has_restricted_access, JWT_SECRET.get().unwrap())?;
+            let jwt = crate::jwt::create_jwt(&gh_user, user_has_restricted_access, JWT_SECRET.get().unwrap())?;
             format!("metadict-creds={jwt}; Path=/")
         },
         Err(e) => {
@@ -149,29 +150,15 @@ async fn handler_auth_logout(
     .into_response()
 }
 
-use crate::cookie_extractor::Cookies;
-
 /// /search/:lang/:query
 /// Finds all matching lemmas to the :query, in all dictionaries.
 async fn handler_search(
-    Path((lang, query)): Path<(String, String)>,
     cookies: Cookies,
+    Path((lang, query)): Path<(String, String)>,
     State(AppState { connpool }): State<AppState>,
 ) -> Result<Response, AppError> {
     let client = connpool.get().await?;
-    let creds: Option<String> = match cookies.to_cookies() {
-        None => None,
-        Some(cookies) => {
-            cookies.iter()
-                .find(|cookie| cookie.name() == "metadict-gh-creds")
-                .map(|cookie| cookie.value().to_string())
-        },
-    };
     
-    let user_can_see_restricted = true;
-
-    //println!("creds in cookie: {:?}", creds);
-
     // TODO is this injection safe?
     let statement = r#"
         SELECT DISTINCT
@@ -216,14 +203,20 @@ async fn handler_search(
 /// Return type:
 ///   [ [lemma, dictionary_name, and article_id], ... ]
 async fn handler_lookup(
-    Path((lang, lemma)): Path<(String, String)>,
     cookies: Cookies,
+    Path((lang, lemma)): Path<(String, String)>,
     State(AppState { connpool }): State<AppState>,
 ) -> Result<Response, AppError> {
     let client = connpool.get().await?;
 
-    let can_see_closed = crate::cookie_extractor::validate_jwt(cookies);
-    println!("handler_lookup: can_see_closed={}", can_see_closed);
+    let can_see_closed = match crate::jwt::validate_jwt(cookies) {
+        Ok(token) => token.claims.restricted_dicts,
+        Err(e) => {
+            // TODO check which error it is, and if it is a validation error
+            // on expired, we need to refresh
+            return Err(anyhow::anyhow!(e).into());
+        }
+    };
 
     // TODO is this injection safe?
     let statement = if can_see_closed {
@@ -284,10 +277,19 @@ async fn handler_lookup(
 
 /// /article/:id
 async fn handler_article(
+    cookies: Cookies,
     Path(id): Path<i32>,
     State(AppState { connpool }): State<AppState>,
 ) -> Result<Response, AppError> {
     let client = connpool.get().await?;
+    let can_see_closed = match crate::jwt::validate_jwt(cookies) {
+        Ok(token) => token.claims.restricted_dicts,
+        Err(e) => {
+            // TODO check which error it is, and if it is a validation error
+            // on expired, we need to refresh
+            return Err(anyhow::anyhow!(e).into());
+        }
+    };
 
     // TODO: Validate jwt, so it requires login to see closed articles!
     let statement = "SELECT rendered FROM articles WHERE id = $1;";

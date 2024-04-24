@@ -40,6 +40,8 @@ impl AccessTokenResponse {
     }
 }
 
+/// Call github.com/login/oauth/access_token
+/// with our client id, secret, and code, to get an access token in return
 pub async fn exchange_code_for_access_token(
     client_id: &str,
     client_secret: &str,
@@ -59,23 +61,6 @@ pub async fn exchange_code_for_access_token(
         .await?)
 }
 
-
-pub async fn gh_get_user(access_token: &str) -> anyhow::Result<GhUserResponse> {
-    let user_req_resp = reqwest::Client::new()
-        .get("https://api.github.com/user")
-        .header("User-Agent", "reqwest/0.12.3")
-        .header("Accept", "application/vnd.github+json")
-        .header("Authorization", format!("Bearer {}", access_token))
-        .header("X-GitHub-Api-Version", "2022-11-28")
-        .send()
-        .await
-        .map_err(|e| anyhow!(e))?
-        .text()
-        .await
-        .map_err(|e| anyhow!(e))?;
-    Ok(serde_json::from_str(&user_req_resp)?)
-}
-
 #[derive(Deserialize)]
 pub struct GhUserResponse {
     //"Phaqui"
@@ -85,7 +70,7 @@ pub struct GhUserResponse {
     //"MDQ6VXNlcjIwNDA1NQ==",
     node_id: String,
     //"https://avatars.githubusercontent.com/u/204055?v=4",
-    avatar_url: String,
+    pub avatar_url: String,
     //"",
     gravatar_id: String,
     //"https://api.github.com/users/Phaqui",
@@ -145,74 +130,19 @@ pub struct GhUserResponse {
     updated_at: String,
 }
 
-#[derive(Deserialize)]
-struct TeamMembershipResponse {
-    // "active" or "pending" (if team invite hasn't been accepted yet)
-    state: String,
-    // "maintainer" or "member"
-    role: String,
-    // e.g. "https://api.github.com/organizations/54359201/team/9970092/memberships/Phaqui
-    url: String,
-}
-
-/// Query the Github API, to see if a user is a member of the
-/// "metadictionary-access" team (and therefore has access to restriced
-/// dictionaries)
-pub async fn check_restricted_access(gh_user: &GhUserResponse, access_token: &str) -> anyhow::Result<bool> {
-    let username = &gh_user.login;
-    let url = format!("https://api.github.com/orgs/giellatekno/teams/metadictionary-access/memberships/{username}");
-    println!("> {url}");
-    let response = reqwest::Client::new()
-        .get(url)
+/// api.github.com/user - get user info, given an access token
+pub async fn gh_get_user(access_token: &str) -> anyhow::Result<GhUserResponse> {
+    let user_req_resp = reqwest::Client::new()
+        .get("https://api.github.com/user")
         .header("User-Agent", "reqwest/0.12.3")
         .header("Accept", "application/vnd.github+json")
         .header("Authorization", format!("Bearer {}", access_token))
         .header("X-GitHub-Api-Version", "2022-11-28")
         .send()
         .await
+        .map_err(|e| anyhow!(e))?
+        .text()
+        .await
         .map_err(|e| anyhow!(e))?;
-
-    match response.status() {
-        reqwest::StatusCode::OK => {
-            let parsed = response.json::<TeamMembershipResponse>().await?;
-            Ok(parsed.state == "active")
-        }
-        reqwest::StatusCode::NOT_FOUND => Ok(false),
-        _ => {
-            Err(anyhow!("non 200"))
-        }
-    }
+    Ok(serde_json::from_str(&user_req_resp)?)
 }
-
-// Our jwt
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Claims {
-    aud: String,   // Optional. Audience
-    exp: usize,    // Required (validate_exp defaults to true in validation). Expiration time (as UTC timestamp)
-    iat: usize,    // Optional. Issued at (as UTC timestamp)
-    iss: String,   // Optional. Issuer
-    //nbf: usize,    // Optional. Not Before (as UTC timestamp)
-    sub: String,   // Optional. Subject (whom token refers to)
-    restricted_dicts: bool,
-    gh_fullname: String,
-    gh_avatar_url: String,
-}
-
-pub fn create_jwt(gh_user: &GhUserResponse, has_restricted_access: bool, jwt_key: &[u8]) -> anyhow::Result<String> {
-    let header = jsonwebtoken::Header::default();
-    let iat = jsonwebtoken::get_current_timestamp();
-    let exp = iat + 60 * 5;
-    let claims = Claims {
-        aud: "giellatekno".to_string(),
-        exp: exp.try_into()?,
-        iat: iat.try_into()?,
-        iss: "Giellatekno".to_string(),
-        sub: gh_user.login.to_string(),
-        restricted_dicts: has_restricted_access,
-        gh_fullname: gh_user.name.to_string(),
-        gh_avatar_url: gh_user.avatar_url.to_string(),
-    };
-    let key = jsonwebtoken::EncodingKey::from_secret(jwt_key);
-    Ok(jsonwebtoken::encode(&header, &claims, &key)?)
-}
-
