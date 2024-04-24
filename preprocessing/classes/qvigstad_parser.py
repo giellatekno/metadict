@@ -29,6 +29,8 @@ class QvigstadParser:
             full_lemma = row[1].text.strip().replace("\n", " ")
 
             for lemma in full_lemma.split(", "):
+                if lemma == "pl.":
+                    continue
 
                 pos = row[2].text.strip()
                 translation = f"{row[0].text+row[3].text}".strip()
@@ -36,7 +38,6 @@ class QvigstadParser:
                 explanation = f"{row[4].text.strip()}\n{row[5].text.strip()}"
 
                 rendered = self.to_html(full_lemma, translation, pos, explanation)
-
 
                 a = Article(
                     dictionary=self.dictionary.id,
