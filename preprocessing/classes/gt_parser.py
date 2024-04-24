@@ -20,31 +20,48 @@ class GTParser:
 
     def parse_dict(self, file):
         articles = []
-    
         xml = ET.parse(file)
-    
+
         for e in xml.iter("e"):
-        
+            
+            rendered = ""
+
             l_node = e.find("lg/l")
             if l_node is None:
                 print("<e> node has no <lg><l>")
                 continue    
-            
+
             lemma = l_node.text.strip("\n\t ").replace("\n", " ")
             pos = l_node.get("pos")
 
+            rendered += f"<div class=\"article\"><h3><b>{lemma}</b> ({pos})</h3><ul>"
+
             mgs = e.findall("mg")
-
             for mg in mgs:
-                tg = mg.find("tg")
-                ts = tg.findall("t")
-                
-                #TODO all translations
-                translation = f", ".join(f"{t.text} ({t.get('pos')})" for t in ts)
-        
-            # TODO add examples
+                rendered += "<li>"
+                tgs = mg.findall("tg")
+                for tg in tgs:
+                    
+                    re = tg.find("re")
+                    if re != None:
+                        rendered += f"({re.text.strip()}) "
 
-            rendered = self.to_html(lemma, translation, pos)
+                    ts = tg.findall("t")
+                    rendered += "; ".join(f'{t.text.strip()} ({t.get("pos")})' for t in ts)                  
+
+                    xgs = tg.findall("xg")
+                    
+                    for xg in xgs:
+                        rendered += "<br/><br/>"
+
+                        x = xg.find("x").text.strip().replace("\n", "").replace("\t", " ")
+                        xt = xg.find("xt").text.strip().replace("\n", "").replace("\t", " ")
+                        
+                        rendered += (f"{x}<br/>{xt}")
+
+                rendered += "</li><br/>"
+
+            rendered += "</div>"
 
             a = Article(
                 dictionary=self.dictionary.id,
@@ -57,15 +74,3 @@ class GTParser:
             articles.append(a)    
             
         return articles
-
-    
-
-    def to_html(self, lemma, translation, pos, examples=""):
-        return f"""
-                <div class="article">
-                    <p>
-                        <b>{lemma}</b> {pos} : {translation} <br>
-                        {examples} 
-                    </p>
-                </div>
-            """.replace("\n", "")
