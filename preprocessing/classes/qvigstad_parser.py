@@ -1,6 +1,4 @@
 from xml.etree import ElementTree as ET
-from lxml.html import builder as E
-from lxml.html import fromstring 
 from utils.dataclasses import Dictionary, Article
 
 class QvigstadParser:
@@ -57,11 +55,4 @@ class QvigstadParser:
     def to_html(self, lemma, translation, pos, explanation):
         explanation = explanation.replace('\n', '<br/>')
 
-        html = E.DIV(E.CLASS("article"),
-                E.P(
-                    E.B(lemma), f" {pos} : {translation}", E.BR, 
-                    fromstring(explanation)
-                )         
-            )
-
-        return ET.tostring(html, "unicode")
+        return f"<div class=\"article\"><p><b>{lemma}</b> {pos} : {translation} <br/> {explanation}</p></div>"
