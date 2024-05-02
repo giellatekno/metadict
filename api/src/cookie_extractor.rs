@@ -1,12 +1,9 @@
-use cookie::Cookie;
 use axum::{
     async_trait,
     extract::FromRequestParts,
-    http::{
-        header::COOKIE,
-        request::Parts,
-    },
+    http::{header::COOKIE, request::Parts},
 };
+use cookie::Cookie;
 
 #[derive(Default)]
 pub struct Cookies(pub Option<Vec<Cookie<'static>>>);

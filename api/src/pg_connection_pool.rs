@@ -1,5 +1,4 @@
 /// Connection pool of postgres connections
-
 use std::path::PathBuf;
 
 use anyhow::anyhow;
@@ -21,6 +20,7 @@ impl Config {
     }
 }
 
+#[derive(Clone)]
 pub struct ConnectionPool {
     pool: deadpool_postgres::Pool,
 }
