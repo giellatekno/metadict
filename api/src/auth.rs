@@ -3,6 +3,7 @@ use anyhow::anyhow;
 use serde::Deserialize;
 use std::path::PathBuf;
 
+/// The Github App's settings
 #[derive(Debug, Deserialize)]
 pub struct GhAppConfig {
     pub client_id: String,

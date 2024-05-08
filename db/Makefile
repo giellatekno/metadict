@@ -23,6 +23,10 @@ run:
 		-p 5432:5432 \
 		metadict-db
 
+.PHONY: shell
+shell:
+	podman exec -it metadict-db /bin/bash
+
 # Stop the running container
 .PHONY: stop
 stop:
