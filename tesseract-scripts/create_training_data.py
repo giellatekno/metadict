@@ -1,11 +1,8 @@
-
-import os.path
 from pathlib import Path
 import subprocess
 import shutil
 import argparse
 import random
-import cv2
 
 GT_DIR = Path("gt")
 

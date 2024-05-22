@@ -1,5 +1,3 @@
-
-import os.path
 from pathlib import Path
 import subprocess
 import argparse

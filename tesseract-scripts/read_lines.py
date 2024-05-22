@@ -38,7 +38,7 @@ def main():
     for i, image_file in enumerate(sorted(input_folder.glob(f"{name}*.png")), 1):    
         print(f"Reading line {i} of {n}\t", end="\r")
         image = cv2.imread(str(image_file))
-        line_text = pytesseract.image_to_string(image, lang="sme_test")
+        line_text = pytesseract.image_to_string(image, lang="nor_sme")
         textfile.writelines([line_text])
     print()
     textfile.close()
