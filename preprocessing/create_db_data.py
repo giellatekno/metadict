@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from classes import QvigstadParser, GTParser
+from classes import QvigstadParser, GTParser, SammallahtiParser
 
 def parse_dictionary(dir_name, file, dictionary_id):
     match dir_name:
-        case 'gt':
+        case "gt":
             parser = GTParser(dictionary_id, file)
-        case 'qvigstad':
+        case "qvigstad":
             parser = QvigstadParser(dictionary_id, file)
+        case "ps":
+            parser = SammallahtiParser(dictionary_id, file)
         case _:
             raise Exception(f"Parsing of \"{dir_name}\" dictionaries not implemented")
             
@@ -25,7 +27,7 @@ def main():
     dictionary_id = 1
 
     for dir in dicts_dir.iterdir():
-        
+
         if not dir.is_dir():
             continue
         
