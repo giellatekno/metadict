@@ -9,7 +9,7 @@ def parse_args():
         prog="PDF to PNG",
         description="Turns a PDF file into PNGs."
     )
-    parser.add_argument("filename", type=str, nargs=1, help="PDF file to be parsed")
+    parser.add_argument("filename", type=str, help="PDF file to be parsed")
     return parser.parse_args()
 
 def check_dirs(name):
@@ -24,7 +24,7 @@ def main():
 
     args = parse_args()
     
-    input_file = Path(args.filename[0])
+    input_file = Path(args.filename)
 
     name = input_file.name[:-4]
 

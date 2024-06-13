@@ -8,7 +8,8 @@ GT_DIR = Path("gt")
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        prog="Create training data"
+        prog="Create training data",
+        description="Displays a line image and waits for the user to type the text in the image."
     )
     parser.add_argument("folder", type=str, nargs=1, help="Folder with line images.")
     return parser.parse_args()

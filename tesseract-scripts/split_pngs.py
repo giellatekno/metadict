@@ -84,7 +84,7 @@ def parse_args():
         prog="Split PNGs",
         description="Splits page PNGs into line PNGs."
     )
-    parser.add_argument("folder", type=str, nargs=1, help="Folder with png files to be read.")
+    parser.add_argument("folder", type=str, help="Folder with png files to be read.")
 
     return parser.parse_args()
 
@@ -101,7 +101,7 @@ def main():
 
     args = parse_args()
     
-    input_folder = Path(args.folder[0])
+    input_folder = Path(args.folder)
 
     name = input_folder.name
 
