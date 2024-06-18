@@ -1,1 +1,4 @@
 init/data_*
+
+# the saved image tarball
+metadict-db.tar*

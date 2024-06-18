@@ -1,39 +1,54 @@
+.PHONY: help
+help:
+	@echo "Available comands:"
+	@echo "image - make podman image"
+	@echo "run - run image locally, data will be stored in voulme called metadict-data"
+	@echo "shell - run bash inside the running container"
+	@echo "psql - run psql inside the running container"
+	@echo "export - save podman image as metadict-db.tar.gz"
+	@echo "push-gtweb - upload metadict-db.tar.gz to gtweb"
 
-# build the podman image
 .PHONY: image
 image:
-	podman build -f Dockerfile -t metadict-db
+	podman build --no-cache -f Dockerfile -t metadict-db
 
 
 # recreate the database (in host /var/lib/postgresql/data)
 .PHONY: recreate
 recreate:
+	@echo "Notice: this isn't needed anymore, as we use volumes instead of storing data directly on host"
+	@echo "Run podman volume rm metadict-data to remove the data (after first stopping the db!)"
 	rm -rf /var/lib/postgresql/data/
 	mkdir -p /var/lib/postgresql/data
 	chmod a+w /var/lib/postgresql/data
 	#chmod a+w /var/lib/postgresql/data/pgdata
 
-# Run the podman image to spawn the database
 .PHONY: run
 run:
-	podman run --rm --name metadict-db -it \
-		-e POSTGRES_PASSWORD=mysecretpassword \
-		-e PGDATA=/var/lib/postgresql/data/pgdata \
-		-v /var/lib/postgresql/data:/var/lib/postgresql/data \
+	podman run --rm -it \
+		--name metadict-db \
 		-p 5432:5432 \
+		--mount type=volume,source=metadict-data,target=/var/lib/postgresql/data \
 		metadict-db
 
 .PHONY: shell
 shell:
 	podman exec -it metadict-db /bin/bash
 
-# Stop the running container
 .PHONY: stop
 stop:
 	podman stop metadict-db
 
-# Get a psql shell to the database
 .PHONY: psql
 psql:
 	podman exec -it metadict-db psql -U postgres
+
+.PHONY: export
+export:
+	podman save -o metadict-db.tar metadict-db
+	gzip -f metadict-db.tar
+
+.PHONY: push-gtweb
+push-gtweb:
+	scp metadict-db.tar.gz gtweb.uit.no:/home/anders/metadict-db.tar.gz
 
