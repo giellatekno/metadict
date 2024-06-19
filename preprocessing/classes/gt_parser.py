@@ -28,7 +28,7 @@ class GTParser:
 
             l_node = e.find("lg/l")
             if l_node is None:
-                print("<e> node has no <lg><l>")
+                # print("<e> node has no <lg><l>")
                 continue    
 
             lemma = l_node.text.strip("\n\t ").replace("\n", " ")

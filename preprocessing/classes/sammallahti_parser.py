@@ -20,6 +20,8 @@ class SammallahtiParser:
             name=f"Sámi-Suoma Sátnegirji",
             lang1="sme",
             lang2="fin",
+            # closed=True,
+            is_ordered=True,
             author="Pekka Sammalahtti",
             date_published="2020",
         )

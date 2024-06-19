@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from classes import QvigstadParser, GTParser, SammallahtiParser
+from classes import GTParser, QvigstadParser, SammallahtiParser, FysihkkaParser, GirjjalasvuodaParser, AlgosatnegirjiParser, RuoktumetParser
+import gzip
 
 def parse_dictionary(dir_name, file, dictionary_id):
     match dir_name:
@@ -11,6 +12,14 @@ def parse_dictionary(dir_name, file, dictionary_id):
             parser = QvigstadParser(dictionary_id, file)
         case "ps":
             parser = SammallahtiParser(dictionary_id, file)
+        case "fysihkka":
+            parser = FysihkkaParser(dictionary_id, file)
+        case "girjjalasvuoda":
+            parser = GirjjalasvuodaParser(dictionary_id, file)
+        case "algosatnegirji":
+            parser = AlgosatnegirjiParser(dictionary_id, file)
+        case "ruoktumet":
+            parser = RuoktumetParser(dictionary_id, file)
         case _:
             raise Exception(f"Parsing of \"{dir_name}\" dictionaries not implemented")
             
@@ -46,12 +55,13 @@ def main():
 
 
     lines = "\n".join(d.to_tsv_string() for d in dictionaries)
-    with open(Path(target) / "data_dictionaries.txt", "w") as f:
-        f.write(lines)
+    with gzip.open(Path(target) / "data_dictionaries.txt.gz", "wb") as f:
+        f.write(lines.encode())
+    
 
     article_lines = "\n".join(d.to_tsv_string() for d in articles)
-    with open(Path(target) / "data_articles.txt", "w") as f:
-        f.write(article_lines)
+    with gzip.open(Path(target) / "data_articles.txt.gz", "wb") as f:
+        f.write(article_lines.encode())
 
 
 if __name__ == "__main__":
