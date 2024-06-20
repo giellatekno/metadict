@@ -20,8 +20,8 @@ use serde_json::json;
 use std::collections::HashMap;
 use std::sync::OnceLock;
 use tokio::net::TcpListener;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use tracing::debug;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::cookie_extractor::Cookies;
 use crate::our_jwt::COOKIE_NAME;
@@ -30,7 +30,7 @@ use crate::timing_middleware::timing_middleware;
 
 static GH_APP_CONFIG: OnceLock<crate::auth::GhAppConfig> = OnceLock::new();
 static JWT_SECRET: OnceLock<Vec<u8>> = OnceLock::new();
-const FRONTEND: &str = "http://localhost:5173";
+static FRONTEND: OnceLock<String> = OnceLock::new();
 
 #[derive(Clone)]
 struct AppState {
@@ -129,7 +129,7 @@ macro_rules! redirect_to_errorpage {
             message: Some($msg.to_string()),
             description: None,
             clear_cookie: true,
-            url: format!("{}/error", FRONTEND),
+            url: format!("{}/error", FRONTEND.get().unwrap()),
         })
     };
     (msg=$msg:expr, desc=$desc:expr) => {
@@ -137,7 +137,7 @@ macro_rules! redirect_to_errorpage {
             message: Some($msg.to_string()),
             description: Some($desc.to_string()),
             clear_cookie: true,
-            url: format!("{}/error", FRONTEND),
+            url: format!("{}/error", FRONTEND.get().unwrap()),
         })
     };
     (desc=$desc:expr) => {
@@ -145,7 +145,7 @@ macro_rules! redirect_to_errorpage {
             message: None,
             description: Some($desc.to_string()),
             clear_cookie: true,
-            url: format!("{}/error", FRONTEND),
+            url: format!("{}/error", FRONTEND.get().unwrap()),
         })
     };
     (message=$msg:expr, description=$desc:expr, clear_cookie=true) => {{
@@ -153,11 +153,17 @@ macro_rules! redirect_to_errorpage {
             .path("/")
             .http_only(true)
             .secure(true)
+            .same_site(cookie::SameSite::None)
             .removal()
             .build()
             .to_string();
         let cookie_header = (http::header::SET_COOKIE, cookie);
-        let url = format!("{}/error?description={}&message={}", FRONTEND, $desc, $msg);
+        let url = format!(
+            "{}/error?description={}&message={}",
+            FRONTEND.get().unwrap(),
+            $desc,
+            $msg
+        );
         let response = ([cookie_header], Redirect::to(&url)).into_response();
         return Ok(response);
     }};
@@ -208,9 +214,9 @@ async fn handler_auth_callback(
         .gh_fullname(gh_user.name.to_string())
         .gh_avatar_url(gh_user.avatar_url.to_string())
         .build()
-        .unwrap()
+        .expect("Our jwt always builds")
         .encode(JWT_SECRET.get().unwrap())
-        .unwrap();
+        .expect("encoding our jwt as actual jwt is ok");
 
     let cookie = cookie::Cookie::build((COOKIE_NAME, jwt_string))
         .path("/")
@@ -218,17 +224,25 @@ async fn handler_auth_callback(
         .http_only(true)
         .same_site(cookie::SameSite::None)
         .build()
+        //.encoded()
+        //.stripped()
         .to_string();
+
+    // anders: Tried to send the data to sveltekit, and have sveltekit set
+    // the cookie, so that it would always send it on requests
+
     let cookie_header = (http::header::SET_COOKIE, cookie);
 
-    Ok(([cookie_header], Redirect::to(FRONTEND)).into_response())
+    //let login_route = format!("{}", FRONTEND.get().unwrap(), cookie);
+    Ok(([cookie_header], Redirect::to(FRONTEND.get().unwrap())).into_response())
+    //Ok(Redirect::to(&login_route).into_response())
 }
 
 /// /auth/logout
 async fn handler_auth_logout(Query(params): Query<HashMap<String, String>>) -> Response {
     let redirect_url: &str = match params.get("redirect") {
         Some(v) => v,
-        None => FRONTEND,
+        None => FRONTEND.get().unwrap(),
     };
 
     let cookie = cookie::Cookie::build(crate::our_jwt::COOKIE_NAME)
@@ -328,8 +342,14 @@ async fn handler_lookup(
                 can_see_closed
             }
         }
-        Err(our_jwt::CookieParseError::NoCookies)
-        | Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => false,
+        Err(e @ our_jwt::CookieParseError::NoCookies) => {
+            debug!(errorkind = ?e, errortext =?e.to_string(), "no cookies found");
+            false
+        }
+        Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => {
+            debug!("no metadict-creds cookie");
+            false
+        }
         Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
             redirect_to_errorpage!(
                 message = inner_error,
@@ -400,6 +420,12 @@ async fn main() -> anyhow::Result<()> {
         .set(crate::auth::GhAppConfig::read_config()?)
         .unwrap();
     JWT_SECRET.set(std::fs::read("jwt_secret.txt")?).unwrap();
+    FRONTEND
+        .set(std::env::var("FRONTEND").unwrap_or_else(|_| {
+            tracing::warn!("Env var FRONTEND not set, using default of localhost:5173");
+            String::from("http://localhost:5173")
+        }))
+        .expect("Nobody else set the FRONTEND static at the same time as this.");
 
     let state = AppState {
         connpool: ConnectionPool::new(),
@@ -407,7 +433,13 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let cors_layer = tower_http::cors::CorsLayer::new()
-        .allow_origin(FRONTEND.parse::<http::HeaderValue>().unwrap())
+        .allow_origin(
+            FRONTEND
+                .get()
+                .unwrap()
+                .parse::<http::HeaderValue>()
+                .unwrap(),
+        )
         .allow_credentials(true)
         .allow_methods([http::Method::GET]);
 

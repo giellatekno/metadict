@@ -12,7 +12,6 @@ help:
 image:
 	podman build --no-cache -f Dockerfile -t metadict-db
 
-
 # recreate the database (in host /var/lib/postgresql/data)
 .PHONY: recreate
 recreate:

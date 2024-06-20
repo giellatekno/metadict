@@ -13,15 +13,17 @@ export async function handle({ event, resolve }) {
     return response;
 }
 
+/*
 export async function handleFetch({ event, request, fetch }) {
     // Make sure to send cookies when we fetch from our api
 	if (request.url.startsWith(env.PUBLIC_API_ENDPOINT)) {
-        const creds = event.request.headers.get('metadict-creds');
-		request.headers.set('metadict-creds', creds);
+        const cookie = event.request.headers.get("Cookie");
+        request.headers.set("Cookie", cookie);
 	}
 
-	return fetch(request);
+	return fetch(request, { credentials: "include" });
 }
+*/
 
 // https://stackoverflow.com/questions/5234581/base64url-decoding-via-javascript
 function base64urldecode(input) {

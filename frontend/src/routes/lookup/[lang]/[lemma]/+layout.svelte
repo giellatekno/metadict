@@ -3,7 +3,6 @@
     export let data;
 
     const { lang, lemma, article_id } = $page.params;
-    console.log(article_id);
     const n_dicts = data.objs.length;
     const singular = n_dicts === 1;
 </script>

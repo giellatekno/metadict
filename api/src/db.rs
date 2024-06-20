@@ -12,7 +12,7 @@ pub async fn find_lemmas(
     // TODO perf: prepared statement cache?
     // TODO injection safe?
     debug!(can_see_closed = can_see_closed, "find_lemmas()");
-    
+
     let statement = if can_see_closed {
         r#"
         SELECT DISTINCT
@@ -20,9 +20,9 @@ pub async fn find_lemmas(
         FROM
             articles
         WHERE
-            lang = $1
+            articles.lang = $1
             AND
-            lemma LIKE $2
+            articles.lemma LIKE $2
         ;
     "#
     } else {
@@ -141,8 +141,8 @@ pub async fn find_article_by_id(
                 articles.dictionary = dictionaries.id
             WHERE
                 articles.id = $1
-            AND
-                dicitionares.closed = FALSE
+                AND
+                dictionaries.closed = FALSE
         "#
     };
 
