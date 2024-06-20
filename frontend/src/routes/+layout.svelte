@@ -4,7 +4,8 @@
     import LocaleSelector from "$lib/components/LocaleSelector.svelte";
     import { page } from "$app/stores";
     import { base } from "$app/paths";
-    import { t } from "svelte-intl-precompile";
+    import { t, locale } from "svelte-intl-precompile";
+    import { langname } from "$lib/langname";
 
     let search_lang = "sme"
 
@@ -37,12 +38,12 @@
                 <span class="user">
                     <img class="gh_avatar" src="{user.gh_avatar_url}" alt="Github user avatar" />
                     <span class="name">{user.gh_fullname}</span>
-                    <span style="margin: 0 1em;">{user.restricted_dicts ? "Access" : "No access"}</span>
-                    <span><a href="/auth/logout">Logout</a></span>
+                    <span style="margin: 0 1em;">{user.restricted_dicts ? $t("access") : "No access"}</span>
+                    <span><a href="/auth/logout">{$t("logout")}</a></span>
                 </span>
             {:else}
                 <a class="small" href="https://github.com/login/oauth/authorize?scope=read:user%20read:repo&client_id=Iv1.f208b6793cca35ec">
-                    Login with GitHub
+                    {$t("login")}
                 </a>
             {/if}
         </span>
@@ -52,7 +53,7 @@
 </div>
 
 <div class="search-wrapper">
-    Oppslagsform (bruk % for wildcard):
+    {$t("dictionaryform")} (%):
     <span>
         <WordInput 
             on:new-value={on_new_value}
@@ -61,9 +62,9 @@
     <span>
         <select
             bind:value={search_lang}>
-            <option value="sme">Nordsamisk</option>
-            <option value="nob">Norsk bokmål</option>
-            <option value="fin">Finsk</option>
+            <option value="sme">{langname("sme", $locale)}</option>
+            <option value="nob">{langname("nob", $locale)}</option>
+            <option value="fin">{langname("fin", $locale)}</option>
         </select>
     </span>
 </div>

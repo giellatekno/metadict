@@ -1,4 +1,10 @@
 export default {
-    "delete": "delete",
-    "dictionaries": "dictionaries",
+    "title": "Giellatekno Metasátnegirji",
+    "interfacelanguage": "Čajehangiella",
+    "login": "Logge sisa Githubiin",
+    "logout": "Logge olggos",
+    "dictionaryform": "Vuođđuhápmi",
+    "access": "Beassan",
+    "noaccess": "No access", // TODO
+
 }
