@@ -82,6 +82,7 @@ impl DecodedJwt {
             .gh_uat(self.gh_uat().to_string())
             .gh_refresh_token(self.gh_refresh_token().to_string())
             .gh_fullname(self.gh_fullname().to_string())
+            .gh_login_name(self.gh_login_name().to_string())
             .gh_avatar_url(self.gh_avatar_url().to_string())
             .build()
             .unwrap();
