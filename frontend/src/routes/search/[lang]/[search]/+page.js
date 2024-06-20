@@ -1,9 +1,9 @@
-const API_ENDPOINT = "http://localhost:3000";
+import { env } from "$env/dynamic/public";
 
 export async function load({ fetch, params }) {
     let { lang, search } = params;
 
-    let url = API_ENDPOINT + `/search/${lang}/${search}`;
+    let url = `${env.PUBLIC_API_ENDPOINT}/search/${lang}/${search}`;
     url = encodeURI(url);
 
     let resp = await fetch(url, { credentials: "include" });

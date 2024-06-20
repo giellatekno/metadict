@@ -1,5 +1,9 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-node';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+
+// If the app should be located under a subpath on the domain, such as
+// some.domain.com/subdir - then set this to "/subdir"
+const base = process.env.SK_BASE || "";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -13,6 +17,9 @@ const config = {
             "$assets": "src/assets",
             "$tries": "src/tries/",
             "$components": "src/lib/components",
+        },
+        paths: {
+            base,
         },
 		// adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
 		// If your environment is not supported or you settled on a specific environment, switch out the adapter.

@@ -1,7 +1,8 @@
 import { redirect } from "@sveltejs/kit";
+import { env } from "$env/dynamic/public";
 
-const API_ENDPOINT = "http://localhost:3000/auth/logout";
-
-export async function GET() {
-    redirect(303, API_ENDPOINT);
+export async function GET({ cookies }) {
+    cookies.delete("metadict-creds", { path: "/" });
+    //redirect(303, `${env.PUBLIC_API_ENDPOINT}/auth/logout`);
+    redirect(303, "/");
 }

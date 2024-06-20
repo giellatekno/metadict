@@ -3,9 +3,8 @@
     import WordInput from "$lib/components/WordInput.svelte";
     import LocaleSelector from "$lib/components/LocaleSelector.svelte";
     import { page } from "$app/stores";
+    import { base } from "$app/paths";
     import { t } from "svelte-intl-precompile";
-
-    let base = "";
 
     type User = {
         gh_fullname: string,
@@ -17,7 +16,7 @@
     $: console.log(user);
     async function on_new_value({ detail }: { detail: string }) {
         const search_term = encodeURIComponent(detail);
-        await goto(`/search/sme/${search_term}`);
+        await goto(`${base}/search/sme/${search_term}`);
     }
 </script>
 
