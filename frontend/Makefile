@@ -12,7 +12,7 @@ help:
 .PHONY: dev
 dev:
 	#CMD := $(shell which pnpm || which npm)
-	PUBLIC_API_ENDPOINT=http://127.0.0.1:3000 pnpm run dev
+	PUBLIC_API_ENDPOINT=http://localhost:3000 pnpm run dev
 
 .PHONY: build-gtweb
 build-gtweb:

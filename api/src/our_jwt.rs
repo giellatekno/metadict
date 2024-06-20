@@ -38,7 +38,7 @@ pub struct OurClaims {
     pub gh_avatar_url: String,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct DecodedJwt(OurClaims);
 
 impl std::fmt::Display for DecodedJwt {

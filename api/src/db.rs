@@ -1,21 +1,18 @@
 //! Database queries
 //! All SQL is in this file.
 
+use tracing::debug;
+
 pub async fn find_lemmas(
     db: deadpool_postgres::Object,
     lang: &str,
     query: &str,
     can_see_closed: bool,
 ) -> anyhow::Result<Vec<String>> {
-    // TODO prepared statement cache? Is that a thing?
-    //let statement = match client.prepare(sql_query).await {
-    //    Ok(statement) => statement,
-    //    Err(e) => return format!("{}", e).into_response(),
-    //};
-    // TODO It could be possible that a lemma is only defined in a closed
-    // dictionary, and in that case, we don't want to show that lemma at all
-    // to a user who can't see closed dictionaries.
-    // TODO is this injection safe?
+    // TODO perf: prepared statement cache?
+    // TODO injection safe?
+    debug!(can_see_closed = can_see_closed, "find_lemmas()");
+    
     let statement = if can_see_closed {
         r#"
         SELECT DISTINCT
@@ -47,6 +44,7 @@ pub async fn find_lemmas(
         ;
     "#
     };
+
     Ok(db
         .query(statement, &[&lang, &query])
         .await
@@ -68,7 +66,7 @@ pub async fn find_articles_for_lemma(
     lemma: &str,
     can_see_closed: bool,
 ) -> anyhow::Result<Vec<(String, String, i32)>> {
-    // TODO is this injection safe?
+    // TODO injection safe?
     let statement = if can_see_closed {
         r#"
             SELECT
@@ -129,7 +127,6 @@ pub async fn find_article_by_id(
     id: i32,
     can_see_closed: bool,
 ) -> anyhow::Result<Vec<String>> {
-    // TODO: Validate jwt, so it requires login to see closed articles!
     let statement = if can_see_closed {
         "SELECT rendered FROM articles WHERE id = $1;"
     } else {
@@ -148,6 +145,7 @@ pub async fn find_article_by_id(
                 dicitionares.closed = FALSE
         "#
     };
+
     Ok(db
         .query(statement, &[&id])
         .await

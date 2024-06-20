@@ -1,3 +1,4 @@
+import { env } from "$env/dynamic/public";
 import { redirect } from "@sveltejs/kit";
 
 export async function handle({ event, resolve }) {
@@ -10,6 +11,16 @@ export async function handle({ event, resolve }) {
     }
     const response = await resolve(event);
     return response;
+}
+
+export async function handleFetch({ event, request, fetch }) {
+    // Make sure to send cookies when we fetch from our api
+	if (request.url.startsWith(env.PUBLIC_API_ENDPOINT)) {
+        const creds = event.request.headers.get('metadict-creds');
+		request.headers.set('metadict-creds', creds);
+	}
+
+	return fetch(request);
 }
 
 // https://stackoverflow.com/questions/5234581/base64url-decoding-via-javascript

@@ -21,6 +21,7 @@ use std::collections::HashMap;
 use std::sync::OnceLock;
 use tokio::net::TcpListener;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tracing::debug;
 
 use crate::cookie_extractor::Cookies;
 use crate::our_jwt::COOKIE_NAME;
@@ -215,6 +216,7 @@ async fn handler_auth_callback(
         .path("/")
         .secure(true)
         .http_only(true)
+        .same_site(cookie::SameSite::None)
         .build()
         .to_string();
     let cookie_header = (http::header::SET_COOKIE, cookie);
@@ -254,6 +256,7 @@ async fn handler_search(
     let mut headers = None;
     let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
         Ok(jwt) => {
+            debug!(jwt = ?jwt, "jwt is");
             if !jwt.has_expired() {
                 jwt.restricted_dicts()
             } else {
@@ -270,8 +273,14 @@ async fn handler_search(
                 can_see_closed
             }
         }
-        Err(our_jwt::CookieParseError::NoCookies)
-        | Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => false,
+        Err(e @ our_jwt::CookieParseError::NoCookies) => {
+            debug!(errorkind = ?e, errortext = ?e.to_string(), "no cookies found");
+            false
+        }
+        Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => {
+            debug!("no metadict-creds cookie");
+            false
+        }
         Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
             redirect_to_errorpage!(
                 message = inner_error,
