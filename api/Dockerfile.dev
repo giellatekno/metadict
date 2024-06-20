@@ -1,0 +1,8 @@
+FROM debian:sid-slim
+RUN mkdir -p /app
+COPY config.gtweb.toml /app/config.toml
+COPY gh_app.toml jwt_secret.txt /app/
+COPY target/debug/metadict-api /usr/local/bin/metadict-api
+ENV PG__PASSWORD=mysecretpassword
+WORKDIR /app
+CMD [ "metadict-api" ]

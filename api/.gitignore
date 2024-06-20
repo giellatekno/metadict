@@ -5,3 +5,6 @@ gh_app.toml
 
 # jwt key. used for signing our own jwts
 jwt_secret.txt
+
+# The IAT key for the GH app
+*.pem
