@@ -6,6 +6,8 @@
     import { base } from "$app/paths";
     import { t } from "svelte-intl-precompile";
 
+    let search_lang = "sme"
+
     type User = {
         gh_fullname: string,
         gh_avatar_url: string,
@@ -13,15 +15,15 @@
     };
     let user: User | undefined;
     $: user = $page.data?.user;
-    $: console.log(user);
+    // $: console.log(user);
     async function on_new_value({ detail }: { detail: string }) {
         const search_term = encodeURIComponent(detail);
-        await goto(`${base}/search/sme/${search_term}`);
+        await goto(`${base}/search/${search_lang}/${search_term}`);
     }
 </script>
 
 <svelte:head>
-    <title>Giellatekno Metadictionary</title>
+    <title>{$t("title")}</title>
 </svelte:head>
 
 <div class="wrapper">
@@ -29,7 +31,7 @@
         <LocaleSelector />
     </div>
     <header>
-        <a class="big" href="{base}/">Giellatekno Metadictionary</a>
+        <a class="big" href="{base}/">{$t("title")}</a>
         <span style="display:inline-flex;align-items:flex-end;">
             {#if user}
                 <span class="user">
@@ -57,10 +59,11 @@
         />
     </span>
     <span>
-        <select>
-            <option>Nordsamisk</option>
-            <option>Lulesamisk</option>
-            <option>Sørsamisk</option>
+        <select
+            bind:value={search_lang}>
+            <option value="sme">Nordsamisk</option>
+            <option value="nob">Norsk bokmål</option>
+            <option value="fin">Finsk</option>
         </select>
     </span>
 </div>

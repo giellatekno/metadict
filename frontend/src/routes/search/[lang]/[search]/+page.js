@@ -35,5 +35,6 @@ export async function load(obj) {
 
     return {
         objs,
+        lang,
     };
 }

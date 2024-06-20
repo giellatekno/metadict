@@ -12,7 +12,7 @@
 
 <main>
     {#each data.objs as lemma}
-        <span><a href="/lookup/sme/{lemma}">{lemma}</a></span>
+        <span><a href="/lookup/{data.lang}/{lemma}">{lemma}</a></span>
     {/each}
 </main>
 
