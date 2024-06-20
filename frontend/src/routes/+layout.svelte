@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import WordInput from "$lib/components/WordInput.svelte";
+    import Profile from "$lib/components/Profile.svelte";
     import LocaleSelector from "$lib/components/LocaleSelector.svelte";
     import { page } from "$app/stores";
     import { base } from "$app/paths";
@@ -33,21 +34,15 @@
     </div>
     <header>
         <a class="big" href="{base}/">{$t("title")}</a>
-        <span style="display:inline-flex;align-items:flex-end;">
+        <span style="margin-left: auto; display:inline-flex;align-items:flex-end;">
             {#if user}
-                <span class="user">
-                    <img class="gh_avatar" src="{user.gh_avatar_url}" alt="Github user avatar" />
-                    <span class="name">{user.gh_fullname}</span>
-                    <span style="margin: 0 1em;">{user.restricted_dicts ? $t("access") : "No access"}</span>
-                    <span><a href="/auth/logout">{$t("logout")}</a></span>
-                </span>
+                <Profile user={user} />
             {:else}
                 <a class="small" href="https://github.com/login/oauth/authorize?scope=read:user%20read:repo&client_id=Iv1.f208b6793cca35ec">
-                    {$t("login")}
+                {$t("login")}
                 </a>
             {/if}
         </span>
-        <!--<a class="small" href="{base}/all">{$t("dictionaries")}</a>-->
     </header>
     <div class="line"></div>
 </div>
@@ -83,6 +78,7 @@
     }
 
     header {
+        display: flex;
         padding-bottom: 8px;
         margin: 5px 0 0 20px;
     }
@@ -101,17 +97,7 @@
     }
 
     span.user {
-        display: inline-flex;
-        align-items: center;
     }
 
-    span.user > span.name {
-        padding-left: 0.5em;
-    }
-
-    img.gh_avatar {
-        border-radius: 50%;
-        height: 1.5em;
-    }
 </style>
 
