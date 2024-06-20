@@ -16,9 +16,10 @@ pub async fn find_lemmas(
     // dictionary, and in that case, we don't want to show that lemma at all
     // to a user who can't see closed dictionaries.
     // TODO is this injection safe?
-    let statement = r#"
+    let statement = if can_see_closed {
+        r#"
         SELECT DISTINCT
-            lemma
+            articles.lemma
         FROM
             articles
         WHERE
@@ -26,7 +27,26 @@ pub async fn find_lemmas(
             AND
             lemma LIKE $2
         ;
-    "#;
+    "#
+    } else {
+        r#"
+        SELECT DISTINCT
+            articles.lemma
+        FROM
+            articles
+        INNER JOIN
+            dictionaries
+        ON
+            articles.dictionary = dictionaries.id
+        WHERE
+            lang = $1
+            AND
+            lemma LIKE $2
+            AND
+            dictionaries.closed = FALSE
+        ;
+    "#
+    };
     Ok(db
         .query(statement, &[&lang, &query])
         .await
@@ -110,7 +130,24 @@ pub async fn find_article_by_id(
     can_see_closed: bool,
 ) -> anyhow::Result<Vec<String>> {
     // TODO: Validate jwt, so it requires login to see closed articles!
-    let statement = "SELECT rendered FROM articles WHERE id = $1;";
+    let statement = if can_see_closed {
+        "SELECT rendered FROM articles WHERE id = $1;"
+    } else {
+        r#"
+            SELECT
+                articles.rendered
+            FROM
+                articles
+            INNER JOIN
+                dictionaries
+            ON
+                articles.dictionary = dictionaries.id
+            WHERE
+                articles.id = $1
+            AND
+                dicitionares.closed = FALSE
+        "#
+    };
     Ok(db
         .query(statement, &[&id])
         .await

@@ -1,6 +1,5 @@
 /// IAT - Installation Access Token
 /// Code for generating the JWT we need to query the GH API for an IAT
-
 use serde::Serialize;
 use std::sync::{Arc, OnceLock};
 use tokio::sync::RwLock;
@@ -61,7 +60,6 @@ impl IAT {
                 }
             }
         }
-        
     }
 }
 
@@ -74,14 +72,11 @@ pub struct Inner {
 impl Inner {
     pub async fn new() -> anyhow::Result<Self> {
         let iat_jwt = generate_app_jwt();
-        let resp_body = crate::ghapi::get_app_installation_access_token(
-            INSTALLATION_ID, &iat_jwt).await?;
+        let resp_body =
+            crate::ghapi::get_app_installation_access_token(INSTALLATION_ID, &iat_jwt).await?;
         let expires_at = chrono::DateTime::parse_from_rfc3339(&resp_body.expires_at)?;
         let token = resp_body.token;
-        Ok(Self {
-            token,
-            expires_at,
-        })
+        Ok(Self { token, expires_at })
     }
 
     pub fn has_expired(&self) -> bool {
@@ -106,8 +101,7 @@ struct AppJwtClaims {
 pub fn generate_app_jwt() -> String {
     let header = jsonwebtoken::Header::new(jsonwebtoken::Algorithm::RS256);
 
-    let iat_private_key = IAT_PRIVATE_KEY
-        .get_or_init(|| std::fs::read(IAT_PK_PATH).unwrap());
+    let iat_private_key = IAT_PRIVATE_KEY.get_or_init(|| std::fs::read(IAT_PK_PATH).unwrap());
     let signing_key = jsonwebtoken::EncodingKey::from_rsa_pem(iat_private_key)
         .expect("key we gave is RS256, so key validates");
     let now = jsonwebtoken::get_current_timestamp();

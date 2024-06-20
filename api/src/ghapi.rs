@@ -214,7 +214,6 @@ pub async fn refresh_access_token(
         .await?)
 }
 
-
 // e.g. {"token":"ghs_xOgq7vewfbFdUdShzybGhRrAOdnwVo26WTic","expires_at":"2024-04-29T11:16:07Z","permissions":{"members":"read"},"repository_selection":"selected"}
 
 #[derive(Deserialize)]
@@ -236,7 +235,9 @@ pub async fn get_app_installation_access_token(
     jwt: &str,
 ) -> anyhow::Result<IatResponseBody> {
     Ok(reqwest::Client::new()
-        .post(format!("https://api.github.com/app/installations/{installation_id}/access_tokens"))
+        .post(format!(
+            "https://api.github.com/app/installations/{installation_id}/access_tokens"
+        ))
         .header("User-Agent", "reqwest/0.12.3")
         .header("Accept", "application/vnd.github+json")
         .header("X-GitHub-Api-Version", "2022-11-28")

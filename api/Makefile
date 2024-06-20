@@ -6,6 +6,8 @@ help:
 	@echo "image - use podman to build the image"
 	@echo "runlocal - run the built image, using local settings"
 	@echo "stop - stop the locally running container"
+	@echo "export - save podman image as metadict-api.tar.gz"
+	@echo "push-gtweb - upload metadict-api.tar.gz to gtweb"
 
 .PHONY: dev
 dev:
@@ -17,11 +19,19 @@ run-release:
 
 .PHONY: build
 build:
-	cargo build --release
+	cargo build --target-dir target/ --release
+
+.PHONY: build-dev
+build-dev:
+	cargo build --target-dir target/
 
 .PHONY: image
 image: target/release/metadict-api
 	podman build -t metadict-api -f Dockerfile .
+
+.PHONY: image-dev
+image-dev:
+	podman build -t metadict-api -f Dockerfile.dev .
 
 .PHONY: runlocal
 runlocal:
@@ -36,4 +46,13 @@ runlocal:
 .PHONY: stop
 stop:
 	podman stop metadict-api
+
+.PHONY: export
+export:
+	podman save -o metadict-api.tar metadict-api
+	gzip -f metadict-api.tar
+
+.PHONY: push-gtweb
+push-gtweb:
+	scp metadict-api.tar.gz gtweb.uit.no:/home/anders/metadict-api.tar.gz
 

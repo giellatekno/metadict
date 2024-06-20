@@ -1,9 +1,9 @@
 //! Our JWT functionality. Our JWT, as opposed to the JWT that we need
 //! to create for getting an installation access token (IAT) from GH.
 
-use serde::{Deserialize, Serialize};
-use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Validation};
 use crate::cookie_extractor::Cookies;
+use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Validation};
+use serde::{Deserialize, Serialize};
 
 /// aud and iss fields in our jwts
 const AUDIENCE: &str = "Giellatekno";
@@ -48,10 +48,7 @@ impl std::fmt::Display for DecodedJwt {
 }
 
 impl DecodedJwt {
-    pub fn encode(
-        &self,
-        signing_key: &[u8],
-    ) -> Result<String, jsonwebtoken::errors::Error> {
+    pub fn encode(&self, signing_key: &[u8]) -> Result<String, jsonwebtoken::errors::Error> {
         let header = jsonwebtoken::Header::default();
         let key = EncodingKey::from_secret(signing_key);
         let claims = self;
@@ -77,7 +74,8 @@ impl DecodedJwt {
             "giellatekno",
             "metadictionary-access",
             iat,
-        ).await?;
+        )
+        .await?;
         let jwt = crate::our_jwt::OurJwt::builder()
             .sub(self.gh_login_name().to_string())
             .restricted_dicts(can_see_closed)
@@ -232,4 +230,3 @@ fn now_utc() -> u64 {
         .expect("We are not in a time before the unix epoch")
         .as_secs()
 }
-

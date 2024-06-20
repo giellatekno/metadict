@@ -1,16 +1,14 @@
 mod auth;
-mod iat;
 mod base64;
 mod cookie_extractor;
 mod db;
 mod ghapi;
+mod iat;
 mod jwt;
 mod our_jwt;
 mod pg_connection_pool;
 mod timing_middleware;
 
-use std::sync::OnceLock;
-use std::collections::HashMap;
 use axum::{
     extract::{Path, Query, State},
     response::{IntoResponse, Redirect, Response},
@@ -19,18 +17,19 @@ use axum::{
 };
 use listenfd::ListenFd;
 use serde_json::json;
+use std::collections::HashMap;
+use std::sync::OnceLock;
 use tokio::net::TcpListener;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+use crate::cookie_extractor::Cookies;
 use crate::our_jwt::COOKIE_NAME;
 use crate::pg_connection_pool::ConnectionPool;
 use crate::timing_middleware::timing_middleware;
-use crate::cookie_extractor::Cookies;
 
 static GH_APP_CONFIG: OnceLock<crate::auth::GhAppConfig> = OnceLock::new();
 static JWT_SECRET: OnceLock<Vec<u8>> = OnceLock::new();
 const FRONTEND: &str = "http://localhost:5173";
-
 
 #[derive(Clone)]
 struct AppState {
@@ -38,7 +37,6 @@ struct AppState {
     connpool: ConnectionPool,
     iat: crate::iat::IAT,
 }
-
 
 #[derive(Default)]
 struct RedirectError {
@@ -158,12 +156,7 @@ macro_rules! redirect_to_errorpage {
             .build()
             .to_string();
         let cookie_header = (http::header::SET_COOKIE, cookie);
-        let url = format!(
-            "{}/error?description={}&message={}",
-            FRONTEND,
-            $desc,
-            $msg
-        );
+        let url = format!("{}/error?description={}&message={}", FRONTEND, $desc, $msg);
         let response = ([cookie_header], Redirect::to(&url)).into_response();
         return Ok(response);
     }};
@@ -178,7 +171,6 @@ async fn handler_auth_callback(
     State(AppState { iat, .. }): State<AppState>,
     Query(params): Query<HashMap<String, String>>,
 ) -> Result<Response, AppError> {
-
     let code = params
         .get("code")
         .ok_or_else(|| redirect_to_errorpage!(msg = "no 'code' in query params"))?;
@@ -203,8 +195,8 @@ async fn handler_auth_callback(
         "metadictionary-access",
         &iat.get().await?,
     )
-        .await
-        .map_err(|e| redirect_to_errorpage!(msg = e, desc = "calling ghapi user in team"))?;
+    .await
+    .map_err(|e| redirect_to_errorpage!(msg = e, desc = "calling ghapi user in team"))?;
 
     let jwt_string = crate::our_jwt::OurJwt::builder()
         .sub(gh_user.login.to_string())
@@ -267,9 +259,7 @@ async fn handler_search(
             } else {
                 let new_jwt = jwt.refresh(&iat.get().await.unwrap()).await?;
                 let can_see_closed = new_jwt.restricted_dicts();
-                let new_jwt_string = new_jwt
-                    .encode(crate::JWT_SECRET.get().unwrap())
-                    .unwrap();
+                let new_jwt_string = new_jwt.encode(crate::JWT_SECRET.get().unwrap()).unwrap();
                 let cookie = cookie::Cookie::build((COOKIE_NAME, new_jwt_string))
                     .path("/")
                     .http_only(true)
@@ -280,13 +270,13 @@ async fn handler_search(
                 can_see_closed
             }
         }
-        Err(our_jwt::CookieParseError::NoCookies) |
-        Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => false,
+        Err(our_jwt::CookieParseError::NoCookies)
+        | Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => false,
         Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
             redirect_to_errorpage!(
-                message=inner_error,
-                description="error while decoding jwt",
-                clear_cookie=true
+                message = inner_error,
+                description = "error while decoding jwt",
+                clear_cookie = true
             );
         }
     };
@@ -294,14 +284,10 @@ async fn handler_search(
     let connection = connpool.get().await?;
     let rows = crate::db::find_lemmas(connection, &lang, &query, can_see_closed).await?;
 
-    Ok(
-        match headers {
-            None => Json(json!(rows)).into_response(),
-            Some(headers) => {
-                (headers, Json(json!(rows))).into_response()
-            }
-        }
-    )
+    Ok(match headers {
+        None => Json(json!(rows)).into_response(),
+        Some(headers) => (headers, Json(json!(rows))).into_response(),
+    })
 }
 
 /// /lookup/:lang/:lemma
@@ -311,11 +297,39 @@ async fn handler_search(
 async fn handler_lookup(
     cookies: Cookies,
     Path((lang, lemma)): Path<(String, String)>,
-    State(AppState { connpool, iat: _ }): State<AppState>,
+    State(AppState { connpool, iat }): State<AppState>,
 ) -> Result<Response, AppError> {
     let db = connpool.get().await?;
+    let mut headers = None;
+    let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
+        Ok(jwt) => {
+            if !jwt.has_expired() {
+                jwt.restricted_dicts()
+            } else {
+                let new_jwt = jwt.refresh(&iat.get().await.unwrap()).await?;
+                let can_see_closed = new_jwt.restricted_dicts();
+                let new_jwt_string = new_jwt.encode(crate::JWT_SECRET.get().unwrap()).unwrap();
+                let cookie = cookie::Cookie::build((COOKIE_NAME, new_jwt_string))
+                    .path("/")
+                    .http_only(true)
+                    .secure(true)
+                    .build()
+                    .to_string();
+                headers = Some([(http::header::SET_COOKIE, cookie)]);
+                can_see_closed
+            }
+        }
+        Err(our_jwt::CookieParseError::NoCookies)
+        | Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => false,
+        Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
+            redirect_to_errorpage!(
+                message = inner_error,
+                description = "error while decoding jwt",
+                clear_cookie = true
+            );
+        }
+    };
 
-    let can_see_closed = false;
     let rows = crate::db::find_articles_for_lemma(db, &lang, &lemma, can_see_closed).await?;
     Ok(Json(json!(rows)).into_response())
 }
@@ -324,10 +338,38 @@ async fn handler_lookup(
 async fn handler_article(
     cookies: Cookies,
     Path(id): Path<i32>,
-    State(AppState { connpool, iat: _ }): State<AppState>,
+    State(AppState { connpool, iat }): State<AppState>,
 ) -> Result<Response, AppError> {
     let db = connpool.get().await?;
-    let can_see_closed = false;
+    let mut headers = None;
+    let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
+        Ok(jwt) => {
+            if !jwt.has_expired() {
+                jwt.restricted_dicts()
+            } else {
+                let new_jwt = jwt.refresh(&iat.get().await.unwrap()).await?;
+                let can_see_closed = new_jwt.restricted_dicts();
+                let new_jwt_string = new_jwt.encode(crate::JWT_SECRET.get().unwrap()).unwrap();
+                let cookie = cookie::Cookie::build((COOKIE_NAME, new_jwt_string))
+                    .path("/")
+                    .http_only(true)
+                    .secure(true)
+                    .build()
+                    .to_string();
+                headers = Some([(http::header::SET_COOKIE, cookie)]);
+                can_see_closed
+            }
+        }
+        Err(our_jwt::CookieParseError::NoCookies)
+        | Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => false,
+        Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
+            redirect_to_errorpage!(
+                message = inner_error,
+                description = "error while decoding jwt",
+                clear_cookie = true
+            );
+        }
+    };
     let rows = crate::db::find_article_by_id(db, id, can_see_closed).await?;
     Ok(Json(json!(rows)).into_response())
 }
@@ -356,11 +398,7 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let cors_layer = tower_http::cors::CorsLayer::new()
-        .allow_origin(
-            FRONTEND
-                .parse::<http::HeaderValue>()
-                .unwrap(),
-        )
+        .allow_origin(FRONTEND.parse::<http::HeaderValue>().unwrap())
         .allow_credentials(true)
         .allow_methods([http::Method::GET]);
 
