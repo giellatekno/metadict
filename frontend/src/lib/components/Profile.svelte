@@ -14,7 +14,7 @@
         {#if user.restricted_dicts}
             <span style="color: green;">{$t("access")}</span>
         {:else}
-            <span style="color: black;">{$t("noaccess")}</span>
+            <span style="color: black;">{$t("no-access")}</span>
         {/if}
     </span>
     <span><a href="/auth/logout">{$t("logout")}</a></span>

@@ -1,9 +1,11 @@
 export default {
-    "title": "Giellatekno Metadictionary",
-    "interfacelanguage": "Interface language",
+    "page-title": "Giellatekno Metadictionary",
+    "interface-language": "Interface language",
     "login": "Log in with Github",
     "logout": "Log out",
-    "dictionaryform": "Dictionary form",
+    "dictionary-form": "Dictionary form",
     "access": "Access",
-    "noaccess": "No access",
+    "no-access": "No access",
+    "search-result": "Found {count, plural, =0 {no lemmas} =1 {# lemma} other {# lemmas}} throughout all dictionaries that matched the search.",
+    "lookup-result": "The lemma \"{lemma}\" was found in {count, plural, =1 {# dictionary} other {# dictionaries}}.",
 }

@@ -25,7 +25,7 @@
 </script>
 
 <svelte:head>
-    <title>{$t("title")}</title>
+    <title>{$t("page-title")}</title>
 </svelte:head>
 
 <div class="wrapper">
@@ -33,7 +33,7 @@
         <LocaleSelector />
     </div>
     <header>
-        <a class="big" href="{base}/">{$t("title")}</a>
+        <a class="big" href="{base}/">{$t("page-title")}</a>
         <span style="margin-left: auto; display:inline-flex;align-items:flex-end;">
             {#if user}
                 <Profile user={user} />
@@ -48,7 +48,7 @@
 </div>
 
 <div class="search-wrapper">
-    {$t("dictionaryform")} (%):
+    {$t("dictionary-form")} (%):
     <span>
         <WordInput 
             on:new-value={on_new_value}

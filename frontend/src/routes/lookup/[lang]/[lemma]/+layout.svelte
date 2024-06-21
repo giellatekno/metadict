@@ -1,5 +1,6 @@
 <script lang="ts">
     import { page } from "$app/stores";
+    import { t } from "svelte-intl-precompile";
     export let data;
 
     const { lang, lemma, article_id } = $page.params;
@@ -8,8 +9,9 @@
 </script>
 
 <p>
-    The search key "{lemma}" was found in {n_dicts}
-    {singular ? "dictionary" : "dictionaries"}.
+    {$t("lookup-result", { values: { lemma: lemma, count: n_dicts } })}
+    <!-- The search key "{lemma}" was found in {n_dicts}
+    {singular ? "dictionary" : "dictionaries"}. -->
 </p>
 
 <main class="container">

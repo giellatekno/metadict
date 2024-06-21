@@ -1,5 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
+import precompileIntl from 'svelte-intl-precompile/sveltekit-plugin.js'
+
 
 export default defineConfig({
     server: {
@@ -7,5 +9,5 @@ export default defineConfig({
         host: '0.0.0.0',
     },
 
-	plugins: [sveltekit()]
+	plugins: [precompileIntl("src/locales"), sveltekit()]
 });

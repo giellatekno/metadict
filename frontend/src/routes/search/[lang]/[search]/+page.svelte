@@ -1,13 +1,13 @@
 <script lang="ts">
+    import { t } from 'svelte-intl-precompile';
     // Data from +page.js load()
     export let data;
-
-    const plural = data.objs.length != 1;
 </script>
 
 <p>
-    Found {data.objs.length} lemma{plural ? "s" : ""} throughout all
-    dictionaries that matched the search.
+    {$t("search-result", { values: { count: data.objs.length } })}
+    <!-- Found {data.objs.length} lemma{plural ? "s" : ""} throughout all
+    dictionaries that matched the search. -->
 </p>
 
 <main>

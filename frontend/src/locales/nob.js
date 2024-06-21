@@ -1,9 +1,11 @@
 export default {
-    "title": "Giellatekno Metaordbok",
-    "interfacelanguage": "Grensesnittspråk",
+    "page-title": "Giellatekno Metaordbok",
+    "interface-language": "Grensesnittspråk",
     "login": "Logg inn med Github",
     "logout": "Logg ut",
-    "dictionaryform": "Oppslagsform",
+    "dictionary-form": "Oppslagsform",
     "access": "Tilgang",
-    "noaccess": "Ingen tilgang",
+    "no-access": "Ingen tilgang",
+    "search-result": "Fant {count, plural, =0 {ingen lemma} =1 {# lemma} other {# lemma}} blandt alle ordbøker som matchet søket.",
+    "lookup-result": "Lemmaet \"{lemma}\" ble funnet i {count, plural, =1 {# ordbok} other {# ordbøker}}.",
 }
