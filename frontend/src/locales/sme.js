@@ -9,4 +9,5 @@ export default {
     "foundlemmas": "Gávdnen n sáni buot sátnegirjjiin mat heivejit ohcamii.",
     "search-result": "{count, plural, =0 {Ii oktage sátni} =1 {# sátni} other {# sáni}} gávdnán {count, plural, =0 {mii heive} =1 {mii heive} other {mat heivejit}} ohcamii.",
     "lookup-result": "Sátni \"{lemma}\" gávdno {count} sátnegirjjis.",
+    "search-language": "Ohcangiella"
 }

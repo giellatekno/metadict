@@ -6,8 +6,6 @@
 
 <p>
     {$t("search-result", { values: { count: data.objs.length } })}
-    <!-- Found {data.objs.length} lemma{plural ? "s" : ""} throughout all
-    dictionaries that matched the search. -->
 </p>
 
 <main>
@@ -20,6 +18,11 @@
     main {
         display: flex;
         flex-direction: column;
+        padding-left: 30px;
+    }
+
+    p {
+        padding-left: 30px;
     }
 
     span {

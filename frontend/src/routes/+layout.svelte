@@ -48,14 +48,17 @@
 </div>
 
 <div class="search-wrapper">
-    {$t("dictionary-form")} (%):
+    <p class="search-info">
+        {$t("dictionary-form")} (%):
+    </p>
     <span>
         <WordInput 
             on:new-value={on_new_value}
         />
     </span>
     <span>
-        <select
+        <label for="search-lang-selector">{$t("search-language")}</label>
+        <select class="search-lang-selector"
             bind:value={search_lang}>
             <option value="sme">{langname("sme", $locale)}</option>
             <option value="nob">{langname("nob", $locale)}</option>
@@ -77,6 +80,11 @@
         width: calc(100vw - 16px);
     }
 
+    div.search-wrapper {
+        display: inline-flex;
+        margin: 10px 0 0 30px;
+    }
+
     header {
         display: flex;
         padding-bottom: 8px;
@@ -96,7 +104,18 @@
         margin-left: 16px;
     }
 
-    span.user {
+    label {
+        font-size: 0.8rem;
+        display: block;
+        margin-left: 8px;
+    }
+
+    select.search-lang-selector {
+        margin-left: 8px;
+    }
+    
+    p.search-info {
+        margin: 10px 8px 0 0 
     }
 
 </style>

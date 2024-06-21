@@ -4,10 +4,6 @@
 
     let rendered: string | undefined;
     $: rendered = data.rendered
-        // .replaceAll("<br>", "\n")
-        // .replaceAll("<", "&lt;")
-        // .replaceAll(">", "&gt;")
-        // .replaceAll("\n", "<br>");
 </script>
 
 {#if rendered}

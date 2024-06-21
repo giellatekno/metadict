@@ -59,7 +59,7 @@
             out:fly={{ y: -18, duration: 120, easing: quintOut, opacity: 0 }}
             class="fullscreen"
         >
-            <h1>{$t("interfacelanguage")}</h1>
+            <h1>{$t("interface-language")}</h1>
 
             <div class="lang-container">
                 {#each LOCALES as { iso, display }}
