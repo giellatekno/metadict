@@ -65,14 +65,15 @@ pub async fn find_articles_for_lemma(
     lang: &str,
     lemma: &str,
     can_see_closed: bool,
-) -> anyhow::Result<Vec<(String, String, i32)>> {
+) -> anyhow::Result<Vec<(String, String, i32, String)>> {
     // TODO injection safe?
     let statement = if can_see_closed {
         r#"
             SELECT
                 articles.lemma,
                 dictionaries.name,
-                articles.id
+                articles.id,
+                dictionaries.lang2
             FROM
                 articles
             INNER JOIN
@@ -90,7 +91,8 @@ pub async fn find_articles_for_lemma(
             SELECT
                 articles.lemma,
                 dictionaries.name,
-                articles.id
+                articles.id,
+                dictionaries.lang2
             FROM
                 articles
             INNER JOIN
@@ -117,6 +119,7 @@ pub async fn find_articles_for_lemma(
                 row.get::<usize, String>(0),
                 row.get::<usize, String>(1),
                 row.get::<usize, i32>(2),
+                row.get::<usize, String>(3),
             )
         })
         .collect::<Vec<_>>())
