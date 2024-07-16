@@ -1,4 +1,6 @@
+import { error } from "@sveltejs/kit";
 import { env } from "$env/dynamic/public";
+import { browser, dev } from "$app/environment";
 
 // argument to load() is an object:
 // {  url: URL {
@@ -28,10 +30,36 @@ import { env } from "$env/dynamic/public";
 export async function load(obj) {
     const { fetch, params, cookies } = obj;
     let { lang, search } = params;
+
+    console.debug(`src/routes/search/[lang]/[search]/+page.js : load()`);
+    console.debug(`env.PUBLIC_API_ENDPOINT = ${env.PUBLIC_API_ENDPOINT}`);
     let url = `${env.PUBLIC_API_ENDPOINT}/search/${lang}/${search}`;
+    console.debug(`url = ${url}`);
+    url = new URL(url);
+
+    if (!browser && !dev) {
+        // on the server, in production, we change the hostname
+        // of the api request to go to the container running on the
+        // same host (the specific domain name is a podman thing,
+        // containers running on a host has access to the host services
+        // under this domain name)
+        url.hostname = "host.containers.internal";
+    }
+
     url = encodeURI(url);
+    console.debug(`after encoding: url = ${url}`);
     const response = await fetch(url, { credentials: "include" });
-    const objs = await response.json();
+
+    if (response.status !== 200) {
+        error(response.status, "non-200 when calling api");
+    }
+
+    let objs;
+    try {
+        objs = await response.json();
+    } catch (e) {
+        error(500, "error when decoding json response body");
+    }
 
     return {
         objs,

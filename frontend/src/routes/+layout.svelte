@@ -8,7 +8,7 @@
     import { t, locale } from "svelte-intl-precompile";
     import { langname } from "$lib/langname";
 
-    let search_lang = "sme"
+    let search_lang = "sme";
 
     type User = {
         gh_fullname: string,
@@ -20,7 +20,20 @@
     // $: console.log(user);
     async function on_new_value({ detail }: { detail: string }) {
         const search_term = encodeURIComponent(detail);
-        await goto(`${base}/search/${search_lang}/${search_term}`);
+        console.debug("src/routes/+layout.svelte : on_new_value()");
+        console.debug(`base=${base}`);
+        console.debug(`search_lang=${search_lang}`);
+        console.debug(`detail = ${detail}`);
+        console.debug(`search_term=${search_term}`);
+        let url = `${base}/search/${search_lang}/${search_term}`;
+        // fix for seemingly working in dev but not prod:
+        // on dev base="", so the url starts with a "/", but on
+        // prod, we have a base, starting with NOT a "/", so we need
+        // to add it here, so that we don't go to a relative url
+        if (!url.startsWith("/")) url = `/${url}`;
+        console.debug(`so full url = ${url}`);
+        await goto(url);
+        console.debug("END on_new_value()");
     }
 </script>
 
@@ -119,4 +132,3 @@
     }
 
 </style>
-

@@ -1,5 +1,7 @@
 <script lang="ts">
     import { t } from 'svelte-intl-precompile';
+    import { base } from "$app/paths";
+    
     // Data from +page.js load()
     export let data;
 </script>
@@ -10,7 +12,7 @@
 
 <main>
     {#each data.objs as lemma}
-        <span><a href="/lookup/{data.lang}/{lemma}">{lemma}</a></span>
+        <span><a href="{base}/lookup/{data.lang}/{lemma}">{lemma}</a></span>
     {/each}
 </main>
 

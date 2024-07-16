@@ -2,6 +2,7 @@
     import { page } from "$app/stores";
     import { langname } from "$lib/langname.js";
     import { locale, t } from "svelte-intl-precompile";
+    import { base } from "$app/paths";
     export let data;
 
     const { lang, lemma, article_id } = $page.params;
@@ -31,7 +32,7 @@
             {#each data.objs as [lemma, dictionary_name, article_id, lang2]}
                 {#if tr_lang === lang2}
                     <span>
-                        <a href="/lookup/{lang}/{lemma}/{article_id}">
+                        <a href="{base}/lookup/{lang}/{lemma}/{article_id}">
                             {lemma}
                         </a>
                         ({dictionary_name})

@@ -435,16 +435,24 @@ async fn main() -> anyhow::Result<()> {
         iat: crate::iat::IAT::new(),
     };
 
-    let cors_layer = tower_http::cors::CorsLayer::new()
-        .allow_origin(
-            FRONTEND
-                .get()
-                .unwrap()
-                .parse::<http::HeaderValue>()
-                .unwrap(),
-        )
-        .allow_credentials(true)
-        .allow_methods([http::Method::GET]);
+    // does this simply work?
+    let cors_layer = tower_http::cors::CorsLayer::very_permissive();
+    //let cors_layer = tower_http::cors::CorsLayer::new()
+    //    .allow_origin([
+    //        FRONTEND
+    //            .get()
+    //            .unwrap()
+    //            .parse::<http::HeaderValue>()
+    //            .unwrap(),
+    //        // When sveltekit internally calls the api, the hostname is this
+    //        // special podman domain name...I think
+    //        "http://host.containers.internal".parse::<http::HeaderValue>().unwrap(),
+    //    ])
+    //    // Error: Allow-Credentials: true  cannot exist at the same time as
+    //    // Allow-Origin: *
+    //    //.allow_origin(tower_http::cors::Any)
+    //    .allow_credentials(true)
+    //    .allow_methods([http::Method::GET]);
 
     let trace_layer = tower_http::trace::TraceLayer::new_for_http();
 
