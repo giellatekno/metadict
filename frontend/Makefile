@@ -8,6 +8,7 @@ help:
 	@echo "runlocal - run the built image, using local settings"
 	@echo "export - save podman image as metadict-front.tar.gz"
 	@echo "push-gtweb - upload metadict-front.tar.gz to gtweb"
+	@echo "push-labacr - push image to gtlabcontainerregistry.azurecr.io"
 
 .PHONY: dev
 dev:
@@ -34,3 +35,8 @@ export:
 .PHONY: push-gtweb
 push-gtweb:
 	scp metadict-front.tar.gz gtweb.uit.no:/home/anders/metadict-front.tar.gz
+
+.PHONY: push-labacr
+push-labacr:
+	podman tag metadict-front gtlabcontainerregistry.azurecr.io/metadict-front
+	podman push gtlabcontainerregistry.azurecr.io/metadict-front
