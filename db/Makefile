@@ -7,6 +7,7 @@ help:
 	@echo "psql - run psql inside the running container"
 	@echo "export - save podman image as metadict-db.tar.gz"
 	@echo "push-gtweb - upload metadict-db.tar.gz to gtweb"
+	@echo "push-labacr - push image to gtlabcontainerregistry.azurecr.io"
 
 .PHONY: image
 image:
@@ -51,3 +52,7 @@ export:
 push-gtweb:
 	scp metadict-db.tar.gz gtweb.uit.no:/home/anders/metadict-db.tar.gz
 
+.PHONY: push-labacr
+push-labacr:
+	podman tag metadict-db gtlabcontainerregistry.azurecr.io/metadict-db
+	podman push gtlabcontainerregistry.azurecr.io/metadict-db
