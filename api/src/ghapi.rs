@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use anyhow::Context;
 
 /// The json object returned when exchanging the code for an access token, at
 /// https://github.com/login/oauth/access_token
@@ -41,9 +42,12 @@ pub async fn exchange_code_for_access_token(
             ("code", code),
         ])
         .send()
-        .await?
+        .await
+        .with_context(|| "POST to https://github.com/login/oauth/access_token")?
         .json()
-        .await?)
+        .await
+        .with_context(|| "decoding json response body")?
+    )
 }
 
 #[derive(Deserialize)]
@@ -146,16 +150,18 @@ pub async fn user_in_team(
     team_name: &str,
     iat: &str,
 ) -> anyhow::Result<bool> {
+    let url = format!(
+        "https://api.github.com/orgs/{org_name}/teams/{team_name}/memberships/{login_name}"
+    );
     let response = reqwest::Client::new()
-        .get(format!(
-            "https://api.github.com/orgs/{org_name}/teams/{team_name}/memberships/{login_name}"
-        ))
+        .get(&url)
         .header("User-Agent", "reqwest/0.12.3")
         .header("Accept", "application/vnd.github+json")
         .header("Authorization", format!("Bearer {}", iat))
         .header("X-GitHub-Api-Version", "2022-11-28")
         .send()
-        .await?;
+        .await
+        .with_context(|| format!("GET to {url}"))?;
 
     match response.status() {
         reqwest::StatusCode::OK => {
@@ -209,9 +215,12 @@ pub async fn refresh_access_token(
             "refresh_token": refresh_token,
         }))
         .send()
-        .await?
+        .await
+        .with_context(|| "POST to https://github.com/login/oauth/access_token")?
         .json()
-        .await?)
+        .await
+        .with_context(|| "decoding json response body")?
+    )
 }
 
 // e.g. {"token":"ghs_xOgq7vewfbFdUdShzybGhRrAOdnwVo26WTic","expires_at":"2024-04-29T11:16:07Z","permissions":{"members":"read"},"repository_selection":"selected"}
@@ -234,16 +243,18 @@ pub async fn get_app_installation_access_token(
     installation_id: u32,
     jwt: &str,
 ) -> anyhow::Result<IatResponseBody> {
+    let url = format!(
+        "https://api.github.com/app/installations/{installation_id}/access_tokens"
+    );
     Ok(reqwest::Client::new()
-        .post(format!(
-            "https://api.github.com/app/installations/{installation_id}/access_tokens"
-        ))
+        .post(&url)
         .header("User-Agent", "reqwest/0.12.3")
         .header("Accept", "application/vnd.github+json")
         .header("X-GitHub-Api-Version", "2022-11-28")
         .header("Authorization", format!("Bearer {jwt}"))
         .send()
-        .await?
+        .await
+        .with_context(|| format!("POST to {url}"))?
         .json()
         .await?)
 }

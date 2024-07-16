@@ -1,6 +1,7 @@
 //! Database queries
 //! All SQL is in this file.
 
+use anyhow::Context;
 use tracing::debug;
 
 pub async fn find_lemmas(
@@ -152,7 +153,8 @@ pub async fn find_article_by_id(
     Ok(db
         .query(statement, &[&id])
         .await
-        .map_err(|e| anyhow::anyhow!(e))?
+        .map_err(|e| anyhow::anyhow!(e))
+        .with_context(|| "running find_article_by_id query against db")?
         .iter()
         .map(|row| row.get::<usize, String>(0))
         .collect::<Vec<_>>())

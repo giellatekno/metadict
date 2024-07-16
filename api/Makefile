@@ -7,6 +7,7 @@ help:
 	@echo "runlocal - run the built image, using local settings"
 	@echo "stop - stop the locally running container"
 	@echo "export - save podman image as metadict-api.tar.gz"
+	@echo "push-labacr - push image to gtlabcontainerregistry.azurecr.io"
 	@echo "push-gtweb - upload metadict-api.tar.gz to gtweb"
 
 .PHONY: dev
@@ -51,6 +52,11 @@ stop:
 export:
 	podman save -o metadict-api.tar metadict-api
 	gzip -f metadict-api.tar
+
+.PHONY: push-labacr
+push-labacr:
+	podman tag metadict-api gtlabcontainerregistry.azurecr.io/metadict-api
+	podman push gtlabcontainerregistry.azurecr.io/metadict-api
 
 .PHONY: push-gtweb
 push-gtweb:

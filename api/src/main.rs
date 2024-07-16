@@ -84,14 +84,17 @@ impl IntoResponse for AppError {
                     Redirect::to(url).into_response()
                 }
             }
-            AppError::Other(e) => (
+            AppError::Other(e) => {
+                debug!(error = ?e, "an error occured");
+                (
                 http::StatusCode::INTERNAL_SERVER_ERROR,
                 #[cfg(debug_assertions)]
                 format!("{e}"),
                 #[cfg(not(debug_assertions))]
                 "Something went wrong",
-            )
-                .into_response(),
+                )
+                .into_response()
+            }
         }
     }
 }

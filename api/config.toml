@@ -1,4 +1,7 @@
 [pg]
 DBNAME = "postgres"
 user = "postgres"
-host = "localhost"
+
+# special podman domain name for containers on the host (...I think)
+host = "host.containers.internal"
+port = 3515
