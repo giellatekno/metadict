@@ -6,15 +6,6 @@ export async function load({ fetch, params }) {
     let { lang, lemma } = params;
     let url = `${env.PUBLIC_API_ENDPOINT}/lookup/${lang}/${lemma}`;
     url = new URL(url);
-
-    if (!browser && !dev) {
-        // on the server, in production, we change the hostname
-        // of the api request to go to the container running on the
-        // same host (the specific domain name is a podman thing,
-        // containers running on a host has access to the host services
-        // under this domain name)
-        url.hostname = "host.containers.internal";
-    }
     url = encodeURI(url);
     let response = await fetch(url, { credentials: "include" });
 

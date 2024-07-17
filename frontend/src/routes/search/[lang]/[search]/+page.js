@@ -36,16 +36,6 @@ export async function load(obj) {
     let url = `${env.PUBLIC_API_ENDPOINT}/search/${lang}/${search}`;
     console.debug(`url = ${url}`);
     url = new URL(url);
-
-    if (!browser && !dev) {
-        // on the server, in production, we change the hostname
-        // of the api request to go to the container running on the
-        // same host (the specific domain name is a podman thing,
-        // containers running on a host has access to the host services
-        // under this domain name)
-        url.hostname = "host.containers.internal";
-    }
-
     url = encodeURI(url);
     console.debug(`after encoding: url = ${url}`);
     const response = await fetch(url, { credentials: "include" });
