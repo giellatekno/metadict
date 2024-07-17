@@ -9,6 +9,7 @@ help:
 	@echo "export - save podman image as metadict-front.tar.gz"
 	@echo "push-gtweb - upload metadict-front.tar.gz to gtweb"
 	@echo "push-labacr - push image to gtlabcontainerregistry.azurecr.io"
+	@echo "bap - 'build and push', does build; image; push-labacr;"
 
 .PHONY: dev
 dev:
@@ -40,3 +41,11 @@ push-gtweb:
 push-labacr:
 	podman tag metadict-front gtlabcontainerregistry.azurecr.io/metadict-front
 	podman push gtlabcontainerregistry.azurecr.io/metadict-front
+
+.PHONY: bap
+bap:
+	SK_BASE=/metadict pnpm run build
+	podman build -t metadict-front -f Dockerfile
+	podman tag metadict-front gtlabcontainerregistry.azurecr.io/metadict-front
+	podman push gtlabcontainerregistry.azurecr.io/metadict-front
+
