@@ -435,6 +435,11 @@ async fn main() -> anyhow::Result<()> {
         iat: crate::iat::IAT::new(),
     };
 
+    // do a check on the connection to the database on startup
+    let _ = state.connpool.get().await.inspect_err(|e| {
+        tracing::warn!(error = e.to_string(), "Could not connect to db on startup");
+    });
+
     // does this simply work?
     let cors_layer = tower_http::cors::CorsLayer::very_permissive();
     //let cors_layer = tower_http::cors::CorsLayer::new()

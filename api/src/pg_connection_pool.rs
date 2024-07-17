@@ -1,6 +1,4 @@
 /// Connection pool of postgres connections
-use std::path::PathBuf;
-
 use anyhow::anyhow;
 
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -13,8 +11,12 @@ impl Config {
     /// pool configuration) from environment variables.
     pub fn from_env() -> Result<Self, config::ConfigError> {
         config::Config::builder()
+            .set_default("pg.DBNAME", "postgres")?
+            .set_default("pg.user", "postgres")?
+            .set_default("pg.port", 3515)?
+            .set_default("pg.host", "deliberately.invalid")?
             .add_source(config::Environment::default().separator("__"))
-            .add_source(config::File::from(PathBuf::from("./config.toml")))
+            //.add_source(config::File::from(PathBuf::from("./config.toml")))
             .build()?
             .try_deserialize()
     }

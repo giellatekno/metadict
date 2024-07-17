@@ -9,10 +9,11 @@ help:
 	@echo "export - save podman image as metadict-api.tar.gz"
 	@echo "push-labacr - push image to gtlabcontainerregistry.azurecr.io"
 	@echo "push-gtweb - upload metadict-api.tar.gz to gtweb"
+	@echo "bap - 'build and push', does build; image; push-gtweb;"
 
 .PHONY: dev
 dev:
-	FRONTEND=http://localhost:5173 RUST_BACKTRACE=1 PG__PASSWORD=mysecretpassword systemfd --no-pid -s http::3000 -- cargo watch -x run
+	FRONTEND=http://localhost:5173 RUST_BACKTRACE=1 PG__HOST=localhost PG__PASSWORD=mysecretpassword systemfd --no-pid -s http::3000 -- cargo watch -x run
 
 .PHONY: run-release
 run-release:
@@ -55,6 +56,16 @@ export:
 
 .PHONY: push-labacr
 push-labacr:
+	podman tag metadict-api gtlabcontainerregistry.azurecr.io/metadict-api
+	podman push gtlabcontainerregistry.azurecr.io/metadict-api
+
+# bap = "build and push"
+# this is make build, make image, and make push-labacr
+# ... I just do it so often
+.PHONY: bap
+bap:
+	cargo build --target-dir target/ --release
+	podman build -t metadict-api -f Dockerfile .
 	podman tag metadict-api gtlabcontainerregistry.azurecr.io/metadict-api
 	podman push gtlabcontainerregistry.azurecr.io/metadict-api
 
