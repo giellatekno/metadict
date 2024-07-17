@@ -38,6 +38,7 @@ const LANGNAMES = {
     smn: { eng: "Inari sami", nob: "Enaresamisk", sme: "Anárašgiella", },
     sms: { nob: "Skoltesamisk", eng: "Skolt Sámi", sme: "Nuortalašgiella", },
     som: { eng: "Somali", nob: "Somalisk", sme: "Somaligiella", },
+    spa: { eng: "Spanish", nob: "Spansk", },
     srs: { eng: "Tsuutʼina", nob: "Tsuutʼina", sme: "Tsuutʼina", },
     swe: { eng: "Swedish", nob: "Svensk", sme: "Ruoŧagiella", },
     udm: { eng: "Udmurt", nob: "Udmurtisk", sme: "Udmurtagiella", },
