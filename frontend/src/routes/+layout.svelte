@@ -7,8 +7,16 @@
     import { base } from "$app/paths";
     import { t, locale } from "svelte-intl-precompile";
     import { langname } from "$lib/langname";
+    import { env } from "$env/dynamic/public";
 
     let search_lang = "sme";
+
+    let callback_uri = env.PUBLIC_API_ENDPOINT;
+    if (callback_uri === undefined) {
+        console.warn("routes/+layout.svelte: env.PUBLIC_API_ENDPOINT is undefined, using default value of 'http://localhost:3000/auth/callback'");
+        callback_uri = "http://localhost:3000/auth/callback";
+    }
+    callback_uri = encodeURIComponent(callback_uri);
 
     type User = {
         gh_fullname: string,
@@ -20,20 +28,13 @@
     // $: console.log(user);
     async function on_new_value({ detail }: { detail: string }) {
         const search_term = encodeURIComponent(detail);
-        console.debug("src/routes/+layout.svelte : on_new_value()");
-        console.debug(`base=${base}`);
-        console.debug(`search_lang=${search_lang}`);
-        console.debug(`detail = ${detail}`);
-        console.debug(`search_term=${search_term}`);
         let url = `${base}/search/${search_lang}/${search_term}`;
         // fix for seemingly working in dev but not prod:
         // on dev base="", so the url starts with a "/", but on
         // prod, we have a base, starting with NOT a "/", so we need
         // to add it here, so that we don't go to a relative url
         if (!url.startsWith("/")) url = `/${url}`;
-        console.debug(`so full url = ${url}`);
         await goto(url);
-        console.debug("END on_new_value()");
     }
 </script>
 
@@ -51,7 +52,7 @@
             {#if user}
                 <Profile user={user} />
             {:else}
-                <a class="small" href="https://github.com/login/oauth/authorize?scope=read:user%20read:repo&client_id=Iv1.f208b6793cca35ec">
+                <a class="small" href="https://github.com/login/oauth/authorize?scope=read:user%20read:repo&client_id=Iv1.f208b6793cca35ec&callback_uri={callback_uri}">
                 {$t("login")}
                 </a>
             {/if}
