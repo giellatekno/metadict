@@ -8,7 +8,7 @@ class GTParser:
         
         self.dictionary = Dictionary(
             id=dictionary_id,
-            name=f"Giellatekno ({name})",
+            name=f"Giellatekno",
             lang1=l1,
             lang2=l2,
         )

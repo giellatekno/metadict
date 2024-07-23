@@ -25,29 +25,6 @@ class AlgosatnegirjiParser:
         lemma = lemma.replace(",", "")
         return lemma.strip()
 
-    def format_article(self, line):
-        words = line.split()
-
-
-        if words[0][-1] == ":":
-            return f"<b>{line}</b>"
-        
-        bold = ""
-        for word in words:
-            bold += word 
-            if not (word[-1] == "," or word[-1] == ")" or word[-1] == ";"):
-                # print(word,"\t\t", line)
-                break
-            bold += " "
-
-        text = line.replace(bold, f"<b>{bold.replace("(", "</b>(").replace(")", ")<b>")}</b>")
-
-        if text.find("(=") != -1:
-            text = text.replace("(=", "<b>(=") + "</b>"
-
-        return text
-
-
     def parse_dict(self, file):
         articles = []
         
@@ -72,6 +49,28 @@ class AlgosatnegirjiParser:
             articles.append(a)   
         
         return articles
+    
+    def format_article(self, line):
+        words = line.split()
+
+
+        if words[0][-1] == ":" and words[1][0] == "(":
+            return f"<b>{line}</b>"
+        
+        bold = ""
+        for word in words:
+            bold += word 
+            if word[-1] not in ",);" or word[-1] == ":":
+                # print(word,"\t\t", line)
+                break
+            bold += " "
+
+        text = line.replace(bold, f"<b>{bold.replace("(", "</b>(").replace(")", ")<b>")}</b>")
+
+        if text.find("(=") != -1:
+            text = text.replace("(=", "<b>(=") + "</b>"
+
+        return text
     
     def to_html(self, line: str):
         return f"<p>{self.format_article(line)}</p>"

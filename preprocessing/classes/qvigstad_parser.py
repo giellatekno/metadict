@@ -5,7 +5,7 @@ class QvigstadParser:
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
-            name="Qvigstad-Kalfjord-sme-nob",
+            name="Qvigstad-Kalfjord",
             lang1="sme",
             lang2="nob",
             is_ordered=True,
