@@ -1,5 +1,21 @@
 #!/usr/bin/env python3
 
+"""
+This script takes as input all files in the dicts/ folder, and creates
+output files in the sql_files/.
+Two types of .sql files will be created, one with a prefix of "a-", and
+one with a prefix of "d-". The "-d" files is the sql for inserting a row
+in the "dictionaries" table of the database, and the "a-"-.sql file is
+the sql for inserting all the articles. The articles needs to know which
+dictionary they belong to, and inserting data into the database is done
+in 2 steps, first create the dictionary entry, to get the id, and then
+replace "$DICTIONARY$" in the "a-" files in the fly while executing the
+sql.
+
+Use the script "db/insert_dictionary.py" to insert these .sql files
+into a live database. Refer to that script for further information.
+"""
+
 import gzip
 from pathlib import Path
 from utils.utils import articles_to_sql, dictionary_to_sql
