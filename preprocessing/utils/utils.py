@@ -41,10 +41,10 @@ def dictionary_to_sql(dictionary: Dictionary, filename):
     '{dictionary.lang2}',
     {dictionary.closed},
     {dictionary.is_ordered},
-    {f"'{dictionary.author}'" if dictionary.author else "None"},
-    {f"'{dictionary.date_published}'" if dictionary.date_published else "None"},
-    {f"'{dictionary.isbn}'" if dictionary.isbn else "None"},
-    {f"'{dictionary.source}'" if dictionary.source else "None"},
+    {f"'{dictionary.author}'" if dictionary.author else "NULL"},
+    {f"'{dictionary.date_published}'" if dictionary.date_published else "NULL"},
+    {f"'{dictionary.isbn}'" if dictionary.isbn else "NULL"},
+    {f"'{dictionary.source}'" if dictionary.source else "NULL"},
     ) RETURNING id;"""
     
     with open(f"sql_files/d-{filename}.sql", "w") as f:
@@ -67,10 +67,10 @@ def articles_to_sql(articles:list[Article], filename):
         sql_statement += f"""('{article.lemma.replace("'", "''")}',
         $DICTIONARY$,
         '{article.rendered.replace("'", "''")}',
-        {f"'{article.pos}'" if article.pos else "None"},
-        {f"'{article.lang}'" if article.lang else "None"},
-        {f"'{article.article_number}'" if article.article_number else "None"},
-        {f"'{article.additional_properties}'" if article.additional_properties else "None"},
+        {f"'{article.pos}'" if article.pos else "NULL"},
+        {f"'{article.lang}'" if article.lang else "NULL"},
+        {f"'{article.article_number}'" if article.article_number else "NULL"},
+        {f"'{article.additional_properties}'" if article.additional_properties else "None"}),
         """
     
     sql_statement = sql_statement[:-2] + ";"
