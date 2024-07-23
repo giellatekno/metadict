@@ -11,7 +11,7 @@ export async function load({ fetch, params }) {
     }
     const rendered = objs[0];
 
-    let neighbors = await api_request(`/neighbors/${article_id}`);
+    let neighbors = await api_request(`neighbors/${article_id}`);
     
     if (!Array.isArray(neighbors)) {
         return {
