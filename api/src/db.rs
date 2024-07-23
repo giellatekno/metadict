@@ -1,7 +1,7 @@
 //! Database queries
 //! All SQL is in this file.
 
-use anyhow::Context;
+use anyhow::{Context, Ok};
 use tracing::debug;
 
 pub async fn find_lemmas(
@@ -158,4 +158,63 @@ pub async fn find_article_by_id(
         .iter()
         .map(|row| row.get::<usize, String>(0))
         .collect::<Vec<_>>())
+}
+
+pub async fn find_neighboring_articles(
+    db: deadpool_postgres::Object,
+    id: i32,
+    can_see_closed: bool,
+) -> anyhow::Result<Vec<String>> {
+    let statement = if can_see_closed {
+        r#"
+            SELECT
+                articles.rendered 
+            FROM 
+                articles, 
+                (SELECT 
+                    article_number, dictionary 
+                FROM 
+                    articles 
+                WHERE 
+                    id = $1) lemma 
+            WHERE 
+                articles.dictionary = lemma.dictionary 
+                AND 
+                articles.article_number BETWEEN lemma.article_number-5 AND lemma.article_number+5 
+            ORDER BY 
+                articles.article_number;
+        "#
+    } else {
+        r#"
+            SELECT
+                articles.rendered 
+            FROM 
+                articles INNER JOIN dictionaries 
+                ON articles.dictionary = dictionaries.id, 
+                (SELECT 
+                    article_number, dictionary 
+                FROM 
+                    articles 
+                WHERE 
+                    id = $1) lemma 
+            WHERE 
+            articles.dictionary = lemma.dictionary 
+            AND 
+            articles.article_number BETWEEN lemma.article_number-5 AND lemma.article_number+5 
+            AND 
+            dictionaries.closed = FALSE;
+        "#
+    };
+
+    let mut result = db
+        .query(statement, &[&id])
+        .await
+        .map_err(|e| anyhow::anyhow!(e))
+        .with_context(|| "running find_neighboring_articles query against db")?
+        .iter()
+        .map(|row| row.get::<usize, String>(0))
+        .collect::<Vec<_>>();
+
+    result.dedup();
+    Ok(result)
 }
