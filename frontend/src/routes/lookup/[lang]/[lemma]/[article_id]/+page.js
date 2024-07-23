@@ -1,17 +1,8 @@
-import { error } from "@sveltejs/kit";
-import { env } from "$env/dynamic/public";
-import { browser, dev } from "$app/environment";
+import { api_request } from "$lib/api_request.js";
 
 export async function load({ fetch, params }) {
     let { article_id } = params;
-    let url = `${env.PUBLIC_API_ENDPOINT}/article/${article_id}`;
-    url = new URL(url);
-    url = encodeURI(url);
-    let response = await fetch(url, { credentials: "include" });
-    if (response.status !== 200) {
-        error(response.status, "non-200 when calling api");
-    }
-    const objs = await response.json();
+    const objs = await api_request(`article/${article_id}`);
 
     if (!Array.isArray(objs)) {
         return {

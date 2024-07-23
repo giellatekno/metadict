@@ -11,12 +11,12 @@
 
     let search_lang = "sme";
 
-    let callback_uri = env.PUBLIC_API_ENDPOINT;
-    if (callback_uri === undefined) {
-        console.warn("routes/+layout.svelte: env.PUBLIC_API_ENDPOINT is undefined, using default value of 'http://localhost:3000/auth/callback'");
-        callback_uri = "http://localhost:3000/auth/callback";
+    let redirect_uri = env.PUBLIC_API_ENDPOINT;
+    if (redirect_uri === undefined) {
+        console.warn("routes/+layout.svelte: env.PUBLIC_API_ENDPOINT is undefined, using default value of 'http://localhost:3000'");
+        redirect_uri = "http://localhost:3000";
     }
-    callback_uri = encodeURIComponent(callback_uri);
+    redirect_uri = encodeURIComponent(redirect_uri + "/auth/callback");
 
     type User = {
         gh_fullname: string,
@@ -25,7 +25,6 @@
     };
     let user: User | undefined;
     $: user = $page.data?.user;
-    // $: console.log(user);
     async function on_new_value({ detail }: { detail: string }) {
         const search_term = encodeURIComponent(detail);
         let url = `${base}/search/${search_lang}/${search_term}`;
@@ -52,7 +51,7 @@
             {#if user}
                 <Profile user={user} />
             {:else}
-                <a class="small" href="https://github.com/login/oauth/authorize?scope=read:user%20read:repo&client_id=Iv1.f208b6793cca35ec&callback_uri={callback_uri}">
+                <a class="small" href="https://github.com/login/oauth/authorize?scope=read:user%20read:repo&client_id=Iv1.f208b6793cca35ec&redirect_uri={redirect_uri}">
                 {$t("login")}
                 </a>
             {/if}
