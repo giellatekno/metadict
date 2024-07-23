@@ -44,9 +44,9 @@ def dictionary_to_sql(dictionary: Dictionary, filename):
     {f"'{dictionary.author}'" if dictionary.author else "NULL"},
     {f"'{dictionary.date_published}'" if dictionary.date_published else "NULL"},
     {f"'{dictionary.isbn}'" if dictionary.isbn else "NULL"},
-    {f"'{dictionary.source}'" if dictionary.source else "NULL"},
+    {f"'{dictionary.source}'" if dictionary.source else "NULL"}
     ) RETURNING id;"""
-    
+
     with open(f"sql_files/d-{filename}.sql", "w") as f:
         f.write(sql_statement)
 
@@ -69,11 +69,12 @@ def articles_to_sql(articles:list[Article], filename):
         '{article.rendered.replace("'", "''")}',
         {f"'{article.pos}'" if article.pos else "NULL"},
         {f"'{article.lang}'" if article.lang else "NULL"},
-        {f"'{article.article_number}'" if article.article_number else "NULL"},
-        {f"'{article.additional_properties}'" if article.additional_properties else "None"}),
+        {article.article_number if article.article_number else "NULL"},
+        {f"'{article.additional_properties}'" if article.additional_properties else "NULL"}),
         """
-    
-    sql_statement = sql_statement[:-2] + ";"
+
+    last_comma = sql_statement.rfind(",")
+    sql_statement = sql_statement[:last_comma] + ";"
 
     with open(f"sql_files/a-{filename}.sql", "w") as f:
         f.write(sql_statement)
