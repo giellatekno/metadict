@@ -19,6 +19,14 @@
             tr_langs.push(item[3])
         }
     });
+
+    // Sort list to show: xxx-sme, xxx-nob, xxx-other-langs
+    const sorted_tr_langs = [
+        ...tr_langs.filter(elm => elm === "sme"),
+        ...tr_langs.filter(elm => elm === "nob"),
+        ...tr_langs.filter(elm => elm !== "sme" && elm !== "nob"),
+    ];
+
 </script>
 
 <p>
@@ -27,8 +35,8 @@
 
 <main class="container">
     <div class="k1">
-        {#each tr_langs as tr_lang}
-            <h5>{langname(lang, $locale)} - {langname(tr_lang, $locale)}</h5>
+        {#each sorted_tr_langs as tr_lang}
+            <h4>{langname(lang, $locale)} - {langname(tr_lang, $locale)}</h4>
             {#each data.objs as [lemma, dictionary_name, article_id, lang2]}
                 {#if tr_lang === lang2}
                     <span>

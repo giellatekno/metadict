@@ -8,7 +8,7 @@ class GTParser:
         
         self.dictionary = Dictionary(
             id=dictionary_id,
-            name=f"gt-{name}",
+            name=f"Giellatekno ({name})",
             lang1=l1,
             lang2=l2,
         )
@@ -34,7 +34,7 @@ class GTParser:
             lemma = l_node.text.strip("\n\t ").replace("\n", " ")
             pos = l_node.get("pos")
 
-            rendered += f"<div class=\"article\"><h3><b>{lemma}</b> ({pos})</h3><ul>"
+            rendered += f"<h3><b>{lemma}</b> ({pos})</h3><ul>"
 
             mgs = e.findall("mg")
             for mg in mgs:
@@ -60,8 +60,6 @@ class GTParser:
                         rendered += (f"{x}<br/>{xt}")
 
                 rendered += "</li><br/>"
-
-            rendered += "</div>"
 
             a = Article(
                 dictionary=self.dictionary.id,

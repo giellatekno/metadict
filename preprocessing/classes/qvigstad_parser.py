@@ -56,4 +56,4 @@ class QvigstadParser:
     def to_html(self, lemma, translation, pos, explanation):
         explanation = explanation.replace('\n', '<br/>')
 
-        return f"<div class=\"article\"><p><b>{lemma}</b> {pos} : {translation} <br/> {explanation}</p></div>"
+        return f"<p><b>{lemma}</b> {pos} : {translation} <br/> {explanation}</p>"

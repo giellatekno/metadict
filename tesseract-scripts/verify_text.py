@@ -8,6 +8,7 @@ from functools import partial
 
 pm_lang1 = None
 pm_lang2 = None
+pm_lang3 = None
 
 unknowns = re.compile(r'\t"[^"]*" \?|(?<!.)"[^"]*"(?!\n\t)')
 words = re.compile(r'"<?([^\s"<>]+)>?"')
@@ -41,14 +42,19 @@ def verify_line(args, latin, latin_words, one_lang):
     line = args[1]
 
     assert(pm_lang1 != None and pm_lang2 != None)
+    # assert(pm_lang1 != None and pm_lang2 != None and pm_lang3 != None)
+
+    line = line.replace(":", " ")
 
     set1 = find_unknown_words(line, pm_lang1)
     set2 = find_unknown_words(line, pm_lang2)
+    # set3 = find_unknown_words(line, pm_lang3)
 
     if one_lang:
         unknown_words = set1
     else:
         unknown_words = set1.intersection(set2)
+        # unknown_words = set1.intersection(set2).intersection(set3)
 
     if latin:
         unknown_words.difference_update(latin_words)
@@ -66,11 +72,12 @@ def verify_line(args, latin, latin_words, one_lang):
 def main():
     ENV = os.environ.copy()
     args = parse_args()
-    global pm_lang1, pm_lang2
+    global pm_lang1, pm_lang2, pm_lang3
 
     try:
         pm_lang1 = hfst.PmatchContainer(f'{ENV["GTLANGS"]}/lang-{args.l1}/tools/tokenisers/tokeniser-disamb-gt-desc.pmhfst')
         pm_lang2 = hfst.PmatchContainer(f'{ENV["GTLANGS"]}/lang-{args.l2}/tools/tokenisers/tokeniser-disamb-gt-desc.pmhfst')
+        # pm_lang3 = hfst.PmatchContainer(f'{ENV["GTLANGS"]}/lang-fin/tools/tokenisers/tokeniser-disamb-gt-desc.pmhfst')
     except Exception as e:
         print(e)
         exit(1)

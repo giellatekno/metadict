@@ -1,5 +1,6 @@
 """
-Short script for turning a wodfrequency list into training_text for tesseract. 
+Short script for turning a wordfrequency list into training_text for tesseract. 
+Wordlist found at: https://giellatekno.uit.no/lists/sme/sme_wf.freq
 """
 
 import random

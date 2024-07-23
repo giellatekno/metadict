@@ -5,3 +5,4 @@ from .fysihkka_parser import FysihkkaParser
 from .girjjalasvuoda_parser import GirjjalasvuodaParser
 from .algosatnegirji_parser import AlgosatnegirjiParser
 from .ruoktumet_parser import RuoktumetParser
+from .pedpsy_parser import PedPsyParser

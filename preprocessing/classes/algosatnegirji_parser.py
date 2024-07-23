@@ -8,7 +8,7 @@ class AlgosatnegirjiParser:
             name="Álgosátnegirji",
             lang1="sme",
             lang2="nob",
-            # closed=True,
+            closed=True,
             is_ordered=True,
             author="Nils Jernsletten",
             date_published="2007",
@@ -74,5 +74,5 @@ class AlgosatnegirjiParser:
         return articles
     
     def to_html(self, line: str):
-        return f"<div class=\"article\"><p>{self.format_article(line)}</p></div>"
+        return f"<p>{self.format_article(line)}</p>"
 

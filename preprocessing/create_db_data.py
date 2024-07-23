@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from classes import GTParser, QvigstadParser, SammallahtiParser, FysihkkaParser, GirjjalasvuodaParser, AlgosatnegirjiParser, RuoktumetParser
+from classes import (GTParser, QvigstadParser, SammallahtiParser, 
+                    FysihkkaParser, GirjjalasvuodaParser, AlgosatnegirjiParser, 
+                    RuoktumetParser, PedPsyParser)
 import gzip
 
 def parse_dictionary(dir_name, file, dictionary_id):
@@ -20,6 +22,8 @@ def parse_dictionary(dir_name, file, dictionary_id):
             parser = AlgosatnegirjiParser(dictionary_id, file)
         case "ruoktumet":
             parser = RuoktumetParser(dictionary_id, file)
+        case "pedpsy":
+            parser = PedPsyParser(dictionary_id, file)
         case _:
             raise Exception(f"Parsing of \"{dir_name}\" dictionaries not implemented")
             

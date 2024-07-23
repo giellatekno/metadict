@@ -20,7 +20,7 @@ class SammallahtiParser:
             name=f"Sámi-Suoma Sátnegirji",
             lang1="sme",
             lang2="fin",
-            # closed=True,
+            closed=True,
             is_ordered=True,
             author="Pekka Sammalahtti",
             date_published="2020",
@@ -96,4 +96,4 @@ class SammallahtiParser:
     
     def to_html(self, line):
         
-        return f"<div class=\"article\"><p>{self.format_article(line)}</p></div><br>"
+        return f"<p>{self.format_article(line)}</p>"

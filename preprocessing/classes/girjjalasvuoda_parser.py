@@ -2,14 +2,14 @@ from utils.dataclasses import Dictionary, Article
 
 class GirjjalasvuodaParser:
     def __init__(self, dictionary_id, file):
-        l1, l2 = file.name.split("-")[-2:]
+        l1, l2 = file.stem.split("-")[-2:]
 
         self.dictionary = Dictionary(
             id=dictionary_id,
             name="Girjjálašvuođa tearpmat",
             lang1=l1,
             lang2=l2,
-            # closed=True,
+            closed=True,
             is_ordered=True,
             author="Harald Gaski, Vuokko Hirvonen, Ellen Näkkäläjärvi",
             date_published="1992",
@@ -47,12 +47,12 @@ class GirjjalasvuodaParser:
     
     def to_html(self, line: str):
         if line.find("\\") == -1:
-            return f"<div class=\"article\"><p><b>{line.split("|")[0].strip()} </b>{line.split("|")[1].strip()}</p></div>"
+            return f"<p><b>{line.split("|")[0].strip()} </b>{line.split("|")[1].strip()}</p>"
 
         lines = line.split("\\")
         html = f"<b>{lines[0].strip()}</b>"
         for l in lines[1:]:
             html += f"<br>{l.strip()}"
 
-        return f"<div class=\"article\"><p>{html}</p></div>"
+        return f"<p>{html}</p>"
 

@@ -6,7 +6,7 @@ export default {
     "dictionary-form": "Oppslagsform",
     "access": "Tilgang",
     "no-access": "Ingen tilgang",
-    "search-result": "Fant {count, plural, =0 {ingen lemma} =1 {# lemma} other {# lemma}} blandt alle ordbøker som matchet søket.",
+    "search-result": "Fant {count, plural, =0 {ingen lemma} =1 {# lemma} other {# lemma}} blant alle ordbøker som matchet søket.",
     "lookup-result": "Lemmaet \"{lemma}\" ble funnet i {count, plural, =1 {# ordbok} other {# ordbøker}}.",
     "search-language": "Søkespråk",
 }
