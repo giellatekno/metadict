@@ -1,5 +1,6 @@
 import os.path
 from utils.dataclasses import Article, Dictionary
+import re
 
 def get_gut_root():
     app_toml_path = os.path.expanduser("~/.config/gut/app.toml")
@@ -40,11 +41,11 @@ def dictionary_to_sql(dictionary: Dictionary, filename):
     '{dictionary.lang2}',
     {dictionary.closed},
     {dictionary.is_ordered},
-    '{dictionary.author}',
-    '{dictionary.date_published}',
-    '{dictionary.isbn}',
-    '{dictionary.source}'
-    );"""
+    {f"'{dictionary.author}'" if dictionary.author else "None"},
+    {f"'{dictionary.date_published}'" if dictionary.date_published else "None"},
+    {f"'{dictionary.isbn}'" if dictionary.isbn else "None"},
+    {f"'{dictionary.source}'" if dictionary.source else "None"},
+    ) RETURNING id;"""
     
     with open(f"sql_files/d-{filename}.sql", "w") as f:
         f.write(sql_statement)
@@ -62,7 +63,15 @@ def articles_to_sql(articles:list[Article], filename):
     ) VALUES """
 
     for article in articles:
-        sql_statement += f"('{article.lemma}', $DICTIONARY$, '{article.rendered}', '{article.pos}', '{article.lang}', '{article.article_number}', '{article.additional_properties}'),\n"
+        # Single quotes are escaped by doubeling them up in SQL
+        sql_statement += f"""('{article.lemma.replace("'", "''")}',
+        $DICTIONARY$,
+        '{article.rendered.replace("'", "''")}',
+        {f"'{article.pos}'" if article.pos else "None"},
+        {f"'{article.lang}'" if article.lang else "None"},
+        {f"'{article.article_number}'" if article.article_number else "None"},
+        {f"'{article.additional_properties}'" if article.additional_properties else "None"},
+        """
     
     sql_statement = sql_statement[:-2] + ";"
 
