@@ -20,18 +20,27 @@ PODMAN_PSQL_CMD = "podman exec -i metadict-db psql -U postgres -f -"
 LOCAL_PSQL_CMD = "psql -U postgres -d postgres -f -"
 
 
-def abort(msg, warn_inconsistent=False):
+def abort(msg, stderr=None, warn_inconsistent=False):
     msg = f"Error: {msg}\n"
     if warn_inconsistent:
         msg += (
             "WARNING: THE DATABASE WAS MODIFIED, AND IS PROBABLY LEFT\n"
             "IN AN INCONSISTENT STATE, DO A MANUAL INSPECTION\n"
         )
-    msg += "Aborting due to errors"
+    if stderr is not None:
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8")
+        assert isinstance(stderr, str)
+        msg += "\n10 last lines of stderr:"
+        msg += "\n".join(stderr.split("\n")[-10:])
+    msg += "\ninsert_dictionaries.py: Aborting due to errors"
     sys.exit(msg)
 
 
 def execute_sql(sql, run_in_container=False):
+    if isinstance(sql, str):
+        sql = sql.encode("utf-8")
+    assert isinstance(sql, bytes)
     if run_in_container:
         cmd = shlex.split(PODMAN_PSQL_CMD)
     else:
@@ -41,7 +50,6 @@ def execute_sql(sql, run_in_container=False):
         input=sql,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True,
     )
     return proc
 
@@ -77,64 +85,82 @@ def main():
 
     data = []
     for dictionary_file in path.glob("d-*.sql"):
+        dict_name = dictionary_file.name[2:]
         article_file = dictionary_file.with_name("a-" + dictionary_file.name[2:])
         if not article_file.exists():
-            exit(f"corresponding article file not found: {article_file}")
-        articles_sql = article_file.read_text()
+            abort(f"corresponding article file not found: {article_file}")
+        articles_sql = article_file.read_bytes()
 
-        data.append((dictionary_file.read_text(), articles_sql))
+        data.append(
+            (dict_name, dictionary_file.read_bytes(), articles_sql)
+        )
 
-    for dictionary_sql, articles_sql in data:
-        insert_dictionary(dictionary_sql, articles_sql, run_in_container)
+    for dict_name, dictionary_sql, articles_sql in data:
+        insert_dictionary(
+            dict_name,
+            dictionary_sql,
+            articles_sql,
+            run_in_container=run_in_container,
+        )
 
     print("all done")
 
 
-def insert_dictionary(dictionary_sql, articles_sql, run_in_container):
+def insert_dictionary(dict_name, dictionary_sql, articles_sql, run_in_container):
+    print(f"inserting dictionary '{dict_name}'")
     dictionary_creation_proc = execute_sql(
         dictionary_sql,
         run_in_container=run_in_container,
     )
 
     if dictionary_creation_proc.returncode != 0:
-        print("ERROR while running sql to create dictionary.")
-        if dictionary_creation_proc.stderr:
-            print("STDERR:")
-            print(dictionary_creation_proc.stderr)
-        return 1
-    else:
-        stderr = dictionary_creation_proc.stderr
-        if stderr:
-            abort("non-empty stderr when running psql")
+        abort("non-0 returncode from psql")
 
-        stdout = dictionary_creation_proc.stdout
-        try:
-            dict_id = _parse_id(stdout)
-        except ValueError:
-            abort("could not parse id of new dictionary")
-        print(
-            f"new dictionary created, it has id: {dict_id}, "
-            "inserting articles..."
-        )
+    stderr = dictionary_creation_proc.stderr
+    if stderr:
+        abort("non-empty stderr when running psql", stderr=stderr)
 
-    articles_sql = articles_sql.replace("$DICTIONARY$", str(dict_id))
+    stdout = dictionary_creation_proc.stdout
+    try:
+        dict_id = _parse_id(stdout.decode("utf-8"))
+    except ValueError:
+        abort("could not parse id of new dictionary")
+    print(
+        f"new dictionary created, it has id: {dict_id}, "
+        "inserting articles..."
+    )
+
+    articles_sql = articles_sql.replace(
+        b"$DICTIONARY$",
+        str(dict_id).encode("utf-8"),
+    )
     articles_creation_proc = execute_sql(
         articles_sql,
         run_in_container=run_in_container,
     )
 
-    stdout = articles_creation_proc.stdout
-    stderr = articles_creation_proc.stderr
+    stdout = articles_creation_proc.stdout.decode("utf-8")
+    stderr = articles_creation_proc.stderr.decode("utf-8")
     ret = articles_creation_proc.returncode
     if ret != 0:
         abort(
             "non-0 returncode from psql when inserting dictionaries",
+            stderr=stderr,
             warn_inconsistent=True,
         )
 
     if stderr:
+        if stderr.startswith("psql:<stdin>:"):
+            try:
+                err_char_pos = int(stderr[13:stderr.index(":", 13)])
+            except ValueError:
+                pass
+            else:
+                # show input around this position, for debugging
+                print(articles_sql[err_char_pos - 50:err_char_pos + 50])
         abort(
             "non-empty stderr from psql when inserting dictionaries",
+            stderr=stderr,
             warn_inconsistent=True,
         )
 
