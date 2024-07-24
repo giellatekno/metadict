@@ -1,5 +1,4 @@
 //! Authenticating and authorization with Github-related functionality
-use anyhow::anyhow;
 use serde::Deserialize;
 use std::path::PathBuf;
 

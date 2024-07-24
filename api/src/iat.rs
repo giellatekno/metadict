@@ -83,9 +83,9 @@ impl Inner {
         self.expires_at < chrono::offset::Utc::now()
     }
 
-    pub fn token(&self) -> &str {
-        self.token.as_str()
-    }
+    // pub fn token(&self) -> &str {
+    //     self.token.as_str()
+    // }
 }
 
 #[derive(Serialize)]

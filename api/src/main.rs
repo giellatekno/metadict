@@ -12,6 +12,7 @@ mod timing_middleware;
 use axum::{
     extract::{Path, Query, State},
     response::{IntoResponse, Redirect, Response},
+    http::HeaderMap,
     routing::get,
     Json, Router,
 };
@@ -87,30 +88,30 @@ impl IntoResponse for AppError {
             AppError::Other(e) => {
                 debug!(error = ?e, "an error occured");
                 (
-                http::StatusCode::INTERNAL_SERVER_ERROR,
-                #[cfg(debug_assertions)]
-                format!("{e}"),
-                #[cfg(not(debug_assertions))]
-                "Something went wrong",
+                    http::StatusCode::INTERNAL_SERVER_ERROR,
+                    #[cfg(debug_assertions)]
+                    format!("{e}"),
+                    #[cfg(not(debug_assertions))]
+                    "Something went wrong",
                 )
-                .into_response()
+                    .into_response()
             }
         }
     }
 }
 
-fn internal_error<E>(err: E) -> (http::StatusCode, String)
-where
-    E: std::error::Error,
-{
-    (
-        http::StatusCode::INTERNAL_SERVER_ERROR,
-        #[cfg(debug_assertions)]
-        err.to_string(),
-        #[cfg(not(debug_assertions))]
-        "Something went wrong".to_string(),
-    )
-}
+// fn internal_error<E>(err: E) -> (http::StatusCode, String)
+// where
+//     E: std::error::Error,
+// {
+//     (
+//         http::StatusCode::INTERNAL_SERVER_ERROR,
+//         #[cfg(debug_assertions)]
+//         err.to_string(),
+//         #[cfg(not(debug_assertions))]
+//         "Something went wrong".to_string(),
+//     )
+// }
 
 async fn handler_root() -> Response {
     concat!(
@@ -270,7 +271,7 @@ async fn handler_search(
     Path((lang, query)): Path<(String, String)>,
     State(AppState { connpool, iat }): State<AppState>,
 ) -> Result<Response, AppError> {
-    let mut headers = None;
+    let mut headers = HeaderMap::new();
     let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
         Ok(jwt) => {
             debug!(jwt = ?jwt, "jwt is");
@@ -285,8 +286,10 @@ async fn handler_search(
                     .http_only(true)
                     .secure(true)
                     .build()
-                    .to_string();
-                headers = Some([(http::header::SET_COOKIE, cookie)]);
+                    .to_string()
+                    .parse()
+                    .unwrap();
+                headers.insert(http::header::SET_COOKIE, cookie);
                 can_see_closed
             }
         }
@@ -309,11 +312,9 @@ async fn handler_search(
 
     let connection = connpool.get().await?;
     let rows = crate::db::find_lemmas(connection, &lang, &query, can_see_closed).await?;
-
-    Ok(match headers {
-        None => Json(json!(rows)).into_response(),
-        Some(headers) => (headers, Json(json!(rows))).into_response(),
-    })
+    let response_body = Json(json!(rows));
+    let response = (headers, response_body).into_response();
+    Ok(response)
 }
 
 /// /lookup/:lang/:lemma
@@ -326,7 +327,7 @@ async fn handler_lookup(
     State(AppState { connpool, iat }): State<AppState>,
 ) -> Result<Response, AppError> {
     let db = connpool.get().await?;
-    let mut headers = None;
+    let mut headers = HeaderMap::new();
     let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
         Ok(jwt) => {
             if !jwt.has_expired() {
@@ -340,8 +341,10 @@ async fn handler_lookup(
                     .http_only(true)
                     .secure(true)
                     .build()
-                    .to_string();
-                headers = Some([(http::header::SET_COOKIE, cookie)]);
+                    .to_string()
+                    .parse()
+                    .unwrap();
+                headers.insert(http::header::SET_COOKIE, cookie);
                 can_see_closed
             }
         }
@@ -363,7 +366,9 @@ async fn handler_lookup(
     };
 
     let rows = crate::db::find_articles_for_lemma(db, &lang, &lemma, can_see_closed).await?;
-    Ok(Json(json!(rows)).into_response())
+    let response_body = Json(json!(rows));
+    let response = (headers, response_body).into_response();
+    Ok(response)
 }
 
 /// /article/:id
@@ -373,7 +378,7 @@ async fn handler_article(
     State(AppState { connpool, iat }): State<AppState>,
 ) -> Result<Response, AppError> {
     let db = connpool.get().await?;
-    let mut headers = None;
+    let mut headers = HeaderMap::new();
     let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
         Ok(jwt) => {
             if !jwt.has_expired() {
@@ -387,8 +392,10 @@ async fn handler_article(
                     .http_only(true)
                     .secure(true)
                     .build()
-                    .to_string();
-                headers = Some([(http::header::SET_COOKIE, cookie)]);
+                    .to_string()
+                    .parse()
+                    .unwrap();
+                headers.insert(http::header::SET_COOKIE, cookie);
                 can_see_closed
             }
         }
@@ -402,8 +409,11 @@ async fn handler_article(
             );
         }
     };
+
     let rows = crate::db::find_article_by_id(db, id, can_see_closed).await?;
-    Ok(Json(json!(rows)).into_response())
+    let response_body = Json(json!(rows));
+    let response = (headers, response_body).into_response();
+    Ok(response)
 }
 
 async fn handler_neighbors(
@@ -412,7 +422,7 @@ async fn handler_neighbors(
     State(AppState { connpool, iat }): State<AppState>,
 ) -> Result<Response, AppError> {
     let db = connpool.get().await?;
-    let mut headers = None;
+    let mut headers = HeaderMap::new();
     let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
         Ok(jwt) => {
             if !jwt.has_expired() {
@@ -426,8 +436,10 @@ async fn handler_neighbors(
                     .http_only(true)
                     .secure(true)
                     .build()
-                    .to_string();
-                headers = Some([(http::header::SET_COOKIE, cookie)]);
+                    .to_string()
+                    .parse()
+                    .unwrap();
+                headers.insert(http::header::SET_COOKIE, cookie);
                 can_see_closed
             }
         }
@@ -442,7 +454,8 @@ async fn handler_neighbors(
         }
     };
     let rows = crate::db::find_neighboring_articles(db, id, can_see_closed).await?;
-    Ok(Json(json!(rows)).into_response())
+    let response_body = Json(json!(rows));
+    Ok((headers, response_body).into_response())
 }
 
 #[tokio::main]

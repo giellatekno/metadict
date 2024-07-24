@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use anyhow::Context;
+use serde::Deserialize;
 
 /// The json object returned when exchanging the code for an access token, at
 /// https://github.com/login/oauth/access_token
@@ -46,10 +46,10 @@ pub async fn exchange_code_for_access_token(
         .with_context(|| "POST to https://github.com/login/oauth/access_token")?
         .json()
         .await
-        .with_context(|| "decoding json response body")?
-    )
+        .with_context(|| "decoding json response body")?)
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct GhUserResponse {
     //"Phaqui"
@@ -132,6 +132,7 @@ pub async fn get_user(access_token: &str) -> anyhow::Result<GhUserResponse> {
         .await?)
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct TeamMembershipResponseBody {
     // "active" or "pending" (if team invite hasn't been accepted yet)
@@ -177,7 +178,11 @@ pub async fn user_in_team(
     }
 }
 
+// Fields in this struct must be named exactly, because it will be deserializeds
+// from json. But otherwise they are not used, so to silence the compiler,
+// we allow dead code in this struct.
 #[derive(serde::Deserialize)]
+#[allow(dead_code)]
 pub struct RefreshAccessTokenResponseBody {
     /// The user access token. The token starts with "ghu_".
     access_token: String,
@@ -198,38 +203,48 @@ pub struct RefreshAccessTokenResponseBody {
     token_type: String,
 }
 
-pub async fn refresh_access_token(
-    refresh_token: &str,
-    client_id: &str,
-    client_secret: &str,
-) -> anyhow::Result<RefreshAccessTokenResponseBody> {
-    Ok(reqwest::Client::new()
-        .post("https://github.com/login/oauth/access_token")
-        .header("User-Agent", "reqwest/0.12.3")
-        .header("Accept", "application/vnd.github+json")
-        .header("X-GitHub-Api-Version", "2022-11-28")
-        .json(&serde_json::json!({
-            "client_id": client_id,
-            "client_secret": client_secret,
-            "grant_type": "refresh",
-            "refresh_token": refresh_token,
-        }))
-        .send()
-        .await
-        .with_context(|| "POST to https://github.com/login/oauth/access_token")?
-        .json()
-        .await
-        .with_context(|| "decoding json response body")?
-    )
-}
+// xxx (anders): I don't actually think I need this.
+// We only do user authentication once, on login, and that's only
+// to get the user id, which we use to see if that user is a part
+// of our team. When _our_ jwt token is refreshed, we still just
+// use the same user name from the first login. It doesn't matter to
+// us that the login token has expired at that point, because we use
+// the IAT to check user membership - we never use the user token
+// for anything (except getting the username, and making sure the
+// user has a github user).
+//pub async fn refresh_access_token(
+//    refresh_token: &str,
+//    client_id: &str,
+//    client_secret: &str,
+//) -> anyhow::Result<RefreshAccessTokenResponseBody> {
+//    Ok(reqwest::Client::new()
+//        .post("https://github.com/login/oauth/access_token")
+//        .header("User-Agent", "reqwest/0.12.3")
+//        .header("Accept", "application/vnd.github+json")
+//        .header("X-GitHub-Api-Version", "2022-11-28")
+//        .json(&serde_json::json!({
+//            "client_id": client_id,
+//            "client_secret": client_secret,
+//            "grant_type": "refresh",
+//            "refresh_token": refresh_token,
+//        }))
+//        .send()
+//        .await
+//        .with_context(|| "POST to https://github.com/login/oauth/access_token")?
+//        .json()
+//        .await
+//        .with_context(|| "decoding json response body")?)
+//}
 
 // e.g. {"token":"ghs_xOgq7vewfbFdUdShzybGhRrAOdnwVo26WTic","expires_at":"2024-04-29T11:16:07Z","permissions":{"members":"read"},"repository_selection":"selected"}
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct Permissions {
     members: String,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct IatResponseBody {
     pub token: String,
@@ -243,9 +258,7 @@ pub async fn get_app_installation_access_token(
     installation_id: u32,
     jwt: &str,
 ) -> anyhow::Result<IatResponseBody> {
-    let url = format!(
-        "https://api.github.com/app/installations/{installation_id}/access_tokens"
-    );
+    let url = format!("https://api.github.com/app/installations/{installation_id}/access_tokens");
     Ok(reqwest::Client::new()
         .post(&url)
         .header("User-Agent", "reqwest/0.12.3")

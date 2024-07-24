@@ -68,7 +68,6 @@ impl DecodedJwt {
     /// as well as our installation access token (iat).
     pub async fn refresh(&self, iat: &str) -> anyhow::Result<DecodedJwt> {
         assert!(self.has_expired());
-        // TODO this may fail because the IAT has expired
         let can_see_closed = crate::ghapi::user_in_team(
             self.gh_login_name(),
             "giellatekno",
@@ -213,8 +212,8 @@ impl OurJwtBuilder {
         Ok(DecodedJwt(claims))
     }
 
-    impl_field!(exp, u64);
-    impl_field!(iat, u64);
+    //impl_field!(exp, u64);
+    //impl_field!(iat, u64);
     impl_field!(sub, String);
     impl_field!(restricted_dicts, bool);
     impl_field!(gh_uat, String);
