@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { base } from "$app/paths";
     import { t } from "svelte-intl-precompile";
     export let user: {
         gh_avatar_url: string;
@@ -17,7 +18,7 @@
             <span style="color: black;">{$t("no-access")}</span>
         {/if}
     </span>
-    <span><a href="/auth/logout">{$t("logout")}</a></span>
+    <span><a href="{base}/auth/logout">{$t("logout")}</a></span>
 </span>
 
 <style>
