@@ -40,11 +40,15 @@ CREATE TABLE articles (
 );
 
 
--- Generated data: Giellatekno dictionaries
-COPY dictionaries FROM PROGRAM 
-    'gzip -cd /docker-entrypoint-initdb.d/data_dictionaries.txt';
+-- Previously used to load data into the database on creation.
+-- We now use the insert_dictionaries.py script with the generated
+-- .sql files found in preprocessing/ instead.
 
--- Generated data: Articles from all giellatekno dictionaries
-COPY articles(lemma, dictionary, rendered, pos, lang, article_number, additional_properties) FROM
-    PROGRAM
-    'gzip -cd /docker-entrypoint-initdb.d/data_articles.txt';
+-- -- Generated data: Giellatekno dictionaries
+-- COPY dictionaries FROM PROGRAM 
+--     'gzip -cd /docker-entrypoint-initdb.d/data_dictionaries.txt';
+-- 
+-- -- Generated data: Articles from all giellatekno dictionaries
+-- COPY articles(lemma, dictionary, rendered, pos, lang, article_number, additional_properties) FROM
+--     PROGRAM
+--     'gzip -cd /docker-entrypoint-initdb.d/data_articles.txt';
