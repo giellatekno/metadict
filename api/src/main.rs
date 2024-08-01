@@ -416,6 +416,7 @@ async fn handler_article(
     Ok(response)
 }
 
+// /neighbors/:id
 async fn handler_neighbors(
     cookies: Cookies,
     Path(id): Path<i32>,
@@ -456,6 +457,52 @@ async fn handler_neighbors(
     let rows = crate::db::find_neighboring_articles(db, id, can_see_closed).await?;
     let response_body = Json(json!(rows));
     Ok((headers, response_body).into_response())
+}
+
+/// /dictionary/:article_id
+/// Given an article, return information about the dictionary it belongs to
+async fn handler_dictionary(
+    cookies: Cookies,
+    Path(id): Path<i32>,
+    State(AppState { connpool, iat }): State<AppState>,
+) -> Result<Response, AppError> {
+    let db = connpool.get().await?;
+    let mut headers = HeaderMap::new();
+    let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
+        Ok(jwt) => {
+            if !jwt.has_expired() {
+                jwt.restricted_dicts()
+            } else {
+                let new_jwt = jwt.refresh(&iat.get().await.unwrap()).await?;
+                let can_see_closed = new_jwt.restricted_dicts();
+                let new_jwt_string = new_jwt.encode(crate::JWT_SECRET.get().unwrap()).unwrap();
+                let cookie = cookie::Cookie::build((COOKIE_NAME, new_jwt_string))
+                    .path("/")
+                    .http_only(true)
+                    .secure(true)
+                    .build()
+                    .to_string()
+                    .parse()
+                    .unwrap();
+                headers.insert(http::header::SET_COOKIE, cookie);
+                can_see_closed
+            }
+        }
+        Err(our_jwt::CookieParseError::NoCookies)
+        | Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => false,
+        Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
+            redirect_to_errorpage!(
+                message = inner_error,
+                description = "error while decoding jwt",
+                clear_cookie = true
+            );
+        }
+    };
+
+    let rows = crate::db::find_dictionary_by_article_id(db, id, can_see_closed).await?;
+    let response_body = Json(json!(rows));
+    let response = (headers, response_body).into_response();
+    Ok(response)
 }
 
 #[tokio::main]
@@ -519,6 +566,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/lookup/:lang/:lemma", get(handler_lookup))
         .route("/article/:id", get(handler_article))
         .route("/neighbors/:id", get(handler_neighbors))
+        .route("/dictionary/:id", get(handler_dictionary))
         .route("/auth/callback", get(handler_auth_callback))
         .route("/auth/logout", get(handler_auth_logout))
         .fallback(handler_404)

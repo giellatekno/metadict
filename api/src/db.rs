@@ -218,3 +218,48 @@ pub async fn find_neighboring_articles(
     result.dedup();
     Ok(result)
 }
+
+pub async fn find_dictionary_by_article_id(
+    db: deadpool_postgres::Object,
+    id: i32,
+    can_see_closed: bool,
+) -> anyhow::Result<Vec<(String, String, String, String)>> {
+    let statement = if can_see_closed {
+        r#"
+            SELECT 
+                name, COALESCE(author, ''), COALESCE(date_published, ''), COALESCE(isbn, '') 
+            FROM 
+                dictionaries,
+                (SELECT dictionary FROM articles WHERE id = $1) 
+            WHERE 
+                id = dictionary;
+        "#
+    } else {
+        r#"
+            SELECT 
+                name, COALESCE(author, ''), COALESCE(date_published, ''), COALESCE(isbn, '') 
+            FROM 
+                dictionaries,
+                (SELECT dictionary FROM articles WHERE id = $1) 
+            WHERE 
+                id = dictionary
+                AND
+                closed = FALSE;
+        "#
+    };
+
+    Ok(db
+        .query(statement, &[&id])
+        .await
+        .map_err(|e| anyhow::anyhow!(e))?
+        .iter()
+        .map(|row| {
+            (
+                row.get::<usize, String>(0),
+                row.get::<usize, String>(1),
+                row.get::<usize, String>(2),
+                row.get::<usize, String>(3),
+            )
+        })
+        .collect::<Vec<_>>())
+}
