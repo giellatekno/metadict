@@ -1,5 +1,5 @@
 import { error } from "@sveltejs/kit";
-import { env } from "$env/dynamic/public";
+import { env } from "$env/dynamic/public";
 import { browser, dev } from "$app/environment";
 
 export async function api_request(path) {
@@ -16,13 +16,13 @@ export async function api_request(path) {
         console.debug("changing hostname of request from host.containers.internal to localhost");
         url.hostname = "localhost";
         url.pathname = "/metadict-api" + url.pathname;
-        url.port = 80;
+        url.port = "80";
         console.debug(`(after changing) url = ${url}`);
     }
 
     let response;
     try {
-        response = await fetch(url, { credentials: "include" });
+        response = await fetch(url, { credentials: "include" });
     } catch (err) {
         error(500, `fetch() to api (${url}) failed`);
     }

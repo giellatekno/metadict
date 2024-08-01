@@ -6,7 +6,7 @@ export async function load({ fetch, params }) {
 
     if (!Array.isArray(objs)) {
         return {
-            error: `response from \"articles/[article_id]\" was not an array`,
+            error: `response from \"articles/${article_id}\" was not an array`,
         };
     }
     const rendered = objs[0];
@@ -15,11 +15,21 @@ export async function load({ fetch, params }) {
     
     if (!Array.isArray(neighbors)) {
         return {
-            error: `response from \"neighbors/[article_id]\" was not an array`,
+            error: `response from \"neighbors/${article_id}\" was not an array`,
         }
     }
 
+    let dictionary = await api_request(`dictionary/${article_id}`)
+
+    if (!Array.isArray(dictionary[0])) {
+        return {
+            error: `response from \"dictionary/${article_id}\" was not an array`,
+        }
+    }
+    
+    dictionary = dictionary[0]
+
     return {
-        rendered, neighbors
+        rendered, neighbors, dictionary
     };
 }
