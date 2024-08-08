@@ -4,6 +4,7 @@ use serde::Deserialize;
 /// The json object returned when exchanging the code for an access token, at
 /// https://github.com/login/oauth/access_token
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct AccessTokenResponse {
     /// The user access token. The token starts with "ghu_".
     pub access_token: String,
@@ -41,6 +42,7 @@ pub async fn exchange_code_for_access_token(
             ("client_secret", client_secret),
             ("code", code),
         ])
+        .timeout(std::time::Duration::from_secs(6))
         .send()
         .await
         .with_context(|| "POST to https://github.com/login/oauth/access_token")?
@@ -126,6 +128,7 @@ pub async fn get_user(access_token: &str) -> anyhow::Result<GhUserResponse> {
         .header("Accept", "application/vnd.github+json")
         .header("Authorization", format!("Bearer {}", access_token))
         .header("X-GitHub-Api-Version", "2022-11-28")
+        .timeout(std::time::Duration::from_secs(6))
         .send()
         .await?
         .json()
