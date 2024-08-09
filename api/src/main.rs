@@ -11,8 +11,8 @@ mod timing_middleware;
 
 use axum::{
     extract::{Path, Query, State},
-    response::{IntoResponse, Redirect, Response},
     http::HeaderMap,
+    response::{IntoResponse, Redirect, Response},
     routing::get,
     Json, Router,
 };
