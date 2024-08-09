@@ -4,7 +4,6 @@ use serde::Deserialize;
 /// The json object returned when exchanging the code for an access token, at
 /// https://github.com/login/oauth/access_token
 #[derive(Debug, Deserialize)]
-#[allow(dead_code)]
 pub struct AccessTokenResponse {
     /// The user access token. The token starts with "ghu_".
     pub access_token: String,
@@ -51,78 +50,51 @@ pub async fn exchange_code_for_access_token(
         .with_context(|| "decoding json response body")?)
 }
 
-#[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct GhUserResponse {
-    //"Phaqui"
     pub login: String,
-    //204055,
-    id: i32,
-    //"MDQ6VXNlcjIwNDA1NQ==",
-    node_id: String,
-    //"https://avatars.githubusercontent.com/u/204055?v=4",
+    pub id: i32,
+    pub node_id: String,
     pub avatar_url: String,
-    //"",
-    gravatar_id: String,
-    //"https://api.github.com/users/Phaqui",
-    url: String,
-    //"https://github.com/Phaqui",
-    html_url: String,
-    //"https://api.github.com/users/Phaqui/followers",
-    followers_url: String,
-    //"https://api.github.com/users/Phaqui/following{/other_user}",
-    following_url: String,
-    //"https://api.github.com/users/Phaqui/gists{/gist_id}",
-    gists_url: String,
-    //"https://api.github.com/users/Phaqui/starred{/owner}{/repo}",
-    starred_url: String,
-    //"https://api.github.com/users/Phaqui/subscriptions",
-    subscriptions_url: String,
-    //"https://api.github.com/users/Phaqui/orgs",
-    organizations_url: String,
-    //"https://api.github.com/users/Phaqui/repos",
-    repos_url: String,
-    //"https://api.github.com/users/Phaqui/events{/privacy}",
-    events_url: String,
-    //"https://api.github.com/users/Phaqui/received_events",
-    received_events_url: String,
-    //"User",
-    r#type: String,
-    //false,
-    site_admin: bool,
-    //"Anders Lorentsen",
-    pub name: String,
-    //null,
-    company: Option<String>,
-    //"",
-    blog: String,
-    //null,
-    location: Option<String>,
-    //null,
-    email: Option<String>,
-    //null,
-    hireable: Option<bool>,
-    //null,
-    bio: Option<String>,
-    //null,
-    twitter_username: Option<String>,
-    //15,
-    public_repos: u32,
-    //4,
-    public_gists: u32,
-    //10,
-    followers: u32,
-    //1,
-    following: u32,
-    //"2010-02-15T16:31:59Z",
-    created_at: String,
-    //"2024-04-03T12:19:15Z"
-    updated_at: String,
+    pub gravatar_id: String,
+    pub url: String,
+    pub html_url: String,
+    pub followers_url: String,
+    pub following_url: String,
+    pub gists_url: String,
+    pub starred_url: String,
+    pub subscriptions_url: String,
+    pub organizations_url: String,
+    pub repos_url: String,
+    pub events_url: String,
+    pub received_events_url: String,
+    pub r#type: String,
+    pub site_admin: bool,
+    pub name: Option<String>,
+    pub company: Option<String>,
+    pub blog: Option<String>,
+    pub location: Option<String>,
+    pub email: Option<String>,
+    pub hireable: Option<bool>,
+    pub bio: Option<String>,
+    pub twitter_username: Option<String>,
+    // bugfix: lene had this field in the response for her user.
+    // this field did not exist at all in neither mine nor brede's!
+    // serde(default) will deserialize with Default::default()
+    // (which is None for Option<T>) if the field is not present
+    #[serde(default)]
+    pub notification_email: Option<String>,
+    pub public_repos: u32,
+    pub public_gists: u32,
+    pub followers: u32,
+    pub following: u32,
+    pub created_at: String,
+    pub updated_at: String,
 }
 
 /// api.github.com/user - get user info, given an access token
 pub async fn get_user(access_token: &str) -> anyhow::Result<GhUserResponse> {
-    Ok(reqwest::Client::new()
+    let resp = reqwest::Client::new()
         .get("https://api.github.com/user")
         .header("User-Agent", "reqwest/0.12.3")
         .header("Accept", "application/vnd.github+json")
@@ -131,19 +103,34 @@ pub async fn get_user(access_token: &str) -> anyhow::Result<GhUserResponse> {
         .timeout(std::time::Duration::from_secs(6))
         .send()
         .await?
-        .json()
-        .await?)
+        .error_for_status()?;
+
+    let bytes: axum::body::Bytes = resp.bytes().await?;
+
+    let json = match serde_json::from_slice(&bytes) {
+        Ok(json) => json,
+        Err(e) => {
+            let text = match String::from_utf8(bytes.to_vec()) {
+                Ok(text) => text,
+                Err(_) => {
+                    anyhow::bail!("response body bytes from gh api is not a utf-8 string");
+                }
+            };
+            anyhow::bail!("could not decode json: {} - text response is: {}", e, text);
+        }
+    };
+
+    Ok(json)
 }
 
-#[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct TeamMembershipResponseBody {
     // "active" or "pending" (if team invite hasn't been accepted yet)
     pub state: String,
     // "maintainer" or "member"
-    role: String,
+    pub role: String,
     // e.g. "https://api.github.com/organizations/54359201/team/9970092/memberships/Phaqui
-    url: String,
+    pub url: String,
 }
 
 /// Query the Github API, to see if a user is a member of a team.
@@ -185,25 +172,24 @@ pub async fn user_in_team(
 // from json. But otherwise they are not used, so to silence the compiler,
 // we allow dead code in this struct.
 #[derive(serde::Deserialize)]
-#[allow(dead_code)]
 pub struct RefreshAccessTokenResponseBody {
     /// The user access token. The token starts with "ghu_".
-    access_token: String,
+    pub access_token: String,
     /// The number of seconds until access_token expires. If you disabled
     /// expiration of user access tokens, this parameter will be omitted.
     /// The value will always be 28800 (8 hours).
-    expires_in: u32,
+    pub expires_in: u32,
     /// The refresh token. If you disabled expiration of user access tokens,
     /// this parameter will be omitted. The token starts with "ghr_".
-    refresh_token: String,
+    pub refresh_token: String,
     /// The number of seconds until refresh_token expires. If you disabled
     /// expiration of user access tokens, this parameter will be omitted.
     /// The value will always be 15897600 (6 months).
-    refresh_token_expires_in: u32,
+    pub refresh_token_expires_in: u32,
     /// The scopes that the token has. This value will always be an empty string. Unlike a traditional OAuth token, the user access token is limited to the permissions that both your app and the user have.
-    scope: String,
+    pub scope: String,
     /// The type of token. The value will always be "bearer".
-    token_type: String,
+    pub token_type: String,
 }
 
 // xxx (anders): I don't actually think I need this.
@@ -241,19 +227,17 @@ pub struct RefreshAccessTokenResponseBody {
 
 // e.g. {"token":"ghs_xOgq7vewfbFdUdShzybGhRrAOdnwVo26WTic","expires_at":"2024-04-29T11:16:07Z","permissions":{"members":"read"},"repository_selection":"selected"}
 
-#[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct Permissions {
-    members: String,
+    pub members: String,
 }
 
-#[allow(dead_code)]
 #[derive(Deserialize)]
 pub struct IatResponseBody {
     pub token: String,
     pub expires_at: String,
-    permissions: Permissions,
-    repository_selection: String,
+    pub permissions: Permissions,
+    pub repository_selection: String,
 }
 
 /// Get an installation access token, using the jwt we created

@@ -86,7 +86,7 @@ impl IntoResponse for AppError {
                 }
             }
             AppError::Other(e) => {
-                debug!(error = ?e, "an error occured");
+                error!(error = ?e, "an error occured");
                 (
                     http::StatusCode::INTERNAL_SERVER_ERROR,
                     #[cfg(debug_assertions)]
@@ -215,7 +215,7 @@ async fn handler_auth_callback(
         .gh_uat(creds.access_token)
         .gh_refresh_token(creds.refresh_token)
         .gh_login_name(gh_user.login)
-        .gh_fullname(gh_user.name.to_string())
+        .gh_fullname(gh_user.name.unwrap_or_else(|| "".to_string()).to_string())
         .gh_avatar_url(gh_user.avatar_url.to_string())
         .build()
         .expect("Our jwt always builds")
