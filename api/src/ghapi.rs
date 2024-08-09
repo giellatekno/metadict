@@ -4,6 +4,7 @@ use serde::Deserialize;
 /// The json object returned when exchanging the code for an access token, at
 /// https://github.com/login/oauth/access_token
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct AccessTokenResponse {
     /// The user access token. The token starts with "ghu_".
     pub access_token: String,
@@ -51,6 +52,7 @@ pub async fn exchange_code_for_access_token(
 }
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct GhUserResponse {
     pub login: String,
     pub id: i32,
@@ -124,6 +126,7 @@ pub async fn get_user(access_token: &str) -> anyhow::Result<GhUserResponse> {
 }
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct TeamMembershipResponseBody {
     // "active" or "pending" (if team invite hasn't been accepted yet)
     pub state: String,
@@ -172,6 +175,7 @@ pub async fn user_in_team(
 // from json. But otherwise they are not used, so to silence the compiler,
 // we allow dead code in this struct.
 #[derive(serde::Deserialize)]
+#[allow(dead_code)]
 pub struct RefreshAccessTokenResponseBody {
     /// The user access token. The token starts with "ghu_".
     pub access_token: String,
@@ -228,11 +232,13 @@ pub struct RefreshAccessTokenResponseBody {
 // e.g. {"token":"ghs_xOgq7vewfbFdUdShzybGhRrAOdnwVo26WTic","expires_at":"2024-04-29T11:16:07Z","permissions":{"members":"read"},"repository_selection":"selected"}
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct Permissions {
     pub members: String,
 }
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct IatResponseBody {
     pub token: String,
     pub expires_at: String,

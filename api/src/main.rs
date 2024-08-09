@@ -21,7 +21,7 @@ use serde_json::json;
 use std::collections::HashMap;
 use std::sync::OnceLock;
 use tokio::net::TcpListener;
-use tracing::debug;
+use tracing::{debug, error};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::cookie_extractor::Cookies;
