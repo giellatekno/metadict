@@ -1,5 +1,5 @@
 """
-Short script for turning a wordfrequency list into training_text for tesseract. 
+Short script for turning a wordfrequency list into training_text for tesseract.
 Wordlist found at: https://giellatekno.uit.no/lists/sme/sme_wf.freq
 """
 
@@ -10,9 +10,8 @@ END_PUNC = list(".,:;])}”»’'?!%´\"-_")
 
 
 def main():
-
     with open("sme_wf.freq", "r") as f:
-        lines = [l.strip() for l in f.readlines()]
+        lines = [line.strip() for line in f.readlines()]
 
     words = []
 
@@ -37,8 +36,7 @@ def main():
         if len(line) + len(word) > 81:
             output_lines.append(line + "\n")
             line = ""
-        
-        
+
         if word in END_PUNC:
             if line and line.rstrip()[-1:] not in END_PUNC:
                 # print(line)
@@ -46,15 +44,12 @@ def main():
         elif word in START_PUNC:
             line = line + word
         else:
-            if random.randint(0,50) == 0:
+            if random.randint(0, 50) == 0:
                 word = word.upper()
             line = line + word + " "
-    
 
     with open("sme.training_text", "w") as output_f:
         output_f.writelines(output_lines)
-
-        
 
 
 if __name__ == "__main__":

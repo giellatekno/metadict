@@ -1,22 +1,24 @@
+"""Checks if lines in a given file are sorted alphabetically.
+Prints lines that are not alphabetically sorted"""
+
 import argparse
 from pathlib import Path
 import re
 
 alphabet = "aábcčdđeéfghijklmnŋopqrsštŧuvwxyzžæäøöå"
 
+
 def parse_args():
-    parser = argparse.ArgumentParser(
-        prog="Alphabetic check",
-        description="Checks if lines in a given file are sorted alphabetically. Prints lines that are not alphabetically sorted"
-    )
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("file", type=str, help="File to sort")
 
     return parser.parse_args()
 
+
 def acmp(a, b):
     la = len(a)
     lb = len(b)
-    lm = min(la,lb)
+    lm = min(la, lb)
     p = 0
     while p < lm:
         pa = alphabet.index(a[p])
@@ -43,20 +45,22 @@ def main():
         exit(1)
 
     with open(input_file, "r") as input_f:
-        words = [re.sub(r"[,:-]", "", l.strip().split()[0].lower()) for l in input_f.readlines()]
-
+        words = [
+            re.sub(r"[,:-]", "", line.strip().split()[0].lower())
+            for line in input_f.readlines()
+        ]
 
     for i in range(1, len(words)):
-
         prev = words[i-1]
         cur = words[i]
-    
+
         try:
             if acmp(prev, cur) == 1:
                 print(f"{i}: {prev}")
                 print(f"{i+1}: {cur}")
                 print()
         except:
+            # anders: Which exception can happen here?
             print("Couldn't compare following words")
             print(prev, cur)
             exit()

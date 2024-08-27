@@ -1,3 +1,7 @@
+"""Uses fst tokenisers to check for spelling mistakes in a given text file.
+Outputs a "mistakes-{filename}.txt file"
+"""
+
 from pathlib import Path
 import argparse
 import os
@@ -15,33 +19,31 @@ words = re.compile(r'"<?([^\s"<>]+)>?"')
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        prog="Verify text",
-        description="Uses fst tokenisers to check for spelling mistakes in a given text file. Outputs a \"mistakes-{filename}.txt file\""
-    )
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("file", type=str, help="Textfile to be analysed.")
     parser.add_argument("-l1", type=str, nargs="?", help="Langcode of language with compiled hfst-tokeniser. Default: \"sme\"", default="sme")
     parser.add_argument("-l2", type=str, nargs="?", help="Langcode of language with compiled hfst-tokeniser. Default: \"nob\"", default="nob")
     parser.add_argument("--latin", action="store_true", help="Input text contains latin words")
     parser.add_argument("-o", "--one", action="store_true", help="One lang only (l1)")
 
-
     return parser.parse_args()
+
 
 def mark_word(word):
     return f"<{word}>"
 
+
 def find_unknown_words(line, pm):
     tokenized = pm.get_tokenized_output(line, output_format="giellacg")
     res = "".join(unknowns.findall(tokenized))
-    return set(words.findall(res)) 
+    return set(words.findall(res))
 
 
 def verify_line(args, latin, latin_words, one_lang):
     idx = args[0]
     line = args[1]
 
-    assert(pm_lang1 != None and pm_lang2 != None)
+    assert pm_lang1 is not None and pm_lang2 is not None
     # assert(pm_lang1 != None and pm_lang2 != None and pm_lang3 != None)
 
     line = line.replace(":", " ")
@@ -58,7 +60,6 @@ def verify_line(args, latin, latin_words, one_lang):
 
     if latin:
         unknown_words.difference_update(latin_words)
-
 
     if unknown_words:
         # print(unknown_words)
@@ -100,7 +101,6 @@ def main():
     with open(input_file, "r") as input_f:
         lines = input_f.readlines()
 
-
     output_list = []
 
     with Pool() as pool:
@@ -113,7 +113,6 @@ def main():
 
     with open(f"mistakes-{input_file.name}", "w") as output_f:
         output_f.writelines(output_list)
-
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ import argparse
 
 IMG_DIR = Path("imgs")
 
+
 def parse_args():
     parser = argparse.ArgumentParser(
         prog="PDF to PNG",
@@ -12,18 +13,18 @@ def parse_args():
     parser.add_argument("filename", type=str, help="PDF file to be parsed")
     return parser.parse_args()
 
-def check_dirs(name):
 
+def check_dirs(name):
     if not IMG_DIR.exists():
         IMG_DIR.mkdir()
-    
+
     if not Path.exists(IMG_DIR / name):
         Path.mkdir(IMG_DIR / name)
-    
-def main():
 
+
+def main():
     args = parse_args()
-    
+
     input_file = Path(args.filename)
 
     name = input_file.name[:-4]
@@ -39,7 +40,15 @@ def main():
     check_dirs(name)
 
     print("Creating .png files")
-    subprocess.run(["pdftoppm", input_file, IMG_DIR / name / name, "-png", "-gray", "-r", "600", "-progress"])
+    subprocess.run([
+        "pdftoppm",
+        input_file, IMG_DIR / name / name,
+        "-png",
+        "-gray",
+        "-r",
+        "600",
+        "-progress"
+    ])
 
 
 if __name__ == "__main__":

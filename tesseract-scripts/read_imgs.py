@@ -1,33 +1,46 @@
+"""Reads images with tesseract and outputs to a single textfile"""
+
 import cv2
 from pathlib import Path
 import pytesseract
 import argparse
 
+
 def parse_args():
-    parser = argparse.ArgumentParser(
-        prog="Read images",
-        description="Reads images with tesseract and outputs to a single textfile"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "folder",
+        type=str,
+        help="Folder with png files to be read.",
     )
-    parser.add_argument("folder", type=str, help="Folder with png files to be read.")
-    parser.add_argument("-l", "--lang", type=str, nargs="?", default="nor_sme", help="Language. Default: \"nor_sme\"")
+    parser.add_argument(
+        "-l",
+        "--lang",
+        type=str,
+        nargs="?",
+        default="nor_sme",
+        help="Language. Default: \"nor_sme\"",
+    )
 
     return parser.parse_args()
 
 
 def preprocess_image(img):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # get grayscale image
-    img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1] # thresholding
-    #img = cv2.medianBlur(img ,5) # remove noise
+    # get grayscale image
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # thresholding
+    img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    # img = cv2.medianBlur(img ,5) # remove noise
     return img
 
-def main():
 
+def main():
     args = parse_args()
-    
+
     input_folder = Path(args.folder)
     name = input_folder.name
 
-    custom_config = f"-l {args.lang}"# --psm 6"
+    custom_config = f"-l {args.lang}" # --psm 6"
     print(custom_config)
 
     if not input_folder.is_dir():
