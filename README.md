@@ -9,8 +9,6 @@ annen ortografi, slik at man enkelt skal kunne se hvordan et ord har blitt
 brukt historisk.
 
 
-Here we include historical dictionaries.
-
 Ein nøkkel frå 
 
 ```
@@ -83,22 +81,14 @@ biblioteket, som en front-end så representerer.
 
 ### Kjernebibliotek og hvordan data ligger lagret
 
-Datamengden er av noe størrelse, og vi ønsker å sørge for at søk og oppslag
-går relativt kjapt. Kanskje kan dataen ligge i en database, for da kan vi
-bruke databasen til å gjøre søk og oppslag. Alternativt må vi ha vårt eget
-format, og vår egen måte å gjøre søk og oppslag i dataen vår på.
+Vi lagrer dataen i en PostgreSQL-database. Fordeler med dette er at søk og
+oppslag tar databasen seg av å optimalisere. Vi har også muligheten for å kunne
+lagre brukerdata (f.eks kommentarer) i en database. Ulempen er at strukturen
+er relativt rigid, og forandring av denne krever en del innsats, om det skulle
+bli nødvendig.
 
-Fordeler med en database:
-- Søk og oppslag gjøres av databasen
-- Kan lagre ekstra data (f.eks kommentarer) uten å behøve å gjøre endringer
-  i kildematriell, eller ha en ekstern plass å lagre slik data.
-
-Ulemper med database:
-- Rigid struktur (relasjonell database)
-- Må hostes.
-
-Alternativt lager vi en egen representasjon, noe ala digtdictionaries.
-Fordeler med database er at søk og oppslagsfunksjonalitet er gjort for oss.
+Alternativet er å bruke vårt eget format, men vi så ikke at vi hadde behov
+for det, og da en database gjør jobben vår enklere, ble det valgt.
 
 
 
@@ -113,20 +103,15 @@ format.
 
 ### Grensesnitt
 
-Det er et web-basert verktøy, og selv om ikke designet trenger å være så
-estetisk flott, så er det nok kompleksitet til å bruke et rammeverk.
-Alternativer her er Svelte, eller React.
+Websida har et enkelt design, og SvelteKit er rammeverket vi bruker.
 
 
 
 ### Autentisering
 
-Prøve å bruke github. Login skjer via github, og vi får informasjon tilbake
-fra github når brukeren har logget inn om brukeren er medlem av en organsisasjon
-vi kontrollerer.
-
-Da gir man tilgang ved å legge en github bruker til i en organsisasjon.
-Evt opprette et eget repo, hvor man legger brukere til.
+Brukere kan logge inn med Github. Om brukeren er medlem av et team vi
+kontrollerer, vil brukeren også se de lukkede ordbøkene. Ellers sees bare de
+åpne.
 
 
 ### norsk - samisk
@@ -134,19 +119,6 @@ Evt opprette et eget repo, hvor man legger brukere til.
 Start ut med nds-ordbøkene: nob-sme, nob-fin
 Alle ordbøker til  samisk
 Einspråklege ordbøker på norsk, svensk, dansk
-
-
-### Kjeldekode 
-
-https://github.com/giellatekno/metadictionary.git
-
-Vi vil ha python og javascript
-
-Vi vurderer satni.org.
-
-### Tilgang
-
-Viss metaordboka skal vere på Azure må vi finne ut av tilgangssystemet.
 
 
 ## Ordbøker
