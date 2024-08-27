@@ -4,14 +4,28 @@ Wordlist found at: https://giellatekno.uit.no/lists/sme/sme_wf.freq
 """
 
 import random
+import argparse
 
 START_PUNC = list("([{«“")
 END_PUNC = list(".,:;])}”»’'?!%´\"-_")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "input",
+        type=argparse.FileType("r", encoding="utf-8"),
+    )
+    parser.add_argument(
+        "output",
+        type=argparse.FileType("w", encoding="utf-8"),
+    )
+    return parser.parse_args()
+
+
 def main():
-    with open("sme_wf.freq", "r") as f:
-        lines = [line.strip() for line in f.readlines()]
+    args = parse_args()
+    lines = [line.strip() for line in args.input.readlines()]
 
     words = []
 
@@ -48,9 +62,8 @@ def main():
                 word = word.upper()
             line = line + word + " "
 
-    with open("sme.training_text", "w") as output_f:
-        output_f.writelines(output_lines)
+    args.output.writelines(output_lines)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
