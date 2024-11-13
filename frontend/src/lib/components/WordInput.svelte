@@ -110,6 +110,7 @@
         border: 0;
         outline: 0;
         padding: 8px;
+        color: black
     }
     input:focus {
         border: 0;

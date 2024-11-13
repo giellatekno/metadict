@@ -1,8 +1,10 @@
 <script lang="ts">
-    import { page } from "$app/stores";
+    import { page } from "$app/stores";
     import { langname } from "$lib/langname.js";
     import { locale, t } from "svelte-intl-precompile";
-    import { base } from "$app/paths";
+    import { base } from "$app/paths";
+    import { Accordion, AccordionItem} from "@skeletonlabs/skeleton"
+    
     export let data;
 
     const { lang, lemma, article_id } = $page.params;
@@ -29,33 +31,40 @@
 
 </script>
 
-<p>
-    {$t("lookup-result", { values: { lemma: lemma, count: n_dicts } })}
-</p>
+<div class="border bottom-1 w-full my-5"/>
 
-<main class="container">
-    <div class="k1">
-        {#each sorted_tr_langs as tr_lang}
-            <h4>{langname(lang, $locale)} - {langname(tr_lang, $locale)}</h4>
-            {#each data.objs as [lemma, dictionary_name, article_id, lang2]}
-                {#if tr_lang === lang2}
-                    <span>
+<h5 class="h5 my-2">{$t("lookup-result", { values: { lemma: lemma, count: n_dicts } })}</h5>
+
+<main class="w-full grid grid-cols-3 gap-5">
+    <div class="flex flex-col w-3/4">
+        <Accordion class="card">
+            {#each sorted_tr_langs as tr_lang}
+            <AccordionItem open>
+                <svelte:fragment slot="summary">
+                    <h6 class="h6"><b>{langname(lang, $locale)} → {langname(tr_lang, $locale)}</b></h6>
+                </svelte:fragment>
+                <svelte:fragment slot="content">
+                    <nav class="list-nav">
+                        {#each data.objs as [lemma, dictionary_name, article_id, lang2]}
+                        {#if tr_lang === lang2}
                         <a href="{base}/lookup/{lang}/{lemma}/{article_id}">
-                            {lemma}
+                            {lemma} ({dictionary_name})
                         </a>
-                        ({dictionary_name})
-                    </span>
-                {/if}
+                        {/if}
+                        {/each}
+                    </nav>
+                </svelte:fragment>
+            </AccordionItem>
             {/each}
-        {/each}
+        </Accordion>
     </div>
 
-    <div class="k2">
-        <slot></slot>
+    <div class="flex col-span-2">
+        <slot/>
     </div>
 </main>
 
-
+<!-- 
 <style>
     main.container {
         width: 100vw;
@@ -84,4 +93,4 @@
     span > a {
         margin-left: 12px;
     }
-</style>
+</style> -->
