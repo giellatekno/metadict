@@ -21,10 +21,10 @@ from pathlib import Path
 from utils.utils import articles_to_sql, dictionary_to_sql
 from classes import (GTParser, QvigstadParser, SammallahtiParser, 
                     FysihkkaParser, GirjjalasvuodaParser, AlgosatnegirjiParser, 
-                    RuoktumetParser, PedPsyParser)
+                    RuoktumetParser, PedPsyParser, NettisanakirjaParser)
 
-def parse_dictionary(file, dictionary_id):
-    match file.name.split("-")[0]:
+def parse_dictionary(file: Path, dictionary_id):
+    match file.stem.split("-")[0]:
         case "gt":
             parser = GTParser(dictionary_id, file)
         case "qvigstad":
@@ -41,6 +41,8 @@ def parse_dictionary(file, dictionary_id):
             parser = RuoktumetParser(dictionary_id, file)
         case "pedagogalas":
             parser = PedPsyParser(dictionary_id, file)
+        case "nettisanakirja":
+            parser = NettisanakirjaParser(dictionary_id, file)
         case _:
             raise Exception(f"Parsing of dictionary \"{file.name}\" not implemented")
             

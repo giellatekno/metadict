@@ -1,4 +1,3 @@
-from xml.etree import ElementTree as ET
 from utils.dataclasses import Dictionary, Article
 
 """
@@ -22,7 +21,7 @@ class SammallahtiParser:
             lang2="fin",
             closed=True,
             is_ordered=True,
-            author="Pekka Sammalahtti",
+            author="Pekka Sammallahti",
             date_published="2020",
         )
 
