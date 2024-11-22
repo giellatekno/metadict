@@ -20,8 +20,6 @@
     )
 </script>
 
-<div class="border bottom-1 w-full my-5"/>
-
 <h5 class="h5 my-2">{$t("search-result", { values: { count: data.objs.length } })}</h5>
 
 <div class="card p-2 w-fit">

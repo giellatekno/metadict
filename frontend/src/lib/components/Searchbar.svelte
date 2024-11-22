@@ -15,12 +15,18 @@
         if (event.key !== "Enter") return;
         dispatch("new-value", value)
     }
+
+    function on_click() {
+        dispatch("new-value", value)
+    }
 </script>
 
 
 <div class="input-group input-group-divider grid-cols-[auto_1fr_auto] w-2/6 h-16">
     <div class="input-group-shim">
-        <img src={searchIcon} alt="Search" width="30">
+        <button class="btn-icon btn-icon-lg !bg-transparent" on:click={on_click}>
+            <img src={searchIcon} alt="Search" width="30">
+        </button>
     </div>
     <input 
         bind:this={input}

@@ -31,8 +31,6 @@
 
 </script>
 
-<div class="border bottom-1 w-full my-5"/>
-
 <h5 class="h5 my-2">{$t("lookup-result", { values: { lemma: lemma, count: n_dicts } })}</h5>
 
 <main class="w-full grid grid-cols-3 gap-5">

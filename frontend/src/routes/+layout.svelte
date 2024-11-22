@@ -32,13 +32,16 @@ type User = {
 let user: User | undefined;
 $: user = $page.data?.user;
 async function on_new_value({ detail }: { detail: string }) {
+    console.log(detail)
     const search_term = encodeURIComponent(detail);
+    console.log(search_term)
     let url = `${base}/search/${search_lang}/${search_term}`;
     // fix for seemingly working in dev but not prod:
     // on dev base="", so the url starts with a "/", but on
     // prod, we have a base, starting with NOT a "/", so we need
     // to add it here, so that we don't go to a relative url
     if (!url.startsWith("/")) url = `/${url}`;
+    console.log(url)
     await goto(url);
 }
 </script>
@@ -77,6 +80,9 @@ async function on_new_value({ detail }: { detail: string }) {
     <div class="mt-2">
         <Searchbar on:new-value="{on_new_value}" bind:search_lang></Searchbar>
     </div>
-    <slot/>
+
+    <div class="border bottom-1 w-full my-5"/>
+    <slot/>    
+
 </div>
 
