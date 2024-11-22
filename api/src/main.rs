@@ -311,6 +311,12 @@ async fn handler_search(
         }
     };
 
+    if query == "%" {
+        let response_body = Json(json!([]));
+        let response = (headers, response_body).into_response();
+        return Ok(response);
+    }
+
     let connection = connpool.get().await?;
     let rows = crate::db::find_lemmas(connection, &lang, &query, can_see_closed).await?;
     let response_body = Json(json!(rows));
