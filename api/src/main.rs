@@ -64,6 +64,7 @@ impl IntoResponse for AppError {
         match self {
             AppError::Redirect(redirect) => {
                 let mut query_params = vec![];
+                error!(desc = ?redirect.description, msg = ?redirect.message, "a function caused a redirect error");
                 if let Some(desc) = redirect.description {
                     query_params.push(("description", desc));
                 };
