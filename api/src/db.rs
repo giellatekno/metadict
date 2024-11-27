@@ -23,7 +23,9 @@ pub async fn find_lemmas(
         WHERE
             articles.lang = $1
             AND
-            articles.lemma LIKE $2
+            LOWER(articles.lemma) LIKE LOWER($2)
+        ORDER BY 
+            articles.lemma
         ;
     "#
     } else {
@@ -39,9 +41,11 @@ pub async fn find_lemmas(
         WHERE
             lang = $1
             AND
-            lemma LIKE $2
+            LOWER(lemma) LIKE LOWER($2)
             AND
             dictionaries.closed = FALSE
+        ORDER BY 
+            articles.lemma
         ;
     "#
     };
@@ -85,6 +89,8 @@ pub async fn find_articles_for_lemma(
                 lang = $1
                 AND
                 lemma LIKE $2
+            ORDER BY 
+                dictionaries.name, articles.id
             ;
         "#
     } else {
@@ -106,6 +112,8 @@ pub async fn find_articles_for_lemma(
                 lemma LIKE $2
                 AND
                 dictionaries.closed = FALSE
+            ORDER BY 
+                dictionaries.name, articles.id
             ;
         "#
     };
@@ -198,11 +206,13 @@ pub async fn find_neighboring_articles(
                 WHERE 
                     id = $1) lemma 
             WHERE 
-            articles.dictionary = lemma.dictionary 
-            AND 
-            articles.article_number BETWEEN lemma.article_number-5 AND lemma.article_number+5 
-            AND 
-            dictionaries.closed = FALSE;
+                articles.dictionary = lemma.dictionary 
+                AND 
+                articles.article_number BETWEEN lemma.article_number-5 AND lemma.article_number+5 
+                AND 
+                dictionaries.closed = FALSE
+            ORDER BY
+                articles.article_number;
         "#
     };
 
