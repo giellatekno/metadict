@@ -4,7 +4,7 @@ import { goto } from "$app/navigation";
 import Profile from "$lib/components/Profile.svelte";
 import { page } from "$app/stores";
 import { base } from "$app/paths";
-import { t, locale } from "svelte-intl-precompile";
+import { t } from "svelte-intl-precompile";
 import { env } from "$env/dynamic/public";
 import { AppBar } from "@skeletonlabs/skeleton"
 import SelectLocale from "$lib/components/SelectLocale.svelte";
@@ -32,9 +32,7 @@ type User = {
 let user: User | undefined;
 $: user = $page.data?.user;
 async function on_new_value({ detail }: { detail: string }) {
-    console.log(detail)
     const search_term = encodeURIComponent(detail);
-    console.log(search_term)
     let url = `${base}/search/${search_lang}/${search_term}`;
     // fix for seemingly working in dev but not prod:
     // on dev base="", so the url starts with a "/", but on
@@ -73,14 +71,8 @@ async function on_new_value({ detail }: { detail: string }) {
     </svelte:fragment>
 </AppBar>
 
-<div class="m-4 p-2">
-    <label for="search-input" class="label">
-        {$t("dictionary-form")} (%):
-    </label>
-    <div class="mt-2">
-        <Searchbar on:new-value="{on_new_value}" bind:search_lang></Searchbar>
-    </div>
-
+<div class="p-6">
+    <Searchbar on:new-value="{on_new_value}" bind:search_lang></Searchbar>
     <div class="border bottom-1 w-full my-5"/>
     <slot/>    
 

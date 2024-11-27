@@ -3,31 +3,31 @@
     export let data;
 
     let rendered: string | undefined;
-    $: rendered = data.rendered
+    $: rendered = data.rendered;
 
-    let neighbors: Array<string> | undefined; 
-    $: neighbors = data.neighbors
-
-    let dictionary: Array<string> | undefined;
-    $ : dictionary = data.dictionary
+    let neighbors: Array<string> | undefined;
+    $: neighbors = data.neighbors;
+        
+    let dictionary;
+    $: dictionary = data.dictionary;
 </script>
 
 <div class="grid grid-cols-5 gap-10 w-full">
-    <div class="card col-span-3 p-5 w-full">
-        {#if neighbors && neighbors.length > 0}
-        {#each neighbors as neighbor}
-        {#if neighbor === rendered} 
-        <div class="p-1 border-y-2 bg-primary-500/10">
-            {@html neighbor}
-        </div>
-        {:else}
-        <div class="p-1 text-sm">
-            {@html neighbor}
-        </div>
-        {/if}
-        {/each}
-        {:else}
-        <div class="single-article">
+    <div class="card col-span-3 py-2 px-2 w-full">
+        {#if neighbors && neighbors.length > 1}
+            {#each neighbors as neighbor}
+            {#if neighbor === rendered} 
+            <div class="px-2 py-3 text-xl border-y-2 border-primary-500">
+                {@html neighbor}
+            </div>
+            {:else}
+            <div class="py-1 text-sm">
+                {@html neighbor}
+            </div>
+            {/if}
+            {/each}
+        {:else if neighbors && neighbors.length === 1}
+        <div class="card">
             {@html rendered}
         </div>
         {/if}

@@ -2,7 +2,6 @@
     import { t } from 'svelte-intl-precompile';
     import { base } from "$app/paths";
     import { Paginator, type PaginationSettings } from '@skeletonlabs/skeleton';
-    import SelectLocale from '$lib/components/SelectLocale.svelte';
 
     // Data from +page.js load()
     export let data;
@@ -13,6 +12,8 @@
         size: data.objs.length,
         amounts: []
     } satisfies PaginationSettings;
+
+    $: paginationSettings.size = data.objs.length;
 
     $: paginatedSource = data.objs.slice(
         paginationSettings.page * paginationSettings.limit,

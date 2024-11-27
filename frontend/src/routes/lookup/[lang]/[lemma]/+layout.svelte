@@ -12,9 +12,6 @@
 
     let tr_langs: Array<string> = [];
     
-    // Sort dicts by name so listing is consistent
-    data.objs.sort((a: Array<any>, b: Array<any>) => {return a[1].localeCompare(b[1])})
-
     // Find all second langs of dicts
     data.objs.forEach((item: Array<any>) => {
         if (!tr_langs.includes(item[3])) {
@@ -61,34 +58,3 @@
         <slot/>
     </div>
 </main>
-
-<!-- 
-<style>
-    main.container {
-        width: 100vw;
-        display: grid;
-        grid-template-columns: 1fr 2fr;
-    }
-
-    div.k1 {
-        display: flex;
-        flex-direction: column;
-        padding-left: 30px;
-    }
-
-    div.k2 {
-        display: flex;
-    }
-
-    p {
-        padding-left: 30px;
-    }
-
-    span {
-        padding: 6px;
-    }
-
-    span > a {
-        margin-left: 12px;
-    }
-</style> -->
