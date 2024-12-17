@@ -2,13 +2,20 @@
     import { t } from "svelte-intl-precompile";
 </script>
 
-<div class="card w-1/2 flex flex-col my-2 px-2">
+<div class="card w-full md:w-[42rem] flex flex-col my-2 px-2 pb-2">
     <span class="my-2">
-        <h3 class="h3">{$t("howto-search-title")}</h3>
+        <h3 class="h3 pb-1 font-medium">{$t("howto-search-title")}</h3>
         <p>{$t("howto-search-body")}</p>
+        <br>
+        <ul>
+            <li>"<b>%</b>laš" {$t("howto-search-example-end", {values: {example: "laš"}}) }</li>
+            <li>"biila<b>%</b>" {$t("howto-search-example-start", {values: {example: "biila"}})}</li>
+            <li>"ráhkis<b>%</b>vuohta" {$t("howto-search-example-middle", {values: {example_start: "ráhkis", example_end: "vuohta"}})}</li>
+        </ul>
+        <br>
     </span>
     <span class="my-2">
-        <h3 class="h3">{$t("howto-access-title")}</h3>
+        <h3 class="h3 pb-1 font-medium">{$t("howto-access-title")}</h3>
         <p>{$t("howto-access-body")}</p>
     </span>
 

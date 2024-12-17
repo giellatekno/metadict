@@ -16,7 +16,10 @@ export default {
     "year-published": "Year published",
     "no-additional-info": "No additional info",
     "howto-search-title": "How to use the metadictionary",
-    "howto-search-body": "Use the searchbox to search for a word in its dictionary form. The percent character (%) is a wildcard symbol. For example searching for \"biila%\" will yield all lemmas that start with \"biila\".",
+    "howto-search-body": "Use the searchbox to search for a word in its dictionary form. The dropdown menu besides the search field is used to select search language. The percent character (%) is a wildcard symbol. It can be placed before, after or in the middle of a word. For example:",
+    "howto-search-example-end": "gives all words ending with \"{example}\".",
+    "howto-search-example-start": "gives all words starting with \"{example}\".",
+    "howto-search-example-middle": "gives all words starting with \"{example_start}\" and ending with \"{example_end}\".",
     "howto-access-title": "How to access restricted dictionaries",
-    "howto-access-body": "If you are a worker at Giellatekno, you can get acces to restricted dictionaries by contacting us (giellatekno@uit.no). Once you have been given access, click \"Log in with Github\" and verify by clicking your name. You should see the message \"Access to restricted dictionaries\". If you have not gotten access logging in won't make a difference in the results you see.",
+    "howto-access-body": "If you are a worker at Giellatekno, you can get access to restricted dictionaries. Once you have been given access, click \"Log in with Github\" and verify by clicking your name. You should see the message \"Access to restricted dictionaries\". If you have not gotten access logging in won't make a difference in the results you see.",
 }
