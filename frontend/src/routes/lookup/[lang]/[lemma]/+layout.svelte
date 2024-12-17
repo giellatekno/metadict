@@ -1,14 +1,15 @@
 <script lang="ts">
     import { page } from "$app/stores";
-    import { langname } from "$lib/langname.js";
+    import { langname } from "$lib/langname";
     import { locale, t } from "svelte-intl-precompile";
     import { base } from "$app/paths";
     import { Accordion, AccordionItem} from "@skeletonlabs/skeleton"
     
     export let data;
 
-    const { lang, lemma, article_id } = $page.params;
-    const n_dicts = data.objs.length;
+    $: lang = $page.params.lang 
+    $: lemma = $page.params.lemma 
+    $: n_dicts = data.objs.length;
 
     let tr_langs: Array<string> = [];
     
@@ -26,9 +27,10 @@
         ...tr_langs.filter(elm => elm !== "sme" && elm !== "nob"),
     ];
 
+    $: result_text = $t("lookup-result", { values: { lemma: lemma, count: n_dicts } })
 </script>
 
-<h5 class="h5 my-2">{$t("lookup-result", { values: { lemma: lemma, count: n_dicts } })}</h5>
+<h5 class="h5 my-2">{result_text}</h5>
 
 <main class="w-full grid grid-cols-3 gap-5">
     <div class="flex flex-col w-3/4">

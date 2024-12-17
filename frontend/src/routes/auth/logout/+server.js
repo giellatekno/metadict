@@ -1,9 +1,7 @@
-import { redirect } from "@sveltejs/kit";
-import { env } from "$env/dynamic/public";
+import { redirect } from "@sveltejs/kit";
 import { base } from "$app/paths";
 
-export async function GET({ cookies }) {
+export async function GET({ cookies }) {
     cookies.delete("metadict-creds", { path: "/" });
-    //redirect(303, `${env.PUBLIC_API_ENDPOINT}/auth/logout`);
     redirect(303, `${base}/`);
 }

@@ -23,19 +23,20 @@
 
 <h5 class="h5 my-2">{$t("search-result", { values: { count: data.objs.length } })}</h5>
 
+{#if paginationSettings.size !== 0}
 <div class="card p-2 w-fit">
-
     <nav class="list-nav">
         {#each paginatedSource as lemma}
-            <a href="{base}/lookup/{data.lang}/{lemma}">
-                <span>{lemma}</span>
-            </a>
+        <a href="{base}/lookup/{data.lang}/{lemma}">
+            <span>{lemma}</span>
+        </a>
         {/each}
     </nav>
     {#if data.objs.length > 10}
     <Paginator class="mt-2"
-        bind:settings={paginationSettings}
-        showPreviousNextButtons={true}
+    bind:settings={paginationSettings}
+    showPreviousNextButtons={true}
     />        
     {/if}
 </div>
+{/if}

@@ -1,4 +1,4 @@
-import { api_request } from "$lib/api_request.js";
+import { api_request } from "$lib/api_request";
 
 export async function load({ fetch, params }) {
     const { lang, lemma } = params;

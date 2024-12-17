@@ -1,5 +1,4 @@
-import { writable } from "svelte/store";
-import { addMessages, init, locale as precompile_locale } from "svelte-intl-precompile";
+import { addMessages, init, locale as precompile_locale } from "svelte-intl-precompile";
 import nob from "../locales/nob.js";
 import eng from "../locales/eng.js";
 import sme from "../locales/sme.js";
@@ -101,4 +100,4 @@ function langtag_in_locale(langtag, locale) {
     return tag;
 }
 
-export { locale, langtag_in_locale };
+export { locale, langtag_in_locale };

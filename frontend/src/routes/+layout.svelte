@@ -1,47 +1,50 @@
 <script lang="ts">
-import "../app.css";
-import { goto } from "$app/navigation";
-import Profile from "$lib/components/Profile.svelte";
-import { page } from "$app/stores";
-import { base } from "$app/paths";
-import { t } from "svelte-intl-precompile";
-import { env } from "$env/dynamic/public";
-import { AppBar } from "@skeletonlabs/skeleton"
-import SelectLocale from "$lib/components/SelectLocale.svelte";
-import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
-import { storePopup } from '@skeletonlabs/skeleton';
-import infoIcon from "$assets/info.svg"
-import Searchbar from "$lib/components/Searchbar.svelte";
+    import "../app.css";
+    import { goto } from "$app/navigation";
+    import { page } from "$app/stores";
+    import { base } from "$app/paths";
+    import { t } from "svelte-intl-precompile";
+    import { env } from "$env/dynamic/public";
+    import { AppBar, storePopup } from "@skeletonlabs/skeleton"
+    import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
+    import infoIcon from "$assets/info.svg"
+    import Profile from "$lib/components/Profile.svelte";
+    import SelectLocale from "$lib/components/SelectLocale.svelte";
+    import Searchbar from "$lib/components/Searchbar.svelte";
 
-storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
-			
-let search_lang = "sme";
+    // Configure popups
+    storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
-let redirect_uri = env.PUBLIC_API_ENDPOINT;
-if (redirect_uri === undefined) {
-    console.warn("routes/+layout.svelte: env.PUBLIC_API_ENDPOINT is undefined, using default value of 'http://localhost:3000'");
-    redirect_uri = "http://localhost:3000";
-}
-redirect_uri = encodeURIComponent(redirect_uri + "/auth/callback");
+    let search_lang = "sme";
+    let search_input : HTMLInputElement;
 
-type User = {
-    gh_fullname: string,
-    gh_avatar_url: string,
-    restricted_dicts: boolean,
-};
-let user: User | undefined;
-$: user = $page.data?.user;
-async function on_new_value({ detail }: { detail: string }) {
-    const search_term = encodeURIComponent(detail);
-    let url = `${base}/search/${search_lang}/${search_term}`;
-    // fix for seemingly working in dev but not prod:
-    // on dev base="", so the url starts with a "/", but on
-    // prod, we have a base, starting with NOT a "/", so we need
-    // to add it here, so that we don't go to a relative url
-    if (!url.startsWith("/")) url = `/${url}`;
-    console.log(url)
-    await goto(url);
-}
+    let redirect_uri = env.PUBLIC_API_ENDPOINT;
+    if (redirect_uri === undefined) {
+        console.warn("routes/+layout.svelte: env.PUBLIC_API_ENDPOINT is undefined, using default value of 'http://localhost:3000'");
+        redirect_uri = "http://localhost:3000";
+    }
+    redirect_uri = encodeURIComponent(redirect_uri + "/auth/callback");
+
+    type User = {
+        gh_fullname: string,
+        gh_avatar_url: string,
+        restricted_dicts: boolean,
+    };
+    let user: User | undefined;
+    $: user = $page.data?.user;
+
+    async function on_new_value({ detail }: { detail: string }) {
+        const search_term = encodeURIComponent(detail);
+        let url = `${base}/search/${search_lang}/${search_term}`;
+        // fix for seemingly working in dev but not prod:
+        // on dev base="", so the url starts with a "/", but on
+        // prod, we have a base, starting with NOT a "/", so we need
+        // to add it here, so that we don't go to a relative url
+        if (!url.startsWith("/")) url = `/${url}`;
+        console.log(url);
+        await goto(url);
+        search_input.focus();
+    }
 </script>
 
 <svelte:head>
@@ -72,7 +75,7 @@ async function on_new_value({ detail }: { detail: string }) {
 </AppBar>
 
 <div class="p-6">
-    <Searchbar on:new-value="{on_new_value}" bind:search_lang></Searchbar>
+    <Searchbar on:new-value="{on_new_value}" bind:search_lang bind:search_input></Searchbar>
     <div class="border bottom-1 w-full my-5"/>
     <slot/>    
 

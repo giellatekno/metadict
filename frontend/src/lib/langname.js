@@ -65,11 +65,11 @@ function get_our(of, in_) {
 
 export function langname(of, in_) {
     if (typeof of !== "string") {
-        const msg = `langname(): argument 'of': must be a string, not ${type(of)}`;
+        const msg = `langname(): argument 'of': must be a string, not ${typeof(of)}`;
         throw new TypeError(msg);
     }
     if (typeof in_ !== "string") {
-        const msg = `langname(): argument 'in_': must be a string, not ${type(in_)}`;
+        const msg = `langname(): argument 'in_': must be a string, not ${typeof(in_)}`;
         throw new TypeError(msg);
     }
 
