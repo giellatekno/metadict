@@ -19,41 +19,39 @@ into a live database. Refer to that script for further information.
 import gzip
 from pathlib import Path
 from utils.utils import articles_to_sql, dictionary_to_sql
-from classes import (GTParser, QvigstadParser, SammallahtiParser, 
-                    FysihkkaParser, GirjjalasvuodaParser, AlgosatnegirjiParser, 
-                    RuoktumetParser, PedPsyParser, NettisanakirjaParser)
+from classes import *
+
+parsers = {
+    "gt": GTParser,
+    "gtsme": GTSmeParser,
+    "qvigstad": QvigstadParser,
+    "sammallahti": SammallahtiParser,
+    "fysihkka": FysihkkaParser,
+    "girjjalasvuoda": GirjjalasvuodaParser,
+    "algosatnegirji": AlgosatnegirjiParser,
+    "ruoktumet": RuoktumetParser,
+    "pedagogalas": PedPsyParser,
+    "nettisanakirja": NettisanakirjaParser,
+    "konrad_nielsen": KonradParser,
+    "skoleordbok": SkoleordbokParser,
+    "apotekordliste": ApotekordlisteParser,
+}
+
 
 def parse_dictionary(file: Path, dictionary_id):
-    match file.stem.split("-")[0]:
-        case "gt":
-            parser = GTParser(dictionary_id, file)
-        case "qvigstad":
-            parser = QvigstadParser(dictionary_id, file)
-        case "sammallahti":
-            parser = SammallahtiParser(dictionary_id, file)
-        case "fysihkka":
-            parser = FysihkkaParser(dictionary_id, file)
-        case "girjjalasvuoda":
-            parser = GirjjalasvuodaParser(dictionary_id, file)
-        case "algosatnegirji":
-            parser = AlgosatnegirjiParser(dictionary_id, file)
-        case "ruoktumet":
-            parser = RuoktumetParser(dictionary_id, file)
-        case "pedagogalas":
-            parser = PedPsyParser(dictionary_id, file)
-        case "nettisanakirja":
-            parser = NettisanakirjaParser(dictionary_id, file)
-        case _:
-            raise Exception(f"Parsing of dictionary \"{file.name}\" not implemented")
+    try:
+        parser = parsers[file.stem.split("-")[0]](dictionary_id, file)
+    except KeyError:    
+        raise Exception("\033[93m" + f"Parsing of dictionary \"{file.name}\" not implemented" + "\033[0m")
             
     return parser.get_parsed_data()
 
 
 def main():
-    dictionaries = []
-    articles = []
+    # dictionaries = []
+    # articles = []
 
-    target = "../db/init"
+    # target = "../db/init"
     sql_folder = Path("sql_files")
     if not sql_folder.exists():
         sql_folder.mkdir()
@@ -73,18 +71,18 @@ def main():
         dictionary_to_sql(d, file.stem)
         articles_to_sql(a, file.stem)
 
-        dictionaries.append(d)
-        articles.extend(a)    
+        # dictionaries.append(d)
+        # articles.extend(a)    
         dictionary_id += 1
 
-    lines = "\n".join(d.to_tsv_string() for d in dictionaries)
-    with gzip.open(Path(target) / "data_dictionaries.txt.gz", "wb") as f:
-        f.write(lines.encode())
+    # lines = "\n".join(d.to_tsv_string() for d in dictionaries)
+    # with gzip.open(Path(target) / "data_dictionaries.txt.gz", "wb") as f:
+    #     f.write(lines.encode())
     
 
-    article_lines = "\n".join(d.to_tsv_string() for d in articles)
-    with gzip.open(Path(target) / "data_articles.txt.gz", "wb") as f:
-        f.write(article_lines.encode())
+    # article_lines = "\n".join(d.to_tsv_string() for d in articles)
+    # with gzip.open(Path(target) / "data_articles.txt.gz", "wb") as f:
+    #     f.write(article_lines.encode())
 
 
 if __name__ == "__main__":

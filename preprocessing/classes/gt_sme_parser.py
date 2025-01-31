@@ -2,23 +2,15 @@ from xml.etree import ElementTree as ET
 from utils.dataclasses import Dictionary, Article
 from utils.utils import sort_by_sami_alphabet
 
-class GTParser:
+class GTSmeParser:
     def __init__(self, dictionary_id, file):
-        langs = file.name[3:-4]
-        l1, l2 = langs.split("-")
         
-        author = "Giellatekno"
-        if langs == "sme-nob" or langs == "nob-sme":
-            author = "Lene Antonsen, Trond Trosterud and Berit Merete Nystad Eskonsipo"
-        elif langs == "sme-fin" or langs == "fin-sme":
-            author = "Trond Trosterud"
-
         self.dictionary = Dictionary(
             id=dictionary_id,
             name="Neahttadigisánit",
-            lang1=l1,
-            lang2=l2,
-            author=author
+            lang1="sme",
+            lang2="sme",
+            author="Risten West, Lene Antonsen, Trond Trosterud & Berit Merete Nystad Eskonsipo",
         )
 
         self.articles = self.parse_dict(file)
@@ -33,14 +25,23 @@ class GTParser:
         for e in xml.iter("e"):
             
             l_node = e.find("lg/l")
+
             if l_node is None:
                 # print("<e> node has no <lg><l>")
                 continue
-
+            
             lemma = l_node.text.strip("\n\t ").replace("\n", " ")
+
+            if e.find("mg/dg") == None:
+                continue
+
             pos = l_node.get("pos")
 
-            rendered = self.to_html(lemma, pos, e)
+            try:
+                rendered = self.to_html(lemma, pos, e)
+            except Exception as e:
+                print(lemma, e)
+                continue
 
             a = Article(
                 dictionary=self.dictionary.id,
@@ -62,46 +63,35 @@ class GTParser:
     def clean_text(self, text: str):
         return text.strip().replace("\n", "").replace("\t", " ")
 
-
     def to_html(self, lemma, pos, e_node: ET.Element):
         # Start html string
         html = f"<b>{lemma}</b> ({pos}): "
 
-        # Make each meaning group a list element
+        # Iterate meaning groups
         mgs = e_node.findall("mg")
         for mg in mgs:
 
-            # Find all translations
-            tgs = mg.findall("tg")
-            for tg in tgs:
+            # Find and add all definitions
+            ds = [self.clean_text(d.text) for d in mg.findall("dg/d") if d.text and d.text.strip()]
+            if ds:
+                html += "; ".join(ds) + "<br/>"
 
-                # Add restriction if any                
-                re = tg.find("re")
-                if re:
-                    html += f"({re.text.strip()}) "
+            # Find and add all example sentences
+            xs = [self.clean_text(x.text)for x in mg.findall("xg/x") if x.text] 
+            tgxs = [self.clean_text(x.text) for x in mg.findall("tg/xg/x") if x.text and self.clean_text(x.text) not in xs]
+            if xs or tgxs:
+                for x in xs:
+                    html += f"<i>{x}</i>" + "<br/>"
+                for x in tgxs:
+                    html += f"<i>{x}</i>" + "<br/>"
 
-                # Add all translations and POS if they have
-                ts = tg.findall("t")
-                html += "; ".join([f'{self.clean_text(t.text)} ({t.get("pos")})' if t.get("pos") else f'{self.clean_text(t.text)}' for t in ts]) + "<br/>"
-
-                for xg in tg.findall("xg"):
-                    x = xg.find("x").text
-                    xt = xg.find("xt").text
-                    if x and xt:
-                        html += f"<i>{self.clean_text(x)}</i> "
-                        html += self.clean_text(xt) + "<br/><br/>"
-
-            
-            # Find and add all example scentences with translation
-            for xg in mg.findall("xg"):
-                x = xg.find("x").text
-                xt = xg.find("xt").text
-                if x and xt:
-                    html += f"<i>{self.clean_text(x)}</i> "
-                    html += self.clean_text(xt) + "<br/><br/>"
+                html += "<br/>"
 
         # Remove excess linebreaks
         while html[-5:] == "<br/>":
             html = html.removesuffix("<br/>")
 
+        # if lemma == "fierbmi":
+        #     print(html)
         return f"<p>{html}</p>"
+

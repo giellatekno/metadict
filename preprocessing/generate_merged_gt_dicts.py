@@ -30,9 +30,6 @@ def main():
     gut_root = get_gut_root()
     p = Path(gut_root) / "giellalt"
 
-    shutil.rmtree("dicts/gt/", ignore_errors=True)
-    Path("dicts/gt/").mkdir(parents=True, exist_ok=True)
-
     for i, directory in enumerate(p.glob("dict-*"), start=1):
         # strip away the "dict-" prefix
         name = directory.name[5:]
@@ -45,7 +42,7 @@ def main():
             if l1 not in args.langs and l2 not in args.langs:
                 continue
 
-        output_filename = f"dicts/gt/gt-{l1}-{l2}.xml"
+        output_filename = f"dicts/gt-{l1}-{l2}.xml"
         try:
             n_entries = merge_giella_dicts(directory / "src", output_filename)
         except FileNotFoundError:
@@ -53,6 +50,9 @@ def main():
         except NotADirectoryError:
             print(f"no src directory in dict {l1}-{l2}, skipping")
 
+    # create a copy of the gt-sme-nob dictionary for the sme-sme dictionary
+    if Path("dicts/gt-sme-nob.xml").exists():
+        shutil.copy("dicts/gt-sme-nob.xml", "dicts/gtsme.xml")
 
 if __name__ == "__main__":
     raise SystemExit(main())

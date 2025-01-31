@@ -78,3 +78,22 @@ def articles_to_sql(articles:list[Article], filename):
 
     with open(f"sql_files/a-{filename}.sql", "w") as f:
         f.write(sql_statement)
+
+def sort_by_sami_alphabet(list: list[Article]):
+    alphabet = ' !"#$%&\'()*+,-./0123456789:;<=>?@[\\]^_`aábcčdđefghijklmnŋopqrsštŧuvwxyzžæäøöå{|}~'
+
+    def clean_lemma(article: Article):
+        lemma = article.lemma.lower()
+        lemma = re.sub(r'[ç]', 'c', lemma)
+        lemma = re.sub(r'[ð]', 'đ', lemma)
+        lemma = re.sub(r'[í]', 'i', lemma)
+        lemma = re.sub(r'[ñ]', 'n', lemma)
+        lemma = re.sub(r'[âàã]', 'a', lemma)
+        lemma = re.sub(r'[éèê]', 'e', lemma)
+        lemma = re.sub(r'[üúû]', 'u', lemma)
+        lemma = re.sub(r'[ôõóò]', 'o', lemma)
+        lemma = re.sub(r'[ʼ´ˈ’]', '\'', lemma)
+
+        return lemma
+
+    return sorted(list, key=lambda article: [alphabet.index(c) for c in clean_lemma(article)])
