@@ -7,7 +7,7 @@ export default {
     "access": "Beasat oaidnit gidden sátnegirjjiid",
     "no-access": "Ii beasa gidden sátnegirjjiid ",
     "search-result": "{count, plural, =0 {Ii oktage sátni} =1 {# sátni} other {# sáni}} gávdnán {count, plural, =0 {mii heive} =1 {mii heive} other {mat heivejit}} ohcamii.",
-    "lookup-result": "Sátni \"{lemma}\" gávdno {count} sátnegirjjis.",
+    "lookup-result": "Sátni \"{lemma}\" gávdnui {count, plural, =0 {# sátnegirjjis} =1 {# sátnegirjjis} other {# iešguđetlágan sátnegirjjis} }.",
     "search-language": "Ohcangiella",
     "search": "Oza...",
     "about-dictionary": "Dán sátnegirjji birra",

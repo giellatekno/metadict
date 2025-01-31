@@ -7,7 +7,7 @@ export default {
     "access": "Access to restricted dictionaries",
     "no-access": "No access to restricted dictionaries",
     "search-result": "Found {count, plural, =0 {no lemmas} =1 {# lemma} other {# lemmas}} throughout all dictionaries that matched the search.",
-    "lookup-result": "The lemma \"{lemma}\" was found in {count, plural, =1 {# dictionary} other {# dictionaries}}.",
+    "lookup-result": "The lemma \"{lemma}\" was found in {count, plural, =0 {# dictionaries} =1 {# dictionary} other {# unique dictionaries}}.",
     "search-language": "Search language",
     "search": "Search...",
     "about-dictionary": "About this dictionary",

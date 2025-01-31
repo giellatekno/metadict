@@ -23,17 +23,18 @@
         <div>{user.gh_fullname}</div>
 </button>
 
-<div class="card p-4 w-30 variant-filled-tertiary shadow-xl" data-popup="profilePopupClick">
+<div class="card p-4 w-44 variant-filled-tertiary shadow-xl" data-popup="profilePopupClick">
     <div class="flex flex-col gap-2 justify-center text-center">
         {#if user.restricted_dicts}
-        <span>{$t("access")}</span>
+        <span class="text-success-800">{$t("access")}</span>
         {:else}
-        <span>{$t("no-access")}</span>
+        <span class="text-error-800">{$t("no-access")}</span>
         {/if}
-        
-        <a href="{base}/auth/logout" class="btn variant-ghost-error ">
-            {$t("logout")}
-        </a>
+        <span>
+            <a href="{base}/auth/logout" class="btn variant-ghost-error w-fit h-fit">
+                {$t("logout")}
+            </a>
+        </span>
     </div>
         
     <div class="arrow variant-filled-tertiary" />

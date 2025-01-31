@@ -7,7 +7,7 @@ export default {
     "access": "Tilgang til lukkede ordbøker",
     "no-access": "Ikke tilgang til lukkede ordbøker",
     "search-result": "Fant {count, plural, =0 {ingen lemma} =1 {# lemma} other {# lemma}} blant alle ordbøker som matchet søket.",
-    "lookup-result": "Lemmaet \"{lemma}\" ble funnet i {count, plural, =1 {# ordbok} other {# ordbøker}}.",
+    "lookup-result": "Lemmaet \"{lemma}\" ble funnet i {count, plural, =0 {# ordbøker} =1 {# ordbok} other {# forskjellige ordbøker}}.",
     "search-language": "Søkespråk",
     "search": "Søk...",
     "about-dictionary": "Om denne ordboka",

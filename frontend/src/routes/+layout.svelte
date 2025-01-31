@@ -43,7 +43,7 @@
         if (!url.startsWith("/")) url = `/${url}`;
         console.log(url);
         await goto(url);
-        search_input.focus();
+        // search_input.focus();
     }
 </script>
 
@@ -51,7 +51,7 @@
     <title>{$t("page-title")}</title>
 </svelte:head> 
 
-<AppBar background="bg-secondary-400" slotTrail="place-content-end">
+<AppBar background="bg-primary-500" slotTrail="place-content-end">
     <a class="h2 font-medium" href="{base}/">{$t("page-title")}</a>
     
     <svelte:fragment slot="trail">
@@ -77,7 +77,6 @@
 <div class="p-6">
     <Searchbar on:new-value="{on_new_value}" bind:search_lang bind:search_input></Searchbar>
     <div class="border bottom-1 w-full my-5"/>
-    <slot/>    
-
+    <slot/>
 </div>
 

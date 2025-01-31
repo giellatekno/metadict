@@ -8,8 +8,11 @@
     export let value = ""
     export let search_lang = "sme"
 
-    const sami_letters = ["á", "č", "đ", "ŋ", "š", "ŧ", "ž"]
-
+    const extra_letters: { [id:string]: Array<string> }= {
+        "sme": ["á", "č", "đ", "ŋ", "š", "ŧ", "ž"],
+        "fin": ["ä", "ö", "å"],
+        "nob": ["æ", "ø", "å"]
+    }
     const dispatch = createEventDispatcher()
 
     function on_enter_keydown(event:KeyboardEvent) {
@@ -25,7 +28,7 @@
         search_input.focus()
     })
 
-    function on_sami_letter(letter: string) {
+    function on_extra_letter(letter: string) {
         value += letter
         search_input.focus()
     }
@@ -53,15 +56,13 @@
             <option value="fin">{langname("fin", $locale)}</option>
         </select>
     </div>
-    {#if search_lang === "sme"}        
-        <div class="ml-[3.8rem] md:ml-5 my-3 w-fit grid grid-cols-7 gap-1">
-            {#each sami_letters as letter}
-                <button 
-                class="px-2 py-1 outline outline-1 outline-primary-500 rounded hover:underline hover:bg-primary-500/15 "
-                on:click = {() => on_sami_letter(letter)}>
-                {letter}
-                </button>
-            {/each}
-        </div>
-    {/if}
+    <div class="ml-[3.8rem] md:ml-5 my-3 w-fit grid grid-cols-7 gap-1">
+        {#each extra_letters[search_lang] as letter}
+            <button 
+            class="px-2 py-1 outline outline-1 outline-primary-500 rounded hover:underline hover:bg-primary-500/15 "
+            on:click = {() => on_extra_letter(letter)}>
+            {letter}
+            </button>
+        {/each}
+    </div>
 </div>

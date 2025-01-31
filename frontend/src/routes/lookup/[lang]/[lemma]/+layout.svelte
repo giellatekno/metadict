@@ -7,9 +7,9 @@
     
     export let data;
 
-    $: lang = $page.params.lang 
-    $: lemma = $page.params.lemma 
-    $: n_dicts = data.objs.length;
+    $: lang = $page.params.lang;
+    $: lemma = $page.params.lemma;
+    $: n_dicts = new Set(data.objs.map((item: Array<any>) => item[1])).size;
 
     let tr_langs: Array<string> = [];
     
@@ -45,7 +45,7 @@
                         {#each data.objs as [lemma, dictionary_name, article_id, lang2]}
                         {#if tr_lang === lang2}
                         <a href="{base}/lookup/{lang}/{lemma}/{article_id}">
-                            {lemma} ({dictionary_name})
+                            {dictionary_name} ({lemma})
                         </a>
                         {/if}
                         {/each}
