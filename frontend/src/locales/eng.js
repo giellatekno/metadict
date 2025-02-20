@@ -22,4 +22,5 @@ export default {
     "howto-search-example-middle": "gives all words starting with \"{example_start}\" and ending with \"{example_end}\".",
     "howto-access-title": "How to access restricted dictionaries",
     "howto-access-body": "If you are a worker at Giellatekno, you can get access to restricted dictionaries. Once you have been given access, click \"Log in with Github\" and verify by clicking your name. You should see the message \"Access to restricted dictionaries\". If you have not gotten access logging in won't make a difference in the results you see.",
+    "historical-dictionaries": "Historical dictionaries",
 }

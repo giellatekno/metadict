@@ -10,18 +10,26 @@
     $: lang = $page.params.lang;
     $: lemma = $page.params.lemma;
     $: n_dicts = new Set(data.objs.map((item: Array<any>) => item[1])).size;
-
-    let tr_langs: Array<string> = [];
     
-    // Find all second langs of dicts
-    data.objs.forEach((item: Array<any>) => {
-        if (!tr_langs.includes(item[3])) {
-            tr_langs.push(item[3])
-        }
+    let hist_dicts: Array<any> = [];
+    
+    $: if (data && data.objs.length > 0) {
+        hist_dicts = data.objs.filter((item: Array<any>) => {
+            return item[4] !== "" && Number(item[4].slice(-4)) < 1979;
+        });
+    }
+    
+    $: dicts = data.objs.filter((item: Array<any>) => {
+        return !hist_dicts.includes(item)
     });
 
+    $: tr_langs = Array.from(new Set(dicts.map((item: Array<any>) => item[3])));
+
+    console.log(hist_dicts.length, dicts, tr_langs);
+    
+
     // Sort list to show: xxx-sme, xxx-nob, xxx-other-langs
-    const sorted_tr_langs = [
+    $: sorted_tr_langs = [
         ...tr_langs.filter(elm => elm === "sme"),
         ...tr_langs.filter(elm => elm === "nob"),
         ...tr_langs.filter(elm => elm !== "sme" && elm !== "nob"),
@@ -42,10 +50,10 @@
                 </svelte:fragment>
                 <svelte:fragment slot="content">
                     <nav class="list-nav">
-                        {#each data.objs as [lemma, dictionary_name, article_id, lang2]}
+                        {#each dicts as [lemma, dictionary_name, article_id, lang2, _]}
                         {#if tr_lang === lang2}
                         <a href="{base}/lookup/{lang}/{lemma}/{article_id}">
-                            {dictionary_name} ({lemma})
+                            {dictionary_name.length > 30 ? dictionary_name.slice(0, 30) + '...' : dictionary_name} ({lemma})
                         </a>
                         {/if}
                         {/each}
@@ -53,6 +61,23 @@
                 </svelte:fragment>
             </AccordionItem>
             {/each}
+
+            {#if hist_dicts.length > 0}
+            <AccordionItem open>
+                <svelte:fragment slot="summary">
+                    <h6 class="h6"><b>{$t("historical-dictionaries")}</b></h6>
+                </svelte:fragment>
+                <svelte:fragment slot="content">
+                    <nav class="list-nav">
+                        {#each hist_dicts as [lemma, dictionary_name, article_id, lang2, _]}
+                        <a href="{base}/lookup/{lang}/{lemma}/{article_id}">
+                            {dictionary_name.length > 30 ? dictionary_name.slice(0, 30) + '...' : dictionary_name} ({lemma})
+                        </a>
+                        {/each}
+                    </nav>
+                </svelte:fragment>
+            </AccordionItem>
+            {/if}
         </Accordion>
     </div>
 
