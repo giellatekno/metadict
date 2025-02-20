@@ -41,9 +41,10 @@ parsers = {
 def parse_dictionary(file: Path, dictionary_id):
     try:
         parser = parsers[file.stem.split("-")[0]](dictionary_id, file)
-    except KeyError:    
-        raise Exception("\033[93m" + f"Parsing of dictionary \"{file.name}\" not implemented" + "\033[0m")
-            
+    except KeyError:
+        raise Exception("\033[93m" + f"Parsing of dictionary \"{file.stem}\" not implemented" + "\033[0m")
+    except Exception as e:
+        raise Exception("\033[91m" + f"Error parsing dictionary \"{file.stem}\": {e}" + "\033[0m")
     return parser.get_parsed_data()
 
 
@@ -59,7 +60,7 @@ def main():
     dicts_dir = Path("dicts")
 
     dictionary_id = 1
-
+    
     for file in dicts_dir.iterdir():        
         print(f"Parsing {file}")
         try:

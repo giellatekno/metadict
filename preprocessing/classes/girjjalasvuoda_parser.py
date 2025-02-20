@@ -1,4 +1,5 @@
 from utils.dataclasses import Dictionary, Article
+import pandas as pd
 
 class GirjjalasvuodaParser:
     def __init__(self, dictionary_id, file):
@@ -23,36 +24,45 @@ class GirjjalasvuodaParser:
 
     def parse_dict(self, file):
         articles = []
-        
-        with open(file, "r") as f:
-            lines = f.readlines()
 
-        for i, line in enumerate(lines, 1):
-            
-            lemma = line.split("|")[0].split("\\")[0].strip()                
+        df = pd.read_csv(file, sep=",", header=None)
 
-            rendered = self.to_html(line.strip())
-          
-            a = Article(
-                dictionary=self.dictionary.id,
-                lemma=lemma,
-                rendered=rendered,
-                lang=self.dictionary.lang1,
-                article_number=i
-            )
+        if df.shape[1] == 2:
+            for index, row in df.iterrows():
+                lemma = row[0]
+                entry = row[1]
 
-            articles.append(a)   
-        
+                rendered = self.to_html(lemma, entry)
+
+                a = Article(
+                    dictionary=self.dictionary.id,
+                    lemma=lemma,
+                    rendered=rendered,
+                    lang=self.dictionary.lang1,
+                    article_number=index
+                )
+                articles.append(a)
+        else:
+            for index, row in df.iterrows():
+                lemma = row[0]
+                entry = row[1]
+                translation = row[2]
+
+                rendered = self.to_html(lemma, entry, translation)
+
+                a = Article(
+                    dictionary=self.dictionary.id,
+                    lemma=lemma,
+                    rendered=rendered,
+                    lang=self.dictionary.lang1,
+                    article_number=index
+                )
+                articles.append(a)
+
         return articles
     
-    def to_html(self, line: str):
-        if line.find("\\") == -1:
-            return f"<p><b>{line.split("|")[0].strip()} </b>{line.split("|")[1].strip()}</p>"
-
-        lines = line.split("\\")
-        html = f"<b>{lines[0].strip()}</b>"
-        for l in lines[1:]:
-            html += f"<br>{l.strip()}"
-
-        return f"<p>{html}</p>"
-
+    def to_html(self, lemma, entry, translation=None):
+        if translation:
+            return f"<p><b>{lemma}</b><br>{entry}<br>{translation}</p>"
+        else:
+            return f"<p><b>{lemma}</b><br>{entry}</p>"

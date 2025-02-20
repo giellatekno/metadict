@@ -1,11 +1,11 @@
-from xml.etree import ElementTree as ET
+import pandas as pd
 from utils.dataclasses import Dictionary, Article
 
 class QvigstadParser:
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
-            name="Qvigstad-Kalfjord",
+            name="Just Qvigstads lappiske ordbok fra Kaldfjorden og Vesterålen",
             lang1="sme",
             lang2="nob",
             is_ordered=True,
@@ -22,22 +22,20 @@ class QvigstadParser:
     def parse_dict(self, file):
         articles = []
         
-        xml_file = ET.parse(file)
+        df = pd.read_csv(file, sep=",")
 
-        for index, row in enumerate(xml_file.iter("row"), 1):
+        for index, row in df.iterrows():
+            full_lemma = row["lemma"]
+            pos = row["pos"]
+            translation = row["translation"]
+            entry = row["dictionary_entry"]
+            ref = row["refrence"]
 
-            full_lemma = row[1].text.strip().replace("\n", " ")
+            rendered = self.to_html(full_lemma, translation, pos, entry, ref)
 
             for lemma in full_lemma.split(", "):
                 if lemma == "pl.":
                     continue
-
-                pos = row[2].text.strip()
-                translation = f"{row[0].text+row[3].text}".strip()
-
-                explanation = f"{row[4].text.strip()}\n{row[5].text.strip()}"
-
-                rendered = self.to_html(full_lemma, translation, pos, explanation)
 
                 a = Article(
                     dictionary=self.dictionary.id,
@@ -47,13 +45,8 @@ class QvigstadParser:
                     pos=pos,
                     article_number=index
                 )
-
                 articles.append(a)
-
         return articles
 
-
-    def to_html(self, lemma, translation, pos, explanation):
-        explanation = explanation.replace('\n', '<br/>')
-
-        return f"<p><b>{lemma}</b> {pos} : {translation} <br/> {explanation}</p>"
+    def to_html(self, lemma, translation, pos, entry, ref):
+        return f"<p><b>{lemma}</b> {pos} : {translation} <br>{entry} <br>{ref}</p>"

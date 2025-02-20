@@ -10,7 +10,6 @@ class KonradParser:
             name="Lappisk ordbok",
             lang1="sme",
             lang2="eng",
-            closed=True,
             is_ordered=True,
             author="Konrad Nielsen",
             date_published="1932-1938"
