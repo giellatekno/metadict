@@ -20,10 +20,11 @@
         dispatch("new-value", value)
     }
 
-    function on_click() {
+    function on_searchbutton_click() {
         if (value === "") return;
         dispatch("new-value", value)
     }
+
     onMount(() => {
         search_input.focus()
     })
@@ -37,13 +38,13 @@
 
 <div class="flex flex-wrap md:flex-initial">
     <div class="input-group input-group-divider rounded-2xl grid-cols-[auto_1fr_auto] w-full md:w-[42rem] h-12 md:h-16">
-        <button class="input-group-shim" on:click={on_click}>
+        <button class="input-group-shim" on:click={on_searchbutton_click}>
             <img src={searchIcon} alt="Search" width="25">
         </button>
         <input
         bind:this={search_input}
         type="search" 
-        placeholder="{$t("search")}" 
+        placeholder="{$t("search-placeholder")}" 
         bind:value={value}
         on:keydown={on_enter_keydown}
         />

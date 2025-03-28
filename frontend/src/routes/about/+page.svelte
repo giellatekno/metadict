@@ -10,7 +10,7 @@
         <ul>
             <li>"<b>%</b>laš" {$t("howto-search-example-end", {values: {example: "laš"}}) }</li>
             <li>"biila<b>%</b>" {$t("howto-search-example-start", {values: {example: "biila"}})}</li>
-            <li>"ráhkis<b>%</b>vuohta" {$t("howto-search-example-middle", {values: {example_start: "ráhkis", example_end: "vuohta"}})}</li>
+            <li>"muit<b>%</b>it" {$t("howto-search-example-middle", {values: {example_start: "muit", example_end: "it"}})}</li>
         </ul>
         <br>
     </span>

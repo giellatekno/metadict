@@ -8,7 +8,7 @@
     let neighbors: Array<string> | undefined;
     $: neighbors = data.neighbors;
         
-    let dictionary;
+    let dictionary: Array<string> | undefined;
     $: dictionary = data.dictionary;
 </script>
 

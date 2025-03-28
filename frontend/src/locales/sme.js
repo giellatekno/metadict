@@ -9,7 +9,7 @@ export default {
     "search-result": "{count, plural, =0 {Ii oktage sátni} =1 {# sátni} other {# sáni}} gávdnán {count, plural, =0 {mii heive} =1 {mii heive} other {mat heivejit}} ohcamii.",
     "lookup-result": "Sátni \"{lemma}\" gávdnui {count, plural, =0 {# sátnegirjjis} =1 {# sátnegirjjis} other {# iešguđetlágan sátnegirjjis} }.",
     "search-language": "Ohcangiella",
-    "search": "Oza...",
+    "search-placeholder": "Oza sániid vuođđohámiid...",
     "about-dictionary": "Dán sátnegirjji birra",
     "close": "Gidde",
     "authors": "Girječálli(t)",
@@ -23,4 +23,5 @@ export default {
     "howto-access-title": "Movt oaidnit giddejuvvon sátnegirjjiid",
     "howto-access-body": "Jus barggat Giellateknos, de sáhtát oažžut beassanlobi giddejuvvon sátnegirjjiide. Go leat ožžon beassama, deaddil \"Logge sisa Githubiin\". Deaddil de iežat nama ja iskka lohká go \"Beassanlobi giddejuvvon sátnegirjjiide\". Jus ii leat ožžon beassanlobi, de logget sisa ii rievdat ohcanbohtosiid.",
     "historical-dictionaries": "Historjjálaš sátnegirjjit",
+    "search-ordbokene": "Oza \"{lemma}\" ordbokene.no:s",
 }

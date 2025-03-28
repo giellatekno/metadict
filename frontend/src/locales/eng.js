@@ -9,7 +9,7 @@ export default {
     "search-result": "Found {count, plural, =0 {no lemmas} =1 {# lemma} other {# lemmas}} throughout all dictionaries that matched the search.",
     "lookup-result": "The lemma \"{lemma}\" was found in {count, plural, =0 {# dictionaries} =1 {# dictionary} other {# unique dictionaries}}.",
     "search-language": "Search language",
-    "search": "Search...",
+    "search-placeholder": "Search for words in dictionary form...",
     "about-dictionary": "About this dictionary",
     "close": "Close",
     "authors": "Author(s)",
@@ -23,4 +23,5 @@ export default {
     "howto-access-title": "How to access restricted dictionaries",
     "howto-access-body": "If you are a worker at Giellatekno, you can get access to restricted dictionaries. Once you have been given access, click \"Log in with Github\" and verify by clicking your name. You should see the message \"Access to restricted dictionaries\". If you have not gotten access logging in won't make a difference in the results you see.",
     "historical-dictionaries": "Historical dictionaries",
+    "search-ordbokene": "Search for \"{lemma}\" in ordbokene.no",
 }

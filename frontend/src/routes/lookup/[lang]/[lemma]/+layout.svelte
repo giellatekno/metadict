@@ -4,6 +4,7 @@
     import { locale, t } from "svelte-intl-precompile";
     import { base } from "$app/paths";
     import { Accordion, AccordionItem} from "@skeletonlabs/skeleton"
+    import externalLinkIcon from "$assets/external-link.svg";
     
     export let data;
 
@@ -79,6 +80,18 @@
             </AccordionItem>
             {/if}
         </Accordion>
+        {#if lang === "nob"}
+            <div class="p-4 mt-10">
+                <a class="btn variant-filled-primary" href={`https://ordbokene.no/nob/bm,nn/${lemma}`} target="_blank">
+                    <span>
+                        {$t("search-ordbokene", { values: { lemma: lemma } })}
+                    </span>
+                    <img src={externalLinkIcon} alt="External link" width="22"/>
+                </a>
+            </div>
+        {/if}
+
+    
     </div>
 
     <div class="flex col-span-2">
