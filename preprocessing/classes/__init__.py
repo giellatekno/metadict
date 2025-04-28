@@ -11,3 +11,4 @@ from .nettisanakirja_parser import NettisanakirjaParser
 from .apotekordliste_parser import ApotekordlisteParser
 from .skoleordbok_parser import SkoleordbokParser
 from .konrad_parser import KonradParser
+from .medisinsk_parser import MedisinskParser

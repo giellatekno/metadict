@@ -35,6 +35,7 @@ parsers = {
     "konrad_nielsen": KonradParser,
     "skoleordbok": SkoleordbokParser,
     "apotekordliste": ApotekordlisteParser,
+    "medisinsk": MedisinskParser,
 }
 
 

@@ -1,4 +1,6 @@
 from utils.dataclasses import Dictionary, Article
+import pandas as pd
+import re
 
 class MedisinskParser:
     def __init__(self, dictionary_id, file):
@@ -21,14 +23,25 @@ class MedisinskParser:
     def parse_dict(self, file):
         articles = []
         
-        with open (file, "r") as f:
-            lines = f.readlines()
+        df = pd.read_csv(file, sep=",", header=None)
+        
+        for index, row in df.iterrows():
+            lemma = re.sub(r"\([\)]+\)", "", row[0])
+            rendered = self.to_html(row[0], row[1])
 
-        # Implement parsing logic here
-        # Denne må jeg putte | inn i manuelt i filen
+            a = Article(
+                dictionary=self.dictionary.id,
+                lemma=lemma,
+                rendered=rendered,
+                lang=self.dictionary.lang1,
+                article_number=index
+            )
+            articles.append(a)
+
+
+
         return articles
         
-    def to_html(self):
-        # Implement HTML formatting logic here
-        pass
+    def to_html(self, lemma, translation):
+        return f"<p><b>{lemma}</b>: {translation}</p>"
     
