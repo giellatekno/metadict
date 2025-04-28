@@ -5,7 +5,7 @@ import argparse
 from pathlib import Path
 import re
 
-alphabet = "aábcčdđeéfghijklmnŋopqrsštŧuvwxyzžæäøöå"
+alphabet = "aábcčdđeéfghijklmnŋoôpqrsštŧuvwxyzžæäøöå"
 
 
 def parse_args():
@@ -46,7 +46,7 @@ def main():
 
     with open(input_file, "r") as input_f:
         words = [
-            re.sub(r"[,:-]", "", line.strip().split()[0].lower())
+            re.sub(r"[\\.\\(\\),:-]", "", line.strip().split()[0].lower())
             for line in input_f.readlines()
         ]
 
@@ -60,7 +60,7 @@ def main():
                 print(f"{i+1}: {cur}")
                 print()
         except:
-            # anders: Which exception can happen here?
+            # If a letter is not in the alphabet, it will throw an exception
             print("Couldn't compare following words")
             print(prev, cur)
             exit()

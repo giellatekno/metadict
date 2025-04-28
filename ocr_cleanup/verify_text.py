@@ -1,5 +1,5 @@
 """Uses fst tokenisers to check for spelling mistakes in a given text file.
-Outputs a "mistakes-{filename}.txt file"
+Outputs a "{filename}-mistakes.txt file"
 """
 
 from pathlib import Path
@@ -47,6 +47,7 @@ def verify_line(args, latin, latin_words, one_lang):
     # assert(pm_lang1 != None and pm_lang2 != None and pm_lang3 != None)
 
     line = line.replace(":", " ")
+    line = re.sub(r"-[^\s]+", "", line)
 
     set1 = find_unknown_words(line, pm_lang1)
     set2 = find_unknown_words(line, pm_lang2)
@@ -67,7 +68,7 @@ def verify_line(args, latin, latin_words, one_lang):
         #     pattern = r'\b' + re.escape(word) + r'\b'
         #     line = re.sub(pattern, mark_word(word), line)
         # print(line)
-        return [(idx, f"{idx:<4} | {word:25} | {line}") for word in unknown_words]
+        return (idx, f"{idx:<4} | {", ".join(unknown_words):25} | {line}")
 
 
 def main():
@@ -84,6 +85,9 @@ def main():
         exit(1)
 
     input_file = Path(args.file)
+    output_folder = Path("mistakes")
+    if not output_folder.exists():
+        output_folder.mkdir()
 
     latin_words = set()
     if args.latin:
@@ -108,10 +112,10 @@ def main():
 
     for r in res:
         if r:
-            output_list.extend(r)
+            output_list.append(r)
     output_list = [o[1] for o in sorted(output_list, key=lambda x: x[0])]
 
-    with open(f"mistakes-{input_file.name}", "w") as output_f:
+    with open(f"{output_folder}/{input_file.stem}-mistakes.txt", "w") as output_f:
         output_f.writelines(output_list)
 
 
