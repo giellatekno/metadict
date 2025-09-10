@@ -1,6 +1,6 @@
 .PHONY: help
 help:
-	@echo "Available comands:"
+	@echo "Available commands:"
 	@echo "image - make podman image"
 	@echo "run - run image locally, data will be stored in volume called metadict-data"
 	@echo "shell - run bash inside the running container"
