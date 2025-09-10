@@ -2,7 +2,7 @@
 help:
 	@echo "Available comands:"
 	@echo "image - make podman image"
-	@echo "run - run image locally, data will be stored in voulme called metadict-data"
+	@echo "run - run image locally, data will be stored in volume called metadict-data"
 	@echo "shell - run bash inside the running container"
 	@echo "psql - run psql inside the running container"
 	@echo "export - save podman image as metadict-db.tar.gz"
