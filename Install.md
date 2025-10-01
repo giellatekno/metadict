@@ -49,7 +49,7 @@ openssl rand --hex 32 > jwt_secret.txt
 
 ## Prepare the dictionaries
 
-First create a virtual environment and install the `pandas` module
+First create a virtual environment and install the `pandas` module:
 ```bash
 cd preprocessing/
 python3 -m venv .venv
@@ -60,11 +60,15 @@ Then generate merged dictionary files from the GiellaLT dictionaries:
 ```bash
 python3 generate_merged_gt_dicts.py -l sme nob fin
 ```
+`create_db_data.py` expects to find the closed source dictionaries in a subfolder of `preprocessing/` named `dicts/`. One way of doing this is adding a symlink to the folder `ocr-read-dicts/` in the `dictionaries-closed` repository:
+```bash
+ln -s path/to/dictionaries-closed/ocr_read_dicts dicts
+```
 And lastly create the sql files needed for adding all the dictionaries to the dictionary database later:
 ```bash
 python3 create_db_data.py 
 ```
-## Initialize the database
+## Initialize and run the database
 If everything works as intended, this might be as easy as running the following commands:
 ```bash
 cd db/
@@ -78,11 +82,11 @@ sudo usermod --add-subgids 65536-75535 $(whoami)
 podman system migrate
 ```
 If `make run` complains that port 5432 is in use, postgres is probably running directly in your OS. As we want to run it in a container, you will need to stop the running instance.
-Find the process id (PID) of postgres using
+Find the process id (PID) of postgres using:
 ```bash
 sudo lsof -i tcp:5432
 ```
-which should return something like
+which should return something like:
 ```text
 COMMAND     PID     USER   FD   TYPE  DEVICE SIZE/OFF NODE NAME
 postgres 340940 postgres    5u  IPv6 1053773      0t0  TCP localhost:postgresql (LISTEN)
@@ -104,7 +108,7 @@ Move to the `api` directory and run the following commands:
 make build
 make dev
 ```
-Keep it running and open a new terminal tab/window
+Keep it running and open a new terminal tab/window.
 
 ## Running the frontend
 Move to the `frontend/` directory and run the following command:
@@ -116,14 +120,22 @@ Now the metadictionary should be up and running on localhost, and you should be 
 
 # Recompiling and re-adding the dictionaries
 
-To update the dictionaries in the database
+To update the dictionaries in the database, create new sql files, remove the existing entries from the database, and then re-add them. 
 
-Re-add dicts:
+To create new sql files, follow the instructions under "Prepare the dictionaries" above.
 
-podman volume rm metadict-data
-cd db/
-make image
-make run
-keep running
-
+While the database is running, enter it by executing this command from another terminal tab/window while in `db/`
+```bash
+make psql
+```
+Then remove all entries from the tables:
+```sql
+DELETE FROM articles ;
+DELETE FROM dictionaries ;
+quit
+```
+Lastly, add the updated dictionaries to the database:
+```bash
 python3 insert_dictionaries.py ../preprocessing/sql_files --container
+```
+You might need to restart the database, api and/or frontend after this.
