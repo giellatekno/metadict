@@ -19,7 +19,7 @@ itertools = "0.14.0"
 listenfd = "1.0.1"
 
 # the async runtime
-tokio = { version = "1.37.0", features = ["rt-multi-thread"] }
+tokio = { version = "1.37.0", features = ["full"] }
 
 # postgres wrapper for use with tokio
 tokio-postgres = "0.7.10"
