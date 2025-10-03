@@ -11,7 +11,7 @@ impl Config {
     /// pool configuration) from environment variables.
     pub fn from_env() -> Result<Self, config::ConfigError> {
         config::Config::builder()
-            .set_default("pg.DBNAME", "postgres")?
+            .set_default("pg.dbname", "postgres")?
             .set_default("pg.user", "postgres")?
             .set_default("pg.port", 3515)?
             .set_default("pg.host", "deliberately.invalid")?
@@ -25,6 +25,7 @@ impl Config {
 #[derive(Clone)]
 pub struct ConnectionPool {
     pool: deadpool_postgres::Pool,
+    config: deadpool_postgres::Config,
 }
 
 impl ConnectionPool {
@@ -37,10 +38,15 @@ impl ConnectionPool {
                 tokio_postgres::NoTls,
             )
             .unwrap();
-        Self { pool }
+        Self { pool, config: config.pg }
     }
 
     pub async fn get(&self) -> Result<deadpool_postgres::Object, anyhow::Error> {
-        self.pool.get().await.map_err(|e| anyhow!(e))
+        self.pool.get().await.map_err(|e| {
+            let port = self.config.port.unwrap();
+            let host: String = self.config.host.as_ref().unwrap().clone();
+            let connection_info = format!("host={host}:{port}");
+            anyhow!(e).context(connection_info)
+        })
     }
 }

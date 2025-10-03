@@ -13,7 +13,8 @@ help:
 
 .PHONY: dev
 dev:
-	FRONTEND=http://localhost:5173 RUST_BACKTRACE=1 PG__HOST=localhost PG__PORT=5432 PG__PASSWORD=mysecretpassword systemfd --no-pid -s http::3000 -- cargo watch -x run
+	FRONTEND=http://localhost:5173 RUST_BACKTRACE=1 PG__HOST=localhost PG__PORT=5431 PG__PASSWORD=mysecretpassword systemfd --no-pid -s http::3000 -- cargo watch -x run
+#	FRONTEND=http://localhost:5173 RUST_BACKTRACE=1 PG__HOST=localhost PG__PORT=5432 PG__PASSWORD=mysecretpassword systemfd --no-pid -s http::3000 -- cargo watch -x run
 
 .PHONY: run-release
 run-release:
@@ -49,11 +50,6 @@ runlocal:
 stop:
 	podman stop metadict-api
 
-.PHONY: export
-export:
-	podman save -o metadict-api.tar metadict-api
-	gzip -f metadict-api.tar
-
 .PHONY: push-labacr
 push-labacr:
 	podman tag metadict-api gtlabcontainerregistry.azurecr.io/metadict-api
@@ -68,8 +64,4 @@ bap:
 	podman build -t metadict-api -f Dockerfile .
 	podman tag metadict-api gtlabcontainerregistry.azurecr.io/metadict-api
 	podman push gtlabcontainerregistry.azurecr.io/metadict-api
-
-.PHONY: push-gtweb
-push-gtweb:
-	scp metadict-api.tar.gz gtweb.uit.no:/home/anders/metadict-api.tar.gz
 

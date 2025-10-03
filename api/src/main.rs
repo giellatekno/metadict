@@ -10,11 +10,7 @@ mod pg_connection_pool;
 mod timing_middleware;
 
 use axum::{
-    extract::{Path, Query, State},
-    http::HeaderMap,
-    response::{IntoResponse, Redirect, Response},
-    routing::get,
-    Json, Router,
+    extract::{Path, Query, State}, http::HeaderMap, response::{IntoResponse, Redirect, Response}, routing::get, serve::Listener, Json, Router
 };
 use listenfd::ListenFd;
 use serde_json::json;
@@ -542,7 +538,33 @@ async fn main() -> anyhow::Result<()> {
     };
 
     // do a check on the connection to the database on startup
-    let _ = state.connpool.get().await.inspect_err(|e| {
+    let _ = state.connpool.get().await.inspect_err(move |e| {
+        use deadpool_postgres::PoolError;
+        match e.downcast_ref::<PoolError>() {
+            Some(e) => {
+                match e {
+                    PoolError::Timeout(timeout_type) => {
+                        tracing::warn!(
+                            "timeout"
+                        );
+                    }
+                    PoolError::Backend(backend_error) => {
+                        tracing::warn!(
+                            error = backend_error.to_string(),
+                            "backend"
+                        );
+
+                    }
+                    PoolError::Closed => {}
+                    PoolError::NoRuntimeSpecified => {}
+                    PoolError::PostCreateHook(x) => {}
+
+                }
+                //tracing::warn!(error = x.to_string(), "could downcast, at least");
+            }
+            None => unreachable!("state.connpool.get() is only PoolError"),
+        }
+
         tracing::warn!(error = e.to_string(), "Could not connect to db on startup");
     });
 
@@ -569,11 +591,11 @@ async fn main() -> anyhow::Result<()> {
 
     let app = Router::new()
         .route("/", get(handler_root))
-        .route("/search/:lang/:query", get(handler_search))
-        .route("/lookup/:lang/:lemma", get(handler_lookup))
-        .route("/article/:id", get(handler_article))
-        .route("/neighbors/:id", get(handler_neighbors))
-        .route("/dictionary/:id", get(handler_dictionary))
+        .route("/search/{lang}/{query}", get(handler_search))
+        .route("/lookup/{lang}/{lemma}", get(handler_lookup))
+        .route("/article/{id}", get(handler_article))
+        .route("/neighbors/{id}", get(handler_neighbors))
+        .route("/dictionary/{id}", get(handler_dictionary))
         .route("/auth/callback", get(handler_auth_callback))
         .route("/auth/logout", get(handler_auth_logout))
         .fallback(handler_404)
@@ -591,6 +613,9 @@ async fn main() -> anyhow::Result<()> {
         // otherwise fall back to local listening
         None => TcpListener::bind("0.0.0.0:3000").await.unwrap(),
     };
+
+    let port = listener.local_addr().unwrap().port();
+    tracing::info!(port = port, "Metadict started");
 
     axum::serve(listener, app).await.unwrap();
     Ok(())

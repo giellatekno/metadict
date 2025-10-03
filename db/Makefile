@@ -43,15 +43,6 @@ stop:
 psql:
 	podman exec -it metadict-db psql -U postgres
 
-.PHONY: export
-export:
-	podman save -o metadict-db.tar metadict-db
-	gzip -f metadict-db.tar
-
-.PHONY: push-gtweb
-push-gtweb:
-	scp metadict-db.tar.gz gtweb.uit.no:/home/anders/metadict-db.tar.gz
-
 .PHONY: push-labacr
 push-labacr:
 	podman tag metadict-db gtlabcontainerregistry.azurecr.io/metadict-db

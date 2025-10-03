@@ -7,13 +7,13 @@ edition = "2021"
 
 [dependencies]
 # The web framework
-axum = "0.7.5"
+axum = "0.8.6"
 
 # generic http definitions
 http = "1.1.0"
 
 # more iterators
-itertools = "0.12.1"
+itertools = "0.14.0"
 
 # required in order to do source code hot reloading
 listenfd = "1.0.1"
@@ -25,14 +25,14 @@ tokio = { version = "1.37.0", features = ["rt-multi-thread"] }
 tokio-postgres = "0.7.10"
 
 # async connection pool of tokio-postgres connections
-deadpool-postgres = { version = "0.13.0", features = ["serde"] }
+deadpool-postgres = { version = "0.14.1", features = ["serde"] }
 
 # Layered config approach. Set defaults, then override/extend through
 # other means. E.g. defaults in file, overriden by env vars.
-config = "0.14"
+config = "0.15"
 
 # http specific middleware on top of tower (axum uses tower)
-tower-http = { version = "0.5.2", features = ["cors", "trace"] }
+tower-http = { version = "0.6.6", features = ["cors", "trace"] }
 
 # logging for async apps, core library
 tracing = "0.1.40"
@@ -59,10 +59,10 @@ base64 = "0.22.0"
 cookie = { version = "0.18.1", features = ["percent-encode"] }
 
 # jwt parsing and creating
-jsonwebtoken = "9.3.0"
+jsonwebtoken = "9.3.1"
 
 # simplifies writing custom errors
-thiserror = "1.0.59"
+thiserror = "2.0.17"
 
 # provide #[derive(Builder)]
 derive_builder = "0.20.0"
