@@ -3,5 +3,6 @@
     "pluginSearchDirs": ["."],
     "overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }],
     "tabWidth": 4,
-    "useTabs": false
+    "useTabs": false,
+    "quoteProps": "consistent"
 }
