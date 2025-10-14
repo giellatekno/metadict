@@ -1,4 +1,8 @@
-import { addMessages, init, locale as precompile_locale } from "svelte-intl-precompile";
+import {
+    addMessages,
+    init,
+    locale as precompile_locale,
+} from "svelte-intl-precompile";
 import nob from "../locales/nob.js";
 import eng from "../locales/eng.js";
 import sme from "../locales/sme.js";
@@ -22,7 +26,7 @@ function make_locale_store() {
     return {
         subscribe: inner.subscribe,
         set,
-    }
+    };
 }
 
 const locale = make_locale_store();
@@ -44,7 +48,7 @@ const LANGTAGS = {
         Pron: "pronomen",
         Prop: "egennavn",
         V: "verb",
-    }
+    },
 };
 
 // set av alle pos="..." som finnes i ordbøkene:

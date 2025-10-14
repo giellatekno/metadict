@@ -6,17 +6,28 @@
     <span class="my-2">
         <h3 class="h3 pb-1 font-medium">{$t("howto-search-title")}</h3>
         <p>{$t("howto-search-body")}</p>
-        <br>
+        <br />
         <ul>
-            <li>"<b>%</b>laš" {$t("howto-search-example-end", {values: {example: "laš"}}) }</li>
-            <li>"biila<b>%</b>" {$t("howto-search-example-start", {values: {example: "biila"}})}</li>
-            <li>"muit<b>%</b>it" {$t("howto-search-example-middle", {values: {example_start: "muit", example_end: "it"}})}</li>
+            <li>
+                "<b>%</b>laš" {$t("howto-search-example-end", {
+                    values: { example: "laš" },
+                })}
+            </li>
+            <li>
+                "biila<b>%</b>" {$t("howto-search-example-start", {
+                    values: { example: "biila" },
+                })}
+            </li>
+            <li>
+                "muit<b>%</b>it" {$t("howto-search-example-middle", {
+                    values: { example_start: "muit", example_end: "it" },
+                })}
+            </li>
         </ul>
-        <br>
+        <br />
     </span>
     <span class="my-2">
         <h3 class="h3 pb-1 font-medium">{$t("howto-access-title")}</h3>
         <p>{$t("howto-access-body")}</p>
     </span>
-
 </div>

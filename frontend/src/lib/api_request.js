@@ -13,7 +13,9 @@ export async function api_request(path) {
         // "host.containers.internal". We know that the only config that
         // has this, is anders' "local gtweb setup", so just change the
         // hostname to "localhost".
-        console.debug("changing hostname of request from host.containers.internal to localhost");
+        console.debug(
+            "changing hostname of request from host.containers.internal to localhost",
+        );
         url.hostname = "localhost";
         url.pathname = "/metadict-api" + url.pathname;
         url.port = "80";

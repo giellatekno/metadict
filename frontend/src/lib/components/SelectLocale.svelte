@@ -5,7 +5,6 @@
     import languageIcon from "$assets/language.svg";
     import { langname } from "$lib/langname";
 
-
     const LOCALES = [
         { iso: "nob", display: "Norsk Bokmål" },
         { iso: "eng", display: "English" },
@@ -15,26 +14,25 @@
     const langPopupClick: PopupSettings = {
         event: "click",
         target: "langPopupClick",
-        placement: "bottom"
+        placement: "bottom",
     };
-
 </script>
 
-
 <button class="btn variant-filled-tertiary" use:popup={langPopupClick}>
-    <img
-        alt="Innholdspråk"
-        src={languageIcon}
-        height="22"
-    />
+    <img alt="Innholdspråk" src={languageIcon} height="22" />
     <span>{langname($locale, $locale)}</span>
 </button>
 
-<div class="card p-4 w-fit shadow-xl variant-filled-tertiary" data-popup="langPopupClick">
+<div
+    class="card p-4 w-fit shadow-xl variant-filled-tertiary"
+    data-popup="langPopupClick"
+>
     <ListBox>
-        {#each LOCALES as { iso, display } }
-        <ListBoxItem bind:group={$locale} name="lang" value={iso}>{display}</ListBoxItem>
+        {#each LOCALES as { iso, display }}
+            <ListBoxItem bind:group={$locale} name="lang" value={iso}>
+                {display}
+            </ListBoxItem>
         {/each}
     </ListBox>
-    <div class="arrow variant-filled-tertiary" />
+    <div class="arrow variant-filled-tertiary"></div>
 </div>
