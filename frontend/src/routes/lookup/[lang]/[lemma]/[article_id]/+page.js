@@ -1,9 +1,13 @@
 import { api_request } from "$lib/api_request";
 
-export async function load({ fetch, params }) {
+export async function load({ params }) {
     let { article_id } = params;
 
-    const objs = await Promise.all([api_request(`article/${article_id}`), api_request(`neighbors/${article_id}`), api_request(`dictionary/${article_id}`)])
+    const objs = await Promise.all([
+        api_request(`article/${article_id}`),
+        api_request(`neighbors/${article_id}`),
+        api_request(`dictionary/${article_id}`),
+    ]);
 
     if (!Array.isArray(objs[0])) {
         return {
@@ -28,6 +32,8 @@ export async function load({ fetch, params }) {
     const dictionary = objs[2][0]; // only one dictionary entry is returned
 
     return {
-        rendered, neighbors, dictionary
+        rendered,
+        neighbors,
+        dictionary,
     };
 }

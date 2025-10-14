@@ -1,41 +1,50 @@
 <script lang="ts">
-    import { base } from "$app/paths";
+    import { resolve } from "$app/paths";
     import { t } from "svelte-intl-precompile";
     import type { PopupSettings } from "@skeletonlabs/skeleton";
     import { Avatar, popup } from "@skeletonlabs/skeleton";
-    
-    export let user: {
-        gh_avatar_url: string;
-        gh_fullname: string;
-        restricted_dicts: boolean;
-    };
+
+    interface Props {
+        user: {
+            gh_avatar_url: string;
+            gh_fullname: string;
+            restricted_dicts: boolean;
+        };
+    }
+
+    let { user }: Props = $props();
 
     const profilePopupClick: PopupSettings = {
         event: "click",
         target: "profilePopupClick",
-        placement: "bottom"
+        placement: "bottom",
     };
-
 </script>
 
 <button class="inline-flex items-center gap-2" use:popup={profilePopupClick}>
-        <Avatar src="{user.gh_avatar_url}" rounded="rounded-full" width="w-10"/>
-        <div>{user.gh_fullname}</div>
+    <Avatar src={user.gh_avatar_url} rounded="rounded-full" width="w-10" />
+    <div>{user.gh_fullname}</div>
 </button>
 
-<div class="card p-4 w-44 variant-filled-tertiary shadow-xl" data-popup="profilePopupClick">
+<div
+    class="card p-4 w-44 variant-filled-tertiary shadow-xl"
+    data-popup="profilePopupClick"
+>
     <div class="flex flex-col gap-2 justify-center text-center">
         {#if user.restricted_dicts}
-        <span class="text-success-800">{$t("access")}</span>
+            <span class="text-success-800">{$t("access")}</span>
         {:else}
-        <span class="text-error-800">{$t("no-access")}</span>
+            <span class="text-error-800">{$t("no-access")}</span>
         {/if}
         <span>
-            <a href="{base}/auth/logout" class="btn variant-ghost-error w-fit h-fit">
+            <a
+                href={resolve("/auth/logout")}
+                class="btn variant-ghost-error w-fit h-fit"
+            >
                 {$t("logout")}
             </a>
         </span>
     </div>
-        
-    <div class="arrow variant-filled-tertiary" />
+
+    <div class="arrow variant-filled-tertiary"></div>
 </div>
