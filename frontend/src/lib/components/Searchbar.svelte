@@ -44,13 +44,12 @@
     }
 </script>
 
-<div class="flex flex-wrap md:flex-initial">
-    <!-- <div class="input-group grid-cols-[auto_1fr_auto]"> -->
+<div class="flex flex-col">
     <div
-        class="input-group rounded-2xl grid-cols-[auto_1fr_auto] w-full md:w-2xl h-12 md:h-16"
+        class="input-group rounded-2xl grid-cols-[auto_1fr_auto] w-full md:w-2xl h-12 md:h-16 preset-filled-tertiary-50-950"
     >
         <button class="ig-cell" onclick={on_searchbutton_click}>
-            <SearchIcon size={16} />
+            <SearchIcon class="size-6" />
         </button>
         <input
             class="ig-input"
@@ -71,10 +70,10 @@
             <option value="fin">{langname("fin", $locale)}</option>
         </select>
     </div>
-    <div class="ml-[3.8rem] md:ml-5 my-3 w-fit grid grid-cols-7 gap-1">
+    <div class="ml-[3.8rem] mt-4 w-fit grid grid-cols-7 gap-1.5">
         {#each extra_letters[search_lang] as letter}
             <button
-                class="px-2 py-1 outline-solid outline-1 outline-primary-500 rounded-sm hover:underline hover:bg-surface-100-900"
+                class="btn btn-sm md:btn-base preset-outlined-primary-400-600"
                 onclick={() => on_extra_letter(letter)}
             >
                 {letter}

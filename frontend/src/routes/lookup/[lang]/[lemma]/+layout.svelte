@@ -3,7 +3,6 @@
     import { langname } from "$lib/langname";
     import { locale, t } from "svelte-intl-precompile";
     import { resolve } from "$app/paths";
-    import { Accordion } from "@skeletonlabs/skeleton-svelte";
     import type { PageData } from "./$types";
     import type { Snippet } from "svelte";
     import { ExternalLink } from "lucide-svelte";
@@ -15,8 +14,8 @@
 
     let { data, children }: Props = $props();
 
-    let lang = page.params.lang;
-    let lemma = page.params.lemma;
+    let lang = page.params.lang ? page.params.lang : "";
+    let lemma = page.params.lemma ? page.params.lemma : "";
     let n_dicts = $derived(
         new Set(data.entries.map((item: Array<any>) => item[1])).size,
     );
@@ -56,69 +55,53 @@
     );
 </script>
 
-<h5 class="h5 my-2">{result_text}</h5>
+<h5 class="h6 my-2">{result_text}</h5>
 
-<main class="w-full grid grid-cols-3 gap-5">
-    <div class="flex flex-col w-3/4">
-        <Accordion class="card" multiple>
-            {#each sorted_tr_langs as tr_lang}
-                <Accordion.Item>
-                    <Accordion.ItemTrigger>
-                        <h6 class="h6">
-                            <b>
-                                {langname(lang, $locale)} → {langname(
-                                    tr_lang,
-                                    $locale,
-                                )}
-                            </b>
-                        </h6>
-                    </Accordion.ItemTrigger>
-                    <Accordion.ItemContent>
-                        <div>
-                            {#each dicts as [lemma, dictionary_name, article_id, lang2, _]}
-                                {#if tr_lang === lang2}
-                                    <a
-                                        href={resolve(
-                                            `/lookup/${lang}/${lemma}/${article_id}`,
-                                        )}
-                                    >
-                                        {dictionary_name.length > 30
-                                            ? dictionary_name.slice(0, 30) +
-                                              "..."
-                                            : dictionary_name} ({lemma})
-                                    </a>
-                                {/if}
-                            {/each}
-                        </div>
-                    </Accordion.ItemContent>
-                </Accordion.Item>
-            {/each}
+<main class="w-full grid grid-cols-3 gap-20">
+    <div
+        class="flex flex-col w-full h-fit p-2 card bg-surface-100-900 border border-surface-200-800"
+    >
+        {#each sorted_tr_langs as tr_lang}
+            <h6 class="h6">
+                <b>
+                    {langname(lang, $locale)} → {langname(tr_lang, $locale)}
+                </b>
+            </h6>
+            <div>
+                {#each dicts as [lemma, dictionary_name, article_id, lang2, _]}
+                    {#if tr_lang === lang2}
+                        <a
+                            class="btn hover:preset-tonal w-full my-1 justify-start"
+                            href={resolve(
+                                `/lookup/${lang}/${lemma}/${article_id}`,
+                            )}
+                        >
+                            {dictionary_name.length > 30
+                                ? dictionary_name.slice(0, 30) + "..."
+                                : dictionary_name} ({lemma})
+                        </a>
+                    {/if}
+                {/each}
+            </div>
+        {/each}
 
-            {#if hist_dicts.length > 0}
-                <Accordion.Item open>
-                    {#snippet summary()}
-                        <h6 class="h6">
-                            <b>{$t("historical-dictionaries")}</b>
-                        </h6>
-                    {/snippet}
-                    {#snippet content()}
-                        <nav class="list-nav">
-                            {#each hist_dicts as [lemma, dictionary_name, article_id, _lang2, _]}
-                                <a
-                                    href={resolve(
-                                        `/lookup/${lang}/${lemma}/${article_id}`,
-                                    )}
-                                >
-                                    {dictionary_name.length > 30
-                                        ? dictionary_name.slice(0, 30) + "..."
-                                        : dictionary_name} ({lemma})
-                                </a>
-                            {/each}
-                        </nav>
-                    {/snippet}
-                </Accordion.Item>
-            {/if}
-        </Accordion>
+        {#if hist_dicts.length > 0}
+            <h6 class="h6">
+                <b>{$t("historical-dictionaries")}</b>
+            </h6>
+            <nav class="list-nav">
+                {#each hist_dicts as [lemma, dictionary_name, article_id, _lang2, _]}
+                    <a
+                        class="btn hover:preset-tonal my-1 w-full justify-start"
+                        href={resolve(`/lookup/${lang}/${lemma}/${article_id}`)}
+                    >
+                        {dictionary_name.length > 30
+                            ? dictionary_name.slice(0, 30) + "..."
+                            : dictionary_name} ({lemma})
+                    </a>
+                {/each}
+            </nav>
+        {/if}
         {#if lang === "nob"}
             <div class="p-4 mt-10">
                 <a

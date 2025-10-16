@@ -2,19 +2,16 @@
     import { AppBar } from "@skeletonlabs/skeleton-svelte";
     import Profile from "./Profile.svelte";
     import SelectLocale from "./SelectLocale.svelte";
-    import LightSwitch from "./LightSwitch.svelte";
     import { t } from "svelte-intl-precompile";
     import { resolve } from "$app/paths";
     import { Info } from "lucide-svelte";
 
     interface Props {
-        user:
-            | {
-                  gh_avatar_url: string;
-                  gh_fullname: string;
-                  restricted_dicts: boolean;
-              }
-            | undefined;
+        user?: {
+            gh_avatar_url: string;
+            gh_fullname: string;
+            restricted_dicts: boolean;
+        };
         redirect_uri: string;
     }
 
@@ -22,14 +19,23 @@
 </script>
 
 <AppBar>
-    <AppBar.Toolbar class="grid grid-cols-[auto_auto] ">
-        <AppBar.Headline class="flex justify-start m-4">
+    <AppBar.Toolbar class="grid-cols-[auto_auto] ">
+        <AppBar.Headline>
             <a class="text-4xl font-medium" href={resolve("/")}
                 >{$t("page-title")}</a
             >
         </AppBar.Headline>
-        <AppBar.Trail class="flex justify-end m-4 ">
+        <AppBar.Trail>
             <div class="flex items-center gap-10">
+                <SelectLocale />
+
+                <a
+                    href={resolve("/about")}
+                    class="btn preset-filled-primary-400-600"
+                >
+                    <Info />
+                    <span>Info</span>
+                </a>
                 {#if user}
                     <Profile {user}></Profile>
                 {:else}
@@ -40,17 +46,6 @@
                         {$t("login")}
                     </a>
                 {/if}
-
-                <SelectLocale />
-
-                <a
-                    href={resolve("/about")}
-                    class="btn preset-filled-primary-500"
-                >
-                    <Info />
-                    <span>Info</span>
-                </a>
-                <!-- <LightSwitch /> -->
             </div>
         </AppBar.Trail>
     </AppBar.Toolbar>

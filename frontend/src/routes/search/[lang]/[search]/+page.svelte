@@ -20,59 +20,56 @@
 <h5 class="h5 my-2">
     {$t("search-result", { values: { count: data.lemmas.length } })}
 </h5>
-<div class="card py-2 w-1/4 bg-surface-100-900 border border-surface-200-800">
-    <div class="flex flex-col gap-2">
-        {#each lemmas as lemma}
-            <a
-                class="btn mx-2 hover:preset-tonal justify-start"
-                href={resolve(`/lookup/${pagestate.params.lang}/${lemma}`)}
-            >
-                {lemma}
-            </a>
-            {#if !(lemma === lemmas[-1])}
-                <hr class="hr border-surface-200-800" />
-            {/if}
-        {/each}
+<div class="w-1/4 flex flex-col gap-2">
+    <div
+        class="card py-2 w-full bg-surface-100-900 border border-surface-200-800"
+    >
+        <div class="flex flex-col gap-2">
+            {#each lemmas as lemma}
+                <a
+                    class="btn mx-2 hover:preset-tonal justify-start"
+                    href={resolve(`/lookup/${pagestate.params.lang}/${lemma}`)}
+                >
+                    {lemma}
+                </a>
+                {#if !(lemma === lemmas[lemmas.length - 1])}
+                    <hr class="hr border-surface-200-800" />
+                {/if}
+            {/each}
+        </div>
     </div>
+
     {#if data.lemmas.length > 10}
-        <Pagination
-            class="w-full justify-center flex gap-2 mt-2"
-            count={data.lemmas.length}
-            pageSize={PAGE_SIZE}
-            {page}
-            onPageChange={(event) => (page = event.page)}
-        >
-            <Pagination.PrevTrigger
-                class="btn btn-sm preset-filled-surface-500"
+        <div class="flex justify-center">
+            <Pagination
+                class="preset-filled-surface-100-900"
+                count={data.lemmas.length}
+                pageSize={PAGE_SIZE}
+                {page}
+                onPageChange={(event) => (page = event.page)}
             >
-                <ArrowLeftIcon size={24} />
-            </Pagination.PrevTrigger>
-            <Pagination.Context>
-                {#snippet children(pagination)}
-                    {#each pagination().pages as page, index (page)}
-                        {#if page.type === "page"}
-                            <Pagination.Item
-                                {...page}
-                                class="btn btn-sm preset-filled-surface-500"
-                            >
-                                {page.value}
-                            </Pagination.Item>
-                        {:else}
-                            <Pagination.Ellipsis
-                                {index}
-                                class="btn btn-sm preset-filled-surface-500"
-                            >
-                                &#8230;
-                            </Pagination.Ellipsis>
-                        {/if}
-                    {/each}
-                {/snippet}
-            </Pagination.Context>
-            <Pagination.NextTrigger
-                class="btn btn-sm preset-filled-surface-500"
-            >
-                <ArrowRightIcon size={24} />
-            </Pagination.NextTrigger>
-        </Pagination>
+                <Pagination.PrevTrigger>
+                    <ArrowLeftIcon class="size-4" />
+                </Pagination.PrevTrigger>
+                <Pagination.Context>
+                    {#snippet children(pagination)}
+                        {#each pagination().pages as page, index (page)}
+                            {#if page.type === "page"}
+                                <Pagination.Item {...page}>
+                                    {page.value}
+                                </Pagination.Item>
+                            {:else}
+                                <Pagination.Ellipsis {index}>
+                                    &#8230;
+                                </Pagination.Ellipsis>
+                            {/if}
+                        {/each}
+                    {/snippet}
+                </Pagination.Context>
+                <Pagination.NextTrigger>
+                    <ArrowRightIcon class="size-4" />
+                </Pagination.NextTrigger>
+            </Pagination>
+        </div>
     {/if}
 </div>

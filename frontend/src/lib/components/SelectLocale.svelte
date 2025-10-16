@@ -9,21 +9,21 @@
 </script>
 
 <Popover>
-    <Popover.Trigger class="btn preset-filled-primary-500">
+    <Popover.Trigger class="btn preset-filled-primary-400-600">
         <LanguagesIcon />
         <span>{langname($locale, $locale)}</span>
     </Popover.Trigger>
     <Portal>
         <Popover.Positioner>
             <Popover.Content
-                class="card p-4 w-fit shadow-xl preset-filled-surface-100-900 border border-surface-200-800"
+                class="card p-4 w-fit shadow-xl preset-filled-tertiary-100-900 border border-tertiary-200-800"
             >
                 <Popover.Description>
                     <ul class="w-full">
                         {#each locales as iso}
                             <li>
                                 <button
-                                    class="btn hover:preset-tonal"
+                                    class="btn hover:preset-tonal w-full justify-start"
                                     onclick={() => ($locale = iso)}
                                 >
                                     {langname(iso, iso)}
@@ -32,11 +32,6 @@
                         {/each}
                     </ul>
                 </Popover.Description>
-                <!-- <Popover.Arrow -->
-                <!--     style="--arrow-size: calc(var(--spacing) * 2); --arrow-background: var(--color-surface-100-900); --arrow-border: var()" -->
-                <!-- > -->
-                <!--     <Popover.ArrowTip /> -->
-                <!-- </Popover.Arrow> -->
             </Popover.Content>
         </Popover.Positioner>
     </Portal>

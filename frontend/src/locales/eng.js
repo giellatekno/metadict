@@ -4,8 +4,8 @@ export default {
     "login": "Log in with Github",
     "logout": "Log out",
     "dictionary-form": "Dictionary form",
-    "access": "Access to restricted dictionaries",
-    "no-access": "No access to restricted dictionaries",
+    "access": "Giellatekno employee",
+    // "no-access": "",
     "search-result":
         "Found {count, plural, =0 {no lemmas} =1 {# lemma} other {# lemmas}} throughout all dictionaries that matched the search.",
     "lookup-result":
@@ -26,7 +26,8 @@ export default {
         'gives all words starting with "{example_start}" and ending with "{example_end}".',
     "howto-access-title": "How to access restricted dictionaries",
     "howto-access-body":
-        'If you are a worker at Giellatekno, you can get access to restricted dictionaries. Once you have been given access, click "Log in with Github" and verify by clicking your name. You should see the message "Access to restricted dictionaries". If you have not gotten access logging in won\'t make a difference in the results you see.',
+        'If you are a worker at Giellatekno, you can get access to restricted dictionaries. Once you have been given access, click "Log in with Github" and verify by clicking your name. You should see the message "Giellatekno employee". If you have not gotten access logging in won\'t make a difference in the results you see.',
     "historical-dictionaries": "Historical dictionaries",
     "search-ordbokene": 'Search for "{lemma}" in ordbokene.no',
+    "dark-mode": "Dark mode",
 };
