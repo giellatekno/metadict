@@ -1,8 +1,8 @@
 <script lang="ts">
-    import searchIcon from "$assets/search.svg";
     import { t, locale } from "svelte-intl-precompile";
     import { langname } from "$lib/langname";
     import { onMount } from "svelte";
+    import { SearchIcon } from "lucide-svelte";
 
     interface Props {
         value?: string;
@@ -15,6 +15,7 @@
         search_lang = $bindable("sme"),
         on_new_value,
     }: Props = $props();
+
     let search_input: HTMLInputElement;
 
     const extra_letters: { [id: string]: Array<string> } = {
@@ -44,20 +45,27 @@
 </script>
 
 <div class="flex flex-wrap md:flex-initial">
+    <!-- <div class="input-group grid-cols-[auto_1fr_auto]"> -->
     <div
-        class="input-group input-group-divider rounded-2xl grid-cols-[auto_1fr_auto] w-full md:w-[42rem] h-12 md:h-16"
+        class="input-group rounded-2xl grid-cols-[auto_1fr_auto] w-full md:w-2xl h-12 md:h-16"
     >
-        <button class="input-group-shim" onclick={on_searchbutton_click}>
-            <img src={searchIcon} alt="Search" width="25" />
+        <button class="ig-cell" onclick={on_searchbutton_click}>
+            <SearchIcon size={16} />
         </button>
         <input
+            class="ig-input"
             bind:this={search_input}
             type="search"
             placeholder={$t("search-placeholder")}
             bind:value
             onkeydown={on_enter_keydown}
         />
-        <select name="searchlang" id="searchlang" bind:value={search_lang}>
+        <select
+            class="ig-select"
+            name="searchlang"
+            id="searchlang"
+            bind:value={search_lang}
+        >
             <option value="sme">{langname("sme", $locale)}</option>
             <option value="nob">{langname("nob", $locale)}</option>
             <option value="fin">{langname("fin", $locale)}</option>
@@ -66,7 +74,7 @@
     <div class="ml-[3.8rem] md:ml-5 my-3 w-fit grid grid-cols-7 gap-1">
         {#each extra_letters[search_lang] as letter}
             <button
-                class="px-2 py-1 outline outline-1 outline-primary-500 rounded hover:underline hover:bg-primary-500/15"
+                class="px-2 py-1 outline-solid outline-1 outline-primary-500 rounded-sm hover:underline hover:bg-surface-100-900"
                 onclick={() => on_extra_letter(letter)}
             >
                 {letter}

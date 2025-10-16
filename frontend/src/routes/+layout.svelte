@@ -5,35 +5,22 @@
     import { resolve } from "$app/paths";
     import { t } from "svelte-intl-precompile";
     import { env } from "$env/dynamic/public";
-    import { AppBar, storePopup } from "@skeletonlabs/skeleton";
-    import {
-        computePosition,
-        autoUpdate,
-        offset,
-        shift,
-        flip,
-        arrow,
-    } from "@floating-ui/dom";
-    import infoIcon from "$assets/info.svg";
-    import Profile from "$lib/components/Profile.svelte";
-    import SelectLocale from "$lib/components/SelectLocale.svelte";
     import Searchbar from "$lib/components/Searchbar.svelte";
+    import AppBar from "$lib/components/AppBar.svelte";
 
     let { children } = $props();
 
-    // Configure popups
-    storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
-
     let search_lang = $state("sme");
 
-    let redirect_uri = $state(env.PUBLIC_API_ENDPOINT);
-    if (redirect_uri === undefined) {
-        console.warn(
-            "routes/+layout.svelte: env.PUBLIC_API_ENDPOINT is undefined, using default value of 'http://localhost:3000'",
-        );
-        redirect_uri = "http://localhost:3000";
-    }
-    redirect_uri = encodeURIComponent(redirect_uri + "/auth/callback");
+    let redirect_uri = (() => {
+        if (env.PUBLIC_API_ENDPOINT === undefined) {
+            console.warn(
+                "routes/+layout.svelte: env.PUBLIC_API_ENDPOINT is undefined, using default value of 'http://localhost:3000'",
+            );
+            return encodeURIComponent("http://localhost:3000/auth/callback");
+        }
+        return encodeURIComponent(env.PUBLIC_API_ENDPOINT + "/auth/callback");
+    })();
 
     type User = {
         gh_fullname: string;
@@ -59,34 +46,10 @@
     <title>{$t("page-title")}</title>
 </svelte:head>
 
-<AppBar background="bg-primary-500" slotTrail="place-content-end">
-    <a class="h2 font-medium" href={resolve("/")}>{$t("page-title")}</a>
-
-    {#snippet trail()}
-        <div class="flex items-center gap-10">
-            {#if user}
-                <Profile {user}></Profile>
-            {:else}
-                <a
-                    class="btn variant-filled-tertiary"
-                    href="https://github.com/login/oauth/authorize?scope=read:user%20read:repo&amp;client_id=Iv1.f208b6793cca35ec&amp;redirect_uri={redirect_uri}"
-                >
-                    {$t("login")}
-                </a>
-            {/if}
-
-            <SelectLocale />
-
-            <a href={resolve("/about")} class="btn variant-filled-tertiary">
-                <img src={infoIcon} alt="Information" width="22" />
-                <span>Info</span>
-            </a>
-        </div>
-    {/snippet}
-</AppBar>
+<AppBar {user} {redirect_uri} />
 
 <div class="p-6">
     <Searchbar {on_new_value} bind:search_lang></Searchbar>
-    <div class="border bottom-1 w-full my-5"></div>
+    <hr class="hr my-6" />
     {@render children?.()}
 </div>

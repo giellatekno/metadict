@@ -1,6 +1,7 @@
 import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vite";
 import precompileIntl from "svelte-intl-precompile/sveltekit-plugin.js";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
     server: {
@@ -8,5 +9,5 @@ export default defineConfig({
         host: "0.0.0.0",
     },
 
-    plugins: [precompileIntl("src/locales"), sveltekit()],
+    plugins: [tailwindcss(), precompileIntl("src/locales"), sveltekit()],
 });

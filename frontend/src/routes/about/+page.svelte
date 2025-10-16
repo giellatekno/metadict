@@ -2,7 +2,7 @@
     import { t } from "svelte-intl-precompile";
 </script>
 
-<div class="card w-full md:w-[42rem] flex flex-col my-2 px-2 pb-2">
+<div class="card w-full md:w-2xl flex flex-col my-2 px-2 pb-2">
     <span class="my-2">
         <h3 class="h3 pb-1 font-medium">{$t("howto-search-title")}</h3>
         <p>{$t("howto-search-body")}</p>

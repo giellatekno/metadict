@@ -3,10 +3,10 @@
     import { langname } from "$lib/langname";
     import { locale, t } from "svelte-intl-precompile";
     import { resolve } from "$app/paths";
-    import { Accordion, AccordionItem } from "@skeletonlabs/skeleton";
-    import externalLinkIcon from "$assets/external-link.svg";
+    import { Accordion } from "@skeletonlabs/skeleton-svelte";
     import type { PageData } from "./$types";
     import type { Snippet } from "svelte";
+    import { ExternalLink } from "lucide-svelte";
 
     interface Props {
         data: PageData;
@@ -15,8 +15,8 @@
 
     let { data, children }: Props = $props();
 
-    let lang = $derived(page.params.lang);
-    let lemma = $derived(page.params.lemma);
+    let lang = page.params.lang;
+    let lemma = page.params.lemma;
     let n_dicts = $derived(
         new Set(data.entries.map((item: Array<any>) => item[1])).size,
     );
@@ -60,10 +60,10 @@
 
 <main class="w-full grid grid-cols-3 gap-5">
     <div class="flex flex-col w-3/4">
-        <Accordion class="card">
+        <Accordion class="card" multiple>
             {#each sorted_tr_langs as tr_lang}
-                <AccordionItem open>
-                    {#snippet summary()}
+                <Accordion.Item>
+                    <Accordion.ItemTrigger>
                         <h6 class="h6">
                             <b>
                                 {langname(lang, $locale)} → {langname(
@@ -72,9 +72,9 @@
                                 )}
                             </b>
                         </h6>
-                    {/snippet}
-                    {#snippet content()}
-                        <nav class="list-nav">
+                    </Accordion.ItemTrigger>
+                    <Accordion.ItemContent>
+                        <div>
                             {#each dicts as [lemma, dictionary_name, article_id, lang2, _]}
                                 {#if tr_lang === lang2}
                                     <a
@@ -89,13 +89,13 @@
                                     </a>
                                 {/if}
                             {/each}
-                        </nav>
-                    {/snippet}
-                </AccordionItem>
+                        </div>
+                    </Accordion.ItemContent>
+                </Accordion.Item>
             {/each}
 
             {#if hist_dicts.length > 0}
-                <AccordionItem open>
+                <Accordion.Item open>
                     {#snippet summary()}
                         <h6 class="h6">
                             <b>{$t("historical-dictionaries")}</b>
@@ -116,24 +116,20 @@
                             {/each}
                         </nav>
                     {/snippet}
-                </AccordionItem>
+                </Accordion.Item>
             {/if}
         </Accordion>
         {#if lang === "nob"}
             <div class="p-4 mt-10">
                 <a
-                    class="btn variant-filled-primary"
+                    class="btn preset-filled-primary-500"
                     href={`https://ordbokene.no/nob/bm,nn/${lemma}`}
                     target="_blank"
                 >
                     <span>
                         {$t("search-ordbokene", { values: { lemma: lemma } })}
                     </span>
-                    <img
-                        src={externalLinkIcon}
-                        alt="External link"
-                        width="22"
-                    />
+                    <ExternalLink />
                 </a>
             </div>
         {/if}
