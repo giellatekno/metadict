@@ -5,16 +5,13 @@
     import { SearchIcon } from "lucide-svelte";
 
     interface Props {
-        value?: string;
         search_lang?: string;
         on_new_value: Function;
     }
 
-    let {
-        value = $bindable(""),
-        search_lang = $bindable("sme"),
-        on_new_value,
-    }: Props = $props();
+    let { search_lang = $bindable("sme"), on_new_value }: Props = $props();
+
+    let value = $state("");
 
     let search_input: HTMLInputElement;
 
@@ -46,7 +43,7 @@
 
 <div class="flex flex-col">
     <div
-        class="input-group rounded-2xl grid-cols-[auto_1fr_auto] w-full md:w-2xl h-12 md:h-16 preset-filled-tertiary-50-950"
+        class="input-group grid-cols-[auto_1fr_auto] w-full md:w-2xl h-12 md:h-16 preset-filled-tertiary-50-950"
     >
         <button class="ig-cell" onclick={on_searchbutton_click}>
             <SearchIcon class="size-6" />

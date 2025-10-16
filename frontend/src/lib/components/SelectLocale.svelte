@@ -3,7 +3,6 @@
     import { Popover, Portal } from "@skeletonlabs/skeleton-svelte";
     import { langname } from "$lib/langname";
     import { LanguagesIcon } from "lucide-svelte";
-    import { t } from "svelte-intl-precompile";
 
     const locales = ["nob", "eng", "sme"];
 </script>
@@ -23,7 +22,7 @@
                         {#each locales as iso}
                             <li>
                                 <button
-                                    class="btn hover:preset-tonal w-full justify-start"
+                                    class="btn hover:preset-filled-tertiary-400-600 w-full justify-start"
                                     onclick={() => ($locale = iso)}
                                 >
                                     {langname(iso, iso)}

@@ -29,8 +29,8 @@
     };
     let user: User | undefined = $derived(page.data?.user);
 
-    async function on_new_value(detail: string) {
-        const search_term = encodeURIComponent(detail);
+    async function on_new_value(input: string) {
+        const search_term = encodeURIComponent(input);
         let url = resolve(`/search/${search_lang}/${search_term}`);
         // fix for seemingly working in dev but not prod:
         // on dev base="", so the url starts with a "/", but on
