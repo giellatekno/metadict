@@ -29,5 +29,6 @@ export default {
         'If you are a worker at Giellatekno, you can get access to restricted dictionaries. Once you have been given access, click "Log in with Github" and verify by clicking your name. You should see the message "Giellatekno employee". If you have not gotten access logging in won\'t make a difference in the results you see.',
     "historical-dictionaries": "Historical dictionaries",
     "search-ordbokene": 'Search for "{lemma}" in ordbokene.no',
+    "search-davvigirji": 'Search for "{lemma}" in Davvi Girji\'s webpage',
     "dark-mode": "Dark mode",
 };

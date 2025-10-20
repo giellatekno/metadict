@@ -42,6 +42,16 @@
 </script>
 
 <div class="flex flex-col">
+    <div class="ml-[3.8rem] mb-2 w-fit grid grid-cols-7 gap-1.5">
+        {#each extra_letters[search_lang] as letter}
+            <button
+                class="btn btn-sm md:btn-base w-4 md:w-8 preset-outlined-primary-400-600"
+                onclick={() => on_extra_letter(letter)}
+            >
+                {letter}
+            </button>
+        {/each}
+    </div>
     <div
         class="input-group grid-cols-[auto_1fr_auto] w-full md:w-2xl h-12 md:h-16 preset-filled-tertiary-50-950"
     >
@@ -66,15 +76,5 @@
             <option value="nob">{langname("nob", $locale)}</option>
             <option value="fin">{langname("fin", $locale)}</option>
         </select>
-    </div>
-    <div class="ml-[3.8rem] mt-4 w-fit grid grid-cols-7 gap-1.5">
-        {#each extra_letters[search_lang] as letter}
-            <button
-                class="btn btn-sm md:btn-base preset-outlined-primary-400-600"
-                onclick={() => on_extra_letter(letter)}
-            >
-                {letter}
-            </button>
-        {/each}
     </div>
 </div>

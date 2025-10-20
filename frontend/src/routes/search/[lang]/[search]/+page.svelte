@@ -17,10 +17,10 @@
     const lemmas = $derived(data.lemmas.slice(start, end));
 </script>
 
-<h5 class="h5 my-2">
+<h5 class="h5 my-2 text-surface-950-50">
     {$t("search-result", { values: { count: data.lemmas.length } })}
 </h5>
-<div class="w-1/4 flex flex-col gap-2">
+<div class="min-w-124 w-1/4 flex flex-col gap-2">
     <div
         class="card py-2 w-full bg-surface-100-900 border border-surface-200-800"
     >

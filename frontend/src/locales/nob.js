@@ -29,5 +29,6 @@ export default {
         'Hvis du jobber for Giellatekno kan du få tilgang til lukkede ordbøker i søkeresultatene. Når du har blitt gitt tilgang kan du klikke "Logg inn med Github" og verifisere at du har tilgang ved å klikke på navnet ditt. Du vil da se meldingen "Giellatekno ansatt". Hvis du ikke har fått tilgang vil ikke det å logge inn ha noen effekt på hvilke søkeresultater du ser.',
     "historical-dictionaries": "Historiske ordbøker",
     "search-ordbokene": 'Søk etter "{lemma}" i ordbokene.no',
+    "search-davvigirji": 'Søk etter "{lemma}" i Davvi Girjis nettside',
     "dark-mode": "Mørk modus",
 };

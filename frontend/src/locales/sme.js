@@ -31,5 +31,6 @@ export default {
         'Jus barggat Giellateknos, de sáhtát oažžut beassanlobi giddejuvvon sátnegirjjiide. Go leat ožžon beassama, deaddil "Logge sisa Githubiin". Deaddil de iežat nama ja iskka lohká go "Giellatekno bargi". Jus ii leat ožžon beassanlobi, de logget sisa ii rievdat ohcanbohtosiid.',
     "historical-dictionaries": "Historjjálaš sátnegirjjit",
     "search-ordbokene": 'Oza "{lemma}" ordbokene.no:s',
+    "search-davvigirji": 'Oza "{lemma}" Davvi Girjji neahttasiiddus',
     "dark-mode": "Sevdnjes modus",
 };
