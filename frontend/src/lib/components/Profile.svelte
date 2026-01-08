@@ -17,11 +17,13 @@
     let { user }: Props = $props();
 
     // Turns John Doe into JD
-    let fallbackname = user.gh_fullname
-        .split(" ")
-        .map((word) => word.charAt(0))
-        .join("")
-        .toUpperCase();
+    let fallbackname = $derived(
+        user.gh_fullname
+            .split(" ")
+            .map((word) => word.charAt(0))
+            .join("")
+            .toUpperCase()
+    );
 </script>
 
 <Popover>

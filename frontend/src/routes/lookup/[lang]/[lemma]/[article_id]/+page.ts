@@ -7,13 +7,13 @@ export const load: Load = async ({ params, fetch }) => {
     let { article_id } = params;
 
     const urls = [
-        `/api/article/${article_id}`,
-        `/api/neighbors/${article_id}`,
-        `/api/dictionary/${article_id}`,
+        `article/${article_id}`,
+        `neighbors/${article_id}`,
+        `dictionary/${article_id}`,
     ];
 
     const responses = await await_or_error(
-        Promise.all(urls.map((url) => fetch(resolve(url)))),
+        Promise.all(urls.map((url) => fetch(`${resolve("/api")}/${url}`))),
         "fetch to api failed",
     );
 

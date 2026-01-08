@@ -1,12 +1,32 @@
 default:
     @just --list
 
-# pnpm run dev
+# pnpm run dev  --  remember .env file with api you use, e.g: PUBLIC_API_ENDPOINT=http://localhost:3000
 dev:
+    #!/usr/bin/env bash
+    if [ ! -f .env ]; then
+        echo "error: no .env file"
+        echo "To run the dev server, it must know which API to use."
+        echo "Create a file .env and fill it with, f.or example:"
+        echo "PUBLIC_API_ENDPOINT=http://localhost:3000"
+        exit 1
+    fi
     pnpm run dev
 
-# pnpm run build
+# pnpm run build  --  Builds for the server, use build-local to build a local image
 build:
+    PUBLIC_API_ENDPOINT=http://metadict-api:3000 pnpm run build
+
+# pnpm run build  --  
+build-local:
+    #!/usr/bin/env bash
+    if [ ! -f .env ]; then
+        echo "error: no .env file"
+        echo "To build for local testing, it must know which API to use."
+        echo "Create a file .env and fill it with, f.or example:"
+        echo "PUBLIC_API_ENDPOINT=http://localhost:3000"
+        exit 1
+    fi
     pnpm run build
 
 # podman build -t metadict-front -f Containerfile (remember to "build" first)
