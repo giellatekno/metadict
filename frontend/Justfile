@@ -1,0 +1,19 @@
+default:
+    @just --list
+
+# SK_BASE=/metadict PUBLIC_API_ENDPOINT=http://localhost:1401 pnpm run dev
+dev:
+    SK_BASE=/metadict PUBLIC_API_ENDPOINT=http://localhost:1401 pnpm run dev
+
+# Build the SvelteKit project, using `pnpm run build` with "/metadict" as the base
+build:
+    SK_BASE=/metadict pnpm run build
+
+# Build the container image using podman (NOTE: Make sure to "build" first)
+image:
+    podman build -t metadict-front -f Containerfile
+
+# Push the built image to the gtlab container registry
+push-labacr:
+    podman tag metadict-front gtlabcontainerregistry.azurecr.io/metadict-front
+    podman push gtlabcontainerregistry.azurecr.io/metadict-front

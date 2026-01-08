@@ -3,7 +3,8 @@ import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 // If the app should be located under a subpath on the domain, such as
 // some.domain.com/subdir - then set this to "/subdir"
-const base = process.env.SK_BASE || "";
+// NOTE: We default to /metadict now, even for local dev build!
+const base = process.env.SK_BASE || "/metadict";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {

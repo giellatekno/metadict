@@ -2,40 +2,40 @@ import { env } from "$env/dynamic/public";
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-    const request = event.request;
-    const { pathname } = event.url;
+    //const request = event.request;
+    //const { pathname } = event.url;
 
-    if (pathname.startsWith("/api/")) {
-        const api_endpoint = new URL(env.PUBLIC_API_ENDPOINT);
-        const api_url = new URL(event.request.url);
-        // anders: on server internal calls, it doesn't use https, right?
-        //api_url.protocol = "http:";
-        api_url.hostname = api_endpoint.host;
-        api_url.port = api_endpoint.port;
-        api_url.pathname = pathname.replace(/^\/api\//, "");
+    //if (pathname.startsWith("/api/")) {
+    //    const api_endpoint = new URL(env.PUBLIC_API_ENDPOINT);
+    //    const api_url = new URL(event.request.url);
+    //    // anders: on server internal calls, it doesn't use https, right?
+    //    //api_url.protocol = "http:";
+    //    api_url.hostname = api_endpoint.host;
+    //    api_url.port = api_endpoint.port;
+    //    api_url.pathname = pathname.replace(/^\/api\//, "");
 
-        const headers = new Headers(event.request.headers);
-        //headers.set("host", env.PUBLIC_API_ENDPOINT);
-        //headers.set('accept-encoding', '');
-        const cookie = event.request.headers.get("Cookie");
-        if (cookie !== null) {
-            request.headers.set("Cookie", cookie);
-        }
-        
-        const client_ip = event.request.headers.get("x-forwarded-for") || event.getClientAddress();
-        if (client_ip) {
-            headers.set("x-forwarded-for", client_ip);
-        }
+    //    const headers = new Headers(event.request.headers);
+    //    //headers.set("host", env.PUBLIC_API_ENDPOINT);
+    //    //headers.set('accept-encoding', '');
+    //    const cookie = event.request.headers.get("Cookie");
+    //    if (cookie !== null) {
+    //        request.headers.set("Cookie", cookie);
+    //    }
+    //    
+    //    const client_ip = event.request.headers.get("x-forwarded-for") || event.getClientAddress();
+    //    if (client_ip) {
+    //        headers.set("x-forwarded-for", client_ip);
+    //    }
 
-        const response = await fetch(api_url, {
-            method: event.request.method,
-            headers,
-            body: event.request.body,
-            //duplex: "half",
-        });
+    //    const response = await fetch(api_url, {
+    //        method: event.request.method,
+    //        headers,
+    //        body: event.request.body,
+    //        //duplex: "half",
+    //    });
 
-        return response;
-    }
+    //    return response;
+    //}
 
     const jwt = event.cookies.get("metadict-creds");
     if (jwt !== undefined) {

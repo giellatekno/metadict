@@ -1,6 +1,7 @@
 import type { Load } from "@sveltejs/kit";
 import { error } from '@sveltejs/kit';
 import { await_or_error } from "$lib/await_or_error";
+import { resolve } from "$app/paths";
 
 export const load: Load = async ({ params, fetch }) => {
     let { article_id } = params;
@@ -12,7 +13,7 @@ export const load: Load = async ({ params, fetch }) => {
     ];
 
     const responses = await await_or_error(
-        Promise.all(urls.map((url) => fetch(url))),
+        Promise.all(urls.map((url) => fetch(resolve(url)))),
         "fetch to api failed",
     );
 
