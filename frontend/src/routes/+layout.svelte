@@ -4,7 +4,7 @@
     import { page } from "$app/state";
     import { resolve } from "$app/paths";
     import { t } from "svelte-intl-precompile";
-    import { env } from "$env/dynamic/public";
+    import { PUBLIC_API_ENDPOINT } from "$env/static/public";
     import Searchbar from "$lib/components/Searchbar.svelte";
     import AppBar from "$lib/components/AppBar.svelte";
 
@@ -12,15 +12,7 @@
 
     let search_lang = $state("sme");
 
-    let redirect_uri = (() => {
-        if (env.PUBLIC_API_ENDPOINT === undefined) {
-            console.warn(
-                "routes/+layout.svelte: env.PUBLIC_API_ENDPOINT is undefined, using default value of 'http://localhost:3000'",
-            );
-            return encodeURIComponent("http://localhost:3000/auth/callback");
-        }
-        return encodeURIComponent(env.PUBLIC_API_ENDPOINT + "/auth/callback");
-    })();
+    let redirect_uri = encodeURIComponent(PUBLIC_API_ENDPOINT + "/auth/callback");
 
     type User = {
         gh_fullname: string;
@@ -30,15 +22,7 @@
     let user: User | undefined = $derived(page.data?.user);
 
     async function on_new_value(input: string) {
-        const search_term = encodeURIComponent(input);
-        let url = resolve(`/search/${search_lang}/${search_term}`);
-        // fix for seemingly working in dev but not prod:
-        // on dev base="", so the url starts with a "/", but on
-        // prod, we have a base, starting with NOT a "/", so we need
-        // to add it here, so that we don't go to a relative url
-        // if (!url.startsWith("/")) url = `/${url}`;
-        console.log(url);
-        await goto(url);
+        await goto(resolve(`/search/${search_lang}/${encodeURIComponent(input)}`));
     }
 </script>
 
