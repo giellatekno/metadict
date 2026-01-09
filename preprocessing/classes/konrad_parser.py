@@ -12,7 +12,7 @@ class KonradParser:
             lang2="eng",
             is_ordered=True,
             author="Konrad Nielsen",
-            date_published="1932-1938"
+            date_published="1932–1938"
         )
 
         self.articles = self.parse_dict(file)
