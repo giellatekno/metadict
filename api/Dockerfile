@@ -5,6 +5,8 @@ RUN set -eux && \
     apt update && \
     apt install -y ca-certificates
 
+RUN apt-get install -y inetutils-ping postgresql
+
 RUN mkdir -p /app
 
 # have to have a specific image for each host, which is a bit sad,

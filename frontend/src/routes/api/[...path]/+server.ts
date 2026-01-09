@@ -1,8 +1,9 @@
 import type { RequestHandler } from './$types';
 import { PUBLIC_API_ENDPOINT } from "$env/static/public";
-import { base } from "$app/paths";
+import { base, resolve } from "$app/paths";
+import { redirect } from '@sveltejs/kit';
 
-export const GET: RequestHandler = async ({ request, url, fetch }) => {
+export const GET: RequestHandler = async ({ cookies, request, url, fetch }) => {
     const pathname = url.pathname;
 
     const api_url = new URL(PUBLIC_API_ENDPOINT);
@@ -31,6 +32,9 @@ export const GET: RequestHandler = async ({ request, url, fetch }) => {
         method: request.method,
         headers,
         body: request.body,
+        // Don't follow the redirect, but return in from
+        // this endpoint instead
+        redirect: "manual",
         //duplex: "half",
     });
 

@@ -11,7 +11,7 @@ dev:
         echo "PUBLIC_API_ENDPOINT=http://localhost:3000"
         exit 1
     fi
-    pnpm run dev
+    PUBLIC_ORIGIN=http://localhost:5173 pnpm run dev
 
 # pnpm run build  --  Builds for the server, use build-local to build a local image
 build:

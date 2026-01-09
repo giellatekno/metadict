@@ -1,7 +1,5 @@
 [pg]
 DBNAME = "postgres"
 user = "postgres"
-
-# special podman domain name for containers on the host (...I think)
-host = "host.containers.internal"
-port = 3515
+host = "metadict-db"
+port = 5432

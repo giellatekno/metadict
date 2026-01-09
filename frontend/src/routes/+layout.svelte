@@ -5,6 +5,7 @@
     import { resolve } from "$app/paths";
     import { t } from "svelte-intl-precompile";
     import { PUBLIC_API_ENDPOINT } from "$env/static/public";
+    import { env } from "$env/dynamic/public";
     import Searchbar from "$lib/components/Searchbar.svelte";
     import AppBar from "$lib/components/AppBar.svelte";
 
@@ -12,7 +13,8 @@
 
     let search_lang = $state("sme");
 
-    let redirect_uri = encodeURIComponent(PUBLIC_API_ENDPOINT + "/auth/callback");
+    //let redirect_uri = encodeURIComponent(PUBLIC_API_ENDPOINT + "/api/auth/callback");
+    let redirect_uri = encodeURIComponent(env.PUBLIC_ORIGIN + resolve("/api/auth/callback"));
 
     type User = {
         gh_fullname: string;

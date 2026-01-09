@@ -191,7 +191,15 @@ async fn handler_auth_callback(
 
     let creds = access_token_future
         .await
-        .map_err(|e| redirect_to_errorpage!(msg = e, desc = "exchange access code"))?;
+        .map_err(|e| {
+            //tracing::error!("{:?}", e.backtrace());
+            if let Some(source) = e.source() {
+                tracing::error!(source, "source");
+            } else {
+                tracing::warn!("no source...");
+            }
+            redirect_to_errorpage!(msg = e, desc = "exchange access code")
+        })?;
 
     let gh_user = ghapi::get_user(&creds.access_token)
         .await
