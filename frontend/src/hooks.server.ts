@@ -20,8 +20,32 @@ function base64urldecode(input: string) {
         input += new Array(5 - pad).join("=");
     }
 
-    return atob(input);
+    const b64_decoded = atob(input);
+
+    // the input is utf-8 encoded, so we want to take all bytes, and decode them
+    // as utf-8. TextDecoder.decode() requires a byte array (such as Uint8Array),
+    // so first we must copy the b64_decoded string into the array, byte for byte
+    const char_codes = new Uint8Array(b64_decoded.length);
+    for (let i = 0; i < b64_decoded.length; i++) {
+        char_codes[i] = b64_decoded.charCodeAt(i);
+    }
+
+    const decoder = new TextDecoder("utf-8");
+    let utf8_decoded = decoder.decode(char_codes);
+
+    return utf8_decoded;
 }
+
+/* from some stackoverflow post, unneeded
+function fromBinary(encoded: any) {
+  const binary = atob(encoded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return String.fromCharCode(...new Uint16Array(bytes.buffer));
+}
+*/
 
 const originalHandle: Handle = async ({ event, resolve }) => {
     const jwt = event.cookies.get("metadict-creds");
