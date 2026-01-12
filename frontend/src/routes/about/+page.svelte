@@ -1,33 +1,27 @@
 <script lang="ts">
-    import { t } from "svelte-intl-precompile";
+    import { m } from "$lib/paraglide/messages";
 </script>
 
 <div class="card w-full md:w-2xl flex flex-col my-2 px-2 pb-2">
     <span class="my-2">
-        <h3 class="h3 pb-1 font-medium">{$t("howto-search-title")}</h3>
-        <p>{$t("howto-search-body")}</p>
+        <h3 class="h3 pb-1 font-medium">{m.howto_search_title()}</h3>
+        <p>{m.howto_search_body()}</p>
         <br />
         <ul>
             <li>
-                "<b>%</b>laš" {$t("howto-search-example-end", {
-                    values: { example: "laš" },
-                })}
+                "<b>%</b>laš" {m.howto_search_example_end({ example: "laš" })}
             </li>
             <li>
-                "biila<b>%</b>" {$t("howto-search-example-start", {
-                    values: { example: "biila" },
-                })}
+                "biila<b>%</b>" {m.howto_search_example_start({ example: "biila" })},
             </li>
             <li>
-                "muit<b>%</b>it" {$t("howto-search-example-middle", {
-                    values: { example_start: "muit", example_end: "it" },
-                })}
+                "muit<b>%</b>it" {m.howto_search_example_middle({ example_start: "muit", example_end: "it" })}
             </li>
         </ul>
         <br />
     </span>
     <span class="my-2">
-        <h3 class="h3 pb-1 font-medium">{$t("howto-access-title")}</h3>
-        <p>{$t("howto-access-body")}</p>
+        <h3 class="h3 pb-1 font-medium">{m.howto_access_title()}</h3>
+        <p>{m.howto_access_body()}</p>
     </span>
 </div>

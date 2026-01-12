@@ -1,6 +1,6 @@
+import { paraglideVitePlugin } from "@inlang/paraglide-js";
 import { sveltekit } from "@sveltejs/kit/vite";
 import { defineConfig } from "vite";
-import precompileIntl from "svelte-intl-precompile/sveltekit-plugin.js";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
@@ -9,5 +9,13 @@ export default defineConfig({
         host: "0.0.0.0",
     },
 
-    plugins: [tailwindcss(), precompileIntl("src/locales"), sveltekit()],
+    plugins: [
+        tailwindcss(),
+        sveltekit(),
+        paraglideVitePlugin({
+            project: "./project.inlang",
+            outdir: "./src/lib/paraglide",
+            strategy: ['localStorage', 'baseLocale'],
+        }),
+    ],
 });

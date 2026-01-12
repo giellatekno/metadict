@@ -1,0 +1,44 @@
+{
+    "page_title": "Giellatekno Metaordbok",
+    "interface_language": "Grensesnittspråk",
+    "login": "Logg inn med Github",
+    "logout": "Logg ut",
+    "dictionary_form": "Oppslagsform",
+    "access": "Giellatekno ansatt",
+    "search_result": [{
+        "declarations": ["input count", "local countPlural = count: plural"],
+        "selectors": ["countPlural"],
+        "match": {
+            "countPlural=zero": "Fant ingen lemma blandt alle ordbøkene som matchet søket.",
+            "countPlural=one": "Fant ett lemma blandt alle ordbøkene som matchet søket.",
+            "countPlural=other": "Fant {count} lemma blandt alle ordbøkene som matchet søket."
+        }
+    }],
+    "lookup_result": [{
+        "declarations": ["input count", "local countPlural = count: plural"],
+        "selectors": ["countPlural"],
+        "match": {
+            "countPlural=zero": "Lemmaet \"{lemma}\" ble ikke funnet i noen ordbøker.",
+            "countPlural=one": "Lemmaet \"{lemma}\" ble funnet i ei ordbok.",
+            "countPlural=other": "Lemmaet \"{lemma}\" ble funnet i {count} forskjellige ordbøker."
+        }
+    }],
+    "search_language": "Søkespråk",
+    "search_placeholder": "Søk etter ord i grunnform...",
+    "about_dictionary": "Om denne ordboka",
+    "close": "Lukk",
+    "authors": "Forfatter(e)",
+    "year_published": "År publisert",
+    "no_additional_info": "Ingen ekstra informasjon",
+    "howto_search_title": "Hvordan bruke metaordboka",
+    "howto_search_body": "Søkeboksen brukes til å søke etter ord i grunnform. Dropdown-menyen ved siden av søkefeltet brukes til å velge søkespråk. Prosent_tegnet (%) brukes som et \"wildcard\" symbol. Det kan plasseres foran, bak eller i midten av søk. For eksempel:",
+    "howto_search_example_end": "gir alle ord som ender med \"{example}\".",
+    "howto_search_example_start": "gir alle ord som starter med \"{example}\".",
+    "howto_search_example_middle": "gir alle ord som starter med \"{example_start}\" og som slutter med \"{example_end}\".",
+    "howto_access_title": "Hvordan få tilgang til lukkede ordbøker",
+    "howto_access_body": "Hvis du jobber for Giellatekno kan du få tilgang til lukkede ordbøker i søkeresultatene. Når du har blitt gitt tilgang kan du klikke \"Logg inn med Github\" og verifisere at du har tilgang ved å klikke på navnet ditt. Du vil da se meldingen \"Giellatekno ansatt\". Hvis du ikke har fått tilgang vil ikke det å logge inn ha noen effekt på hvilke søkeresultater du ser.",
+    "historical_dictionaries": "Historiske ordbøker",
+    "search_ordbokene": "Søk etter \"{lemma}\" i ordbokene.no",
+    "search_davvigirji": "Søk etter \"{lemma}\" i Davvi Girjis nettside",
+    "dark_mode": "Mørk modus"
+}

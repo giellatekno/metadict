@@ -1,0 +1,44 @@
+{
+    "page_title": "Giellatekno Metasátnegirji",
+    "interface_language": "Geavaheaddjilaktagiella",
+    "login": "Logge sisa Githubiin",
+    "logout": "Logge olggos",
+    "dictionary_form": "Vuođđuhápmi",
+    "access": "Giellatekno bargi",
+    "search_result": [{
+        "declarations": ["input count", "local countPlural = count: plural"],
+        "selectors": ["countPlural"],
+        "match": {
+            "countPlural=zero": "Ii oktage sátni mii heive ohcamii",
+            "countPlural=one": "okta sátni gávdnán mii heive ohcamii",
+            "countPlural=other": "{count} sáni gávdnán mat heivejit ohcamii"
+        }
+    }],
+    "lookup_result": [{
+        "declarations": ["input count", "local countPlural = count: plural"],
+        "selectors": ["countPlural"],
+        "match": {
+            "countPlural=zero": "Sátni {lemma} gávdnui 0 sátnegirjjis",
+            "countPlural=one": "Sátni {lemma} gávdnui 1 sátnegirjjis",
+            "countPlural=other": "Sátni {lemma} gávdnui {count} iešguđetlágan sátnegirjjis"
+        }
+    }],
+    "search_language": "Ohcangiella",
+    "search_placeholder": "Oza sániid vuođđohámiid...",
+    "about_dictionary": "Dán sátnegirjji birra",
+    "close": "Gidde",
+    "authors": "Girječálli(t)",
+    "year_published": "Almmuhanjahki",
+    "no_additional_info": "Liigediehtu váilu",
+    "howto_search_title": "Movt geavahit metasátnegirjji",
+    "howto_search_body": "Geavat ohcanbovssa ohcat sániid vuođđohámiid. Ohcanbovssa bálddas lea dropdown-fállu gos sáhttá váljet ohcangiela. Proseantasymbola (%) lea \"wildcard\" symbolan. Dien sáhttá bidjat sániid ovddabealde, maŋábealde dahje gasku sániid. Ovddamearkka dihte:",
+    "howto_search_example_end": "addá buot sániid main lea \"{example}\" loahpas.",
+    "howto_search_example_start": "addá buot sániid main lea \"{example}\" álggus.",
+    "howto_search_example_middle": "addá buot sániid main lea \"{example_start}\" álggus ja \"{example_end}\" loahpas.",
+    "howto_access_title": "Movt oaidnit giddejuvvon sátnegirjjiid",
+    "howto_access_body": "Jus barggat Giellateknos, de sáhtát oažžut beassanlobi giddejuvvon sátnegirjjiide. Go leat ožžon beassama, deaddil \"Logge sisa Githubiin\". Deaddil de iežat nama ja iskka lohká go \"Giellatekno bargi\". Jus ii leat ožžon beassanlobi, de logget sisa ii rievdat ohcanbohtosiid.",
+    "historical_dictionaries": "Historjjálaš sátnegirjjit",
+    "search_ordbokene": "Oza \"{lemma}\" ordbokene.no:s",
+    "search_davvigirji": "Oza \"{lemma}\" Davvi Girjji neahttasiiddus",
+    "dark_mode": "Sevdnjes modus"
+}

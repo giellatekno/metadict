@@ -1,7 +1,8 @@
 <script lang="ts">
     import { page } from "$app/state";
     import { langname } from "$lib/langname";
-    import { locale, t } from "svelte-intl-precompile";
+    import { getLocale } from "$lib/paraglide/runtime.js";
+    import { m } from "$lib/paraglide/messages";
     import { resolve } from "$app/paths";
     import type { PageData } from "./$types";
     import type { Snippet } from "svelte";
@@ -51,7 +52,7 @@
     ]);
 
     let result_text = $derived(
-        $t("lookup-result", { values: { lemma: lemma, count: n_dicts } }),
+        m.lookup_result({ lemma, count: n_dicts })
     );
 </script>
 
@@ -65,7 +66,7 @@
             {#each sorted_tr_langs as tr_lang}
                 <h6 class="h6">
                     <b>
-                        {langname(lang, $locale)} → {langname(tr_lang, $locale)}
+                        {langname(lang, getLocale())} → {langname(tr_lang, getLocale())}
                     </b>
                 </h6>
                 <div>
@@ -88,7 +89,7 @@
 
             {#if hist_dicts.length > 0}
                 <h6 class="h6">
-                    <b>{$t("historical-dictionaries")}</b>
+                    <b>{m.historical_dictionaries()}</b>
                 </h6>
                 <nav class="list-nav">
                     {#each hist_dicts as [lemma, dictionary_name, article_id, _lang2, _]}
@@ -113,9 +114,7 @@
                     href={`https://ordbokene.no/nob/bm,nn/${lemma}`}
                     target="_blank"
                 >
-                    <span>
-                        {$t("search-ordbokene", { values: { lemma: lemma } })}
-                    </span>
+                    <span>{m.search_ordbokene({ lemma })}</span>
                     <ExternalLink />
                 </a>
                 <a
@@ -123,9 +122,7 @@
                     href={`https://533.davvi.no/ordbok_norsam.php?finn=${lemma}`}
                     target="_blank"
                 >
-                    <span>
-                        {$t("search-davvigirji", { values: { lemma: lemma } })}
-                    </span>
+                    <span>{m.search_davvigirji({ lemma })}</span>
                     <ExternalLink />
                 </a>
             </div>
@@ -136,9 +133,7 @@
                     href={`https://533.davvi.no/ordbok_samnor.php?finn=${lemma}`}
                     target="_blank"
                 >
-                    <span>
-                        {$t("search-davvigirji", { values: { lemma: lemma } })}
-                    </span>
+                    <span>{m.search_davvigirji({ lemma })}</span>
                     <ExternalLink />
                 </a>
             </div>

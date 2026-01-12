@@ -2,7 +2,7 @@
     import { AppBar } from "@skeletonlabs/skeleton-svelte";
     import Profile from "./Profile.svelte";
     import SelectLocale from "./SelectLocale.svelte";
-    import { t } from "svelte-intl-precompile";
+    import { m } from "$lib/paraglide/messages.js";
     import { resolve } from "$app/paths";
     import { Info } from "lucide-svelte";
 
@@ -22,7 +22,7 @@
     <AppBar.Toolbar class="grid-cols-[auto_auto] ">
         <AppBar.Headline>
             <a class="text-4xl font-medium" href={resolve("/")}
-                >{$t("page-title")}</a
+                >{m.page_title()}</a
             >
         </AppBar.Headline>
         <AppBar.Trail>
@@ -43,7 +43,7 @@
                         class="btn btn-large preset-filled-primary-500"
                         href="https://github.com/login/oauth/authorize?scope=read:user%20read:repo&client_id=Iv1.f208b6793cca35ec&redirect_uri={redirect_uri}"
                     >
-                        {$t("login")}
+                        {m.login()}
                     </a>
                 {/if}
             </div>

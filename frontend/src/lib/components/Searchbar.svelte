@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { t, locale } from "svelte-intl-precompile";
+    import { getLocale } from "$lib/paraglide/runtime.js";
+    import { m } from "$lib/paraglide/messages.js";
     import { langname } from "$lib/langname";
     import { onMount } from "svelte";
     import { SearchIcon } from "lucide-svelte";
@@ -62,7 +63,7 @@
             class="ig-input"
             bind:this={search_input}
             type="search"
-            placeholder={$t("search-placeholder")}
+            placeholder={m.search_placeholder()}
             bind:value
             onkeydown={on_enter_keydown}
         />
@@ -72,9 +73,9 @@
             id="searchlang"
             bind:value={search_lang}
         >
-            <option value="sme">{langname("sme", $locale)}</option>
-            <option value="nob">{langname("nob", $locale)}</option>
-            <option value="fin">{langname("fin", $locale)}</option>
+            <option value="sme">{langname("sme", getLocale())}</option>
+            <option value="nob">{langname("nob", getLocale())}</option>
+            <option value="fin">{langname("fin", getLocale())}</option>
         </select>
     </div>
 </div>

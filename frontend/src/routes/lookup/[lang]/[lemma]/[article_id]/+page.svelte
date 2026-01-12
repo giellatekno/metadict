@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { t } from "svelte-intl-precompile";
+    import { m } from "$lib/paraglide/messages";
     import type { PageProps } from "./$types";
 
     let { data }: PageProps = $props();
@@ -41,13 +41,13 @@
             <hr class="hr" />
             {#if dictionary[1]}
                 <div>
-                    <h4 class="h4">{$t("authors")}:</h4>
+                    <h4 class="h4">{m.authors()}:</h4>
                     <p>{dictionary[1]}</p>
                 </div>
             {/if}
             {#if dictionary[2]}
                 <div>
-                    <h4 class="h4">{$t("year-published")}:</h4>
+                    <h4 class="h4">{m.year_published()}:</h4>
                     <p>{dictionary[2]}</p>
                 </div>
             {/if}
@@ -58,7 +58,7 @@
                 </div>
             {/if}
             {#if !(dictionary[1] || dictionary[2] || dictionary[3])}
-                <p>{$t("no-additional-info")}</p>
+                <p>{m.no_additional_info()}</p>
             {/if}
         </div>
     {/if}

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { resolve } from "$app/paths";
-    import { t } from "svelte-intl-precompile";
+    import { m } from "$lib/paraglide/messages";
     import { Popover, Portal } from "@skeletonlabs/skeleton-svelte";
     import { Avatar } from "@skeletonlabs/skeleton-svelte";
     import LightSwitch from "./LightSwitch.svelte";
@@ -43,18 +43,18 @@
                     <div class="flex flex-col gap-2 justify-center text-center">
                         {#if user.restricted_dicts}
                             <div class="flex flex-row gap-2 justify-start">
-                                <span>{$t("access")}</span>
+                                <span>{m.access()}</span>
                                 <BadgeCheck />
                             </div>
                             <!-- {:else} -->
                             <!--     <span class="text-error-950-50" -->
-                            <!--         >{$t("no-access")}</span -->
+                            <!--         >{m.no_access()}</span -->
                             <!--     > -->
                             <hr class="hr" />
                         {/if}
                         <div class="flex flex-row gap-2 justify-start">
                             <span>
-                                {$t("dark-mode")}
+                                {m.dark_mode()}
                             </span>
                             <LightSwitch />
                         </div>
@@ -64,7 +64,7 @@
                                 href={resolve("/auth/logout")}
                                 class="btn preset-filled-secondary-400-600 w-full h-fit"
                             >
-                                {$t("logout")}
+                                {m.logout()}
                             </a>
                         </span>
                     </div>

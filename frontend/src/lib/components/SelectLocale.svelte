@@ -1,16 +1,16 @@
 <script lang="ts">
-    import { locale } from "$lib/locale.js";
+    import { getLocale, setLocale } from "$lib/paraglide/runtime";
     import { Popover, Portal } from "@skeletonlabs/skeleton-svelte";
     import { langname } from "$lib/langname";
     import { LanguagesIcon } from "lucide-svelte";
 
-    const locales = ["nob", "eng", "sme"];
+    const locales = ["nob", "eng", "sme"] as const;
 </script>
 
 <Popover>
     <Popover.Trigger class="btn preset-filled-primary-400-600">
         <LanguagesIcon />
-        <span>{langname($locale, $locale)}</span>
+        <span>{langname(getLocale(), getLocale())}</span>
     </Popover.Trigger>
     <Portal>
         <Popover.Positioner>
@@ -23,7 +23,7 @@
                             <li>
                                 <button
                                     class="btn hover:preset-filled-tertiary-400-600 w-full justify-start"
-                                    onclick={() => ($locale = iso)}
+                                    onclick={() => setLocale(iso)}
                                 >
                                     {langname(iso, iso)}
                                 </button>

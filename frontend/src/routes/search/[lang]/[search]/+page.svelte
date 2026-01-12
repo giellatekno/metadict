@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { t } from "svelte-intl-precompile";
     import { resolve } from "$app/paths";
     import { Pagination } from "@skeletonlabs/skeleton-svelte";
     import type { PageProps } from "./$types";
+    import { m } from "$lib/paraglide/messages";
     import { page as pagestate } from "$app/state";
     import { ArrowLeftIcon, ArrowRightIcon } from "lucide-svelte";
 
@@ -18,7 +18,7 @@
 </script>
 
 <h5 class="h5 my-2 text-surface-950-50">
-    {$t("search-result", { values: { count: data.lemmas.length } })}
+    {m.search_result({ count: data.lemmas.length })}
 </h5>
 <div class="min-w-124 w-1/4 flex flex-col gap-2">
     <div
