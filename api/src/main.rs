@@ -9,9 +9,9 @@ mod our_jwt;
 mod pg_connection_pool;
 mod timing_middleware;
 
-use axum::{
-    extract::{Path, Query, State}, http::HeaderMap, response::{IntoResponse, Redirect, Response}, routing::get, serve::Listener, Json, Router
-};
+use axum::extract::{Path, Query, State};
+use axum::response::{IntoResponse, Redirect, Response};
+use axum::{http::HeaderMap, routing::get, Json, Router};
 use listenfd::ListenFd;
 use serde_json::json;
 use std::collections::HashMap;
@@ -189,17 +189,16 @@ async fn handler_auth_callback(
         code,
     );
 
-    let creds = access_token_future
-        .await
-        .map_err(|e| {
-            //tracing::error!("{:?}", e.backtrace());
-            if let Some(source) = e.source() {
-                tracing::error!(source, "source");
-            } else {
-                tracing::warn!("no source...");
-            }
-            redirect_to_errorpage!(msg = e, desc = "exchange access code")
-        })?;
+    use std::error::Error;
+    let creds = access_token_future.await.map_err(|e| {
+        //tracing::error!("{:?}", e.backtrace());
+        if let Some(source) = e.source() {
+            tracing::error!(source, "source");
+        } else {
+            tracing::warn!("no source...");
+        }
+        redirect_to_errorpage!(msg = e, desc = "exchange access code")
+    })?;
 
     let gh_user = ghapi::get_user(&creds.access_token)
         .await
@@ -580,22 +579,15 @@ async fn main() -> anyhow::Result<()> {
         match e.downcast_ref::<PoolError>() {
             Some(e) => {
                 match e {
-                    PoolError::Timeout(timeout_type) => {
-                        tracing::warn!(
-                            "timeout"
-                        );
+                    PoolError::Timeout(_timeout_type) => {
+                        tracing::warn!("timeout");
                     }
                     PoolError::Backend(backend_error) => {
-                        tracing::warn!(
-                            error = backend_error.to_string(),
-                            "backend"
-                        );
-
+                        tracing::warn!(error = backend_error.to_string(), "backend");
                     }
                     PoolError::Closed => {}
                     PoolError::NoRuntimeSpecified => {}
-                    PoolError::PostCreateHook(x) => {}
-
+                    PoolError::PostCreateHook(_x) => {}
                 }
                 //tracing::warn!(error = x.to_string(), "could downcast, at least");
             }

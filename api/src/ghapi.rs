@@ -1,6 +1,9 @@
 use anyhow::Context;
 use serde::Deserialize;
 
+const TIMEOUT: std::time::Duration = std::time::Duration::from_secs(5);
+const USER_AGENT: &'static str = "reqwest/0.13.1";
+
 /// The json object returned when exchanging the code for an access token, at
 /// https://github.com/login/oauth/access_token
 #[derive(Debug, Deserialize)]
@@ -27,13 +30,97 @@ pub struct AccessTokenResponse {
     pub token_type: String,
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum RequestError {
+    #[error("Error related to the body from https://github.com/login/oauth/access_token")]
+    Body {
+        source: reqwest::Error
+    },
+    #[error("Error related to Builder from https://github.com/login/oauth/access_token")]
+    Builder {
+        source: reqwest::Error
+    },
+    #[error("Could not connect to https://github.com/login/oauth/access_token")]
+    Connect {
+        source: reqwest::Error
+    },
+    #[error("Could not connect to https://github.com/login/oauth/access_token")]
+    Decode {
+        source: reqwest::Error
+    },
+    #[error("Could not decode json body from https://github.com/login/oauth/access_token")]
+    Json {
+        source: reqwest::Error
+    },
+    #[error("Query to https://github.com/login/oauth/access_token returned redirect erroronously")]
+    Redirect {
+        source: reqwest::Error
+    },
+    #[error("Generic error related to the request to https://github.com/login/oauth/access_token")]
+    Request {
+        source: reqwest::Error
+    },
+    #[error("Request to https://github.com/login/oauth/access_token had incorrect status")]
+    Status {
+        source: reqwest::Error
+    },
+    #[error("query to https://github.com/login/oauth/access_token timed out")]
+    Timeout {
+        source: reqwest::Error
+    },
+    #[error("Request to https://github.com/login/oauth/access_token asked us to Upgrade")]
+    Upgrade {
+        source: reqwest::Error
+    },
+}
+
+/*
+impl std::error::Error for RequestError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        use RequestError::*;
+        match self {
+            Body(source) => Some(source),
+            _ => None,
+        }
+    }
+}
+*/
+
+impl From<reqwest::Error> for RequestError {
+    fn from(err: reqwest::Error) -> Self {
+        use RequestError::*;
+        if err.is_body() {
+            Body { source: err }
+        } else if err.is_builder() {
+            Builder { source: err }
+        // only on non-wasm?
+        } else if err.is_connect() {
+            Connect { source: err }
+        } else if err.is_decode() {
+            Decode { source: err }
+        } else if err.is_redirect() {
+            Redirect { source: err }
+        } else if err.is_request() {
+            Request { source: err }
+        } else if err.is_status() {
+            Status { source: err }
+        } else if err.is_timeout() {
+            Timeout { source: err }
+        } else if err.is_upgrade() {
+            Upgrade { source: err }
+        } else {
+            unreachable!("can't be any other error")
+        }
+    }
+}
+
 /// Call github.com/login/oauth/access_token
 /// with our client id, secret, and code, to get an access token in return
 pub async fn exchange_code_for_access_token(
     client_id: &str,
     client_secret: &str,
     code: &str,
-) -> anyhow::Result<AccessTokenResponse> {
+) -> Result<AccessTokenResponse, RequestError> {
     Ok(reqwest::Client::new()
         .post("https://github.com/login/oauth/access_token")
         .header("Accept", "application/json")
@@ -42,13 +129,13 @@ pub async fn exchange_code_for_access_token(
             ("client_secret", client_secret),
             ("code", code),
         ])
-        .timeout(std::time::Duration::from_secs(6))
+        .timeout(TIMEOUT)
         .send()
         .await
-        .with_context(|| "POST to https://github.com/login/oauth/access_token")?
+        .map_err(RequestError::from)?
         .json()
         .await
-        .with_context(|| "decoding json response body")?)
+        .map_err(|e| RequestError::Json { source: e })?)
 }
 
 #[derive(Deserialize)]
@@ -95,34 +182,21 @@ pub struct GhUserResponse {
 }
 
 /// api.github.com/user - get user info, given an access token
-pub async fn get_user(access_token: &str) -> anyhow::Result<GhUserResponse> {
-    let resp = reqwest::Client::new()
+pub async fn get_user(access_token: &str) -> Result<GhUserResponse, RequestError> {
+    Ok(reqwest::Client::new()
         .get("https://api.github.com/user")
-        .header("User-Agent", "reqwest/0.12.3")
+        .header("User-Agent", USER_AGENT)
         .header("Accept", "application/vnd.github+json")
         .header("Authorization", format!("Bearer {}", access_token))
         .header("X-GitHub-Api-Version", "2022-11-28")
-        .timeout(std::time::Duration::from_secs(6))
+        .timeout(TIMEOUT)
         .send()
-        .await?
-        .error_for_status()?;
-
-    let bytes: axum::body::Bytes = resp.bytes().await?;
-
-    let json = match serde_json::from_slice(&bytes) {
-        Ok(json) => json,
-        Err(e) => {
-            let text = match String::from_utf8(bytes.to_vec()) {
-                Ok(text) => text,
-                Err(_) => {
-                    anyhow::bail!("response body bytes from gh api is not a utf-8 string");
-                }
-            };
-            anyhow::bail!("could not decode json: {} - text response is: {}", e, text);
-        }
-    };
-
-    Ok(json)
+        .await
+        .map_err(RequestError::from)?
+        .error_for_status()?
+        .json()
+        .await
+        .map_err(|err| RequestError::Json { source: err })?)
 }
 
 #[derive(Deserialize)]
@@ -149,7 +223,7 @@ pub async fn user_in_team(
     );
     let response = reqwest::Client::new()
         .get(&url)
-        .header("User-Agent", "reqwest/0.12.3")
+        .header("User-Agent", USER_AGENT)
         .header("Accept", "application/vnd.github+json")
         .header("Authorization", format!("Bearer {}", iat))
         .header("X-GitHub-Api-Version", "2022-11-28")
@@ -212,7 +286,7 @@ pub struct RefreshAccessTokenResponseBody {
 //) -> anyhow::Result<RefreshAccessTokenResponseBody> {
 //    Ok(reqwest::Client::new()
 //        .post("https://github.com/login/oauth/access_token")
-//        .header("User-Agent", "reqwest/0.12.3")
+//        .header("User-Agent", USER_AGENT)
 //        .header("Accept", "application/vnd.github+json")
 //        .header("X-GitHub-Api-Version", "2022-11-28")
 //        .json(&serde_json::json!({
@@ -250,17 +324,18 @@ pub struct IatResponseBody {
 pub async fn get_app_installation_access_token(
     installation_id: u32,
     jwt: &str,
-) -> anyhow::Result<IatResponseBody> {
+) -> Result<IatResponseBody, RequestError> {
     let url = format!("https://api.github.com/app/installations/{installation_id}/access_tokens");
     Ok(reqwest::Client::new()
         .post(&url)
-        .header("User-Agent", "reqwest/0.12.3")
+        .header("User-Agent", USER_AGENT)
         .header("Accept", "application/vnd.github+json")
         .header("X-GitHub-Api-Version", "2022-11-28")
         .header("Authorization", format!("Bearer {jwt}"))
         .send()
         .await
-        .with_context(|| format!("POST to {url}"))?
+        .map_err(|err| RequestError::from(err))?
         .json()
-        .await?)
+        .await
+        .map_err(|err| RequestError::Json { source: err })?)
 }

@@ -38,7 +38,10 @@ impl ConnectionPool {
                 tokio_postgres::NoTls,
             )
             .unwrap();
-        Self { pool, config: config.pg }
+        Self {
+            pool,
+            config: config.pg,
+        }
     }
 
     pub async fn get(&self) -> Result<deadpool_postgres::Object, anyhow::Error> {

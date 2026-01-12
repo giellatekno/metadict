@@ -13,7 +13,7 @@ where
 {
     type Rejection = core::convert::Infallible;
 
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         let Some(cookies) = parts.headers.get(COOKIE) else {
             return Ok(Self::default());
         };
