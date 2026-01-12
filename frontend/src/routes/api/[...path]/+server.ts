@@ -1,9 +1,7 @@
-import type { RequestHandler } from './$types';
+import type { RequestHandler } from "./$types";
 import { PUBLIC_API_ENDPOINT } from "$env/static/public";
-import { base, resolve } from "$app/paths";
-import { redirect } from '@sveltejs/kit';
 
-export const GET: RequestHandler = async ({ cookies, request, url, fetch }) => {
+export const GET: RequestHandler = async ({ params, request, url, fetch }) => {
     const pathname = url.pathname;
 
     const api_url = new URL(PUBLIC_API_ENDPOINT);
@@ -12,7 +10,7 @@ export const GET: RequestHandler = async ({ cookies, request, url, fetch }) => {
     // Strip the leading BASE/api from the pathname before we send the query to the API
     // note: the "base" variable (from "$app/paths") is deprecated (for some mystical
     // reason..), hence the warning. It is impossible to silence it.
-    api_url.pathname = strip_prefix(`${base}/api`, url.pathname);
+    api_url.pathname = `/${params.path}`;
 
     const headers = new Headers(request.headers);
     //headers.set("host", env.PUBLIC_API_ENDPOINT);
@@ -21,8 +19,8 @@ export const GET: RequestHandler = async ({ cookies, request, url, fetch }) => {
     if (cookie !== null) {
         headers.set("Cookie", cookie);
     }
-    
-    const client_ip = request.headers.get("x-forwarded-for");// || event.getClientAddress();
+
+    const client_ip = request.headers.get("x-forwarded-for"); // || event.getClientAddress();
     if (client_ip) {
         headers.set("x-forwarded-for", client_ip);
     }
@@ -40,8 +38,3 @@ export const GET: RequestHandler = async ({ cookies, request, url, fetch }) => {
 
     return response;
 };
-
-function strip_prefix(prefix: string, str: string): string {
-    console.assert(str.startsWith(prefix));
-    return str.slice(prefix.length);
-}

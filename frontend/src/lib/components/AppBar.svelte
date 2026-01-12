@@ -5,6 +5,7 @@
     import { m } from "$lib/paraglide/messages.js";
     import { resolve } from "$app/paths";
     import { Info } from "lucide-svelte";
+    import LightSwitch from "./LightSwitch.svelte";
 
     interface Props {
         user?: {
@@ -27,6 +28,7 @@
         </AppBar.Headline>
         <AppBar.Trail>
             <div class="flex items-center gap-10">
+                <LightSwitch />
                 <SelectLocale />
 
                 <a

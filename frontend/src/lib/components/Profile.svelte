@@ -1,28 +1,24 @@
 <script lang="ts">
     import { resolve } from "$app/paths";
-    import { m } from "$lib/paraglide/messages";
+    import { m } from "$lib/paraglide/messages";
+    import type { User } from "$lib/utils";
     import { Popover, Portal } from "@skeletonlabs/skeleton-svelte";
     import { Avatar } from "@skeletonlabs/skeleton-svelte";
-    import LightSwitch from "./LightSwitch.svelte";
     import { BadgeCheck } from "lucide-svelte";
 
     interface Props {
-        user: {
-            gh_avatar_url: string;
-            gh_fullname: string;
-            restricted_dicts: boolean;
-        };
+        user: User;
     }
 
     let { user }: Props = $props();
 
     // Turns John Doe into JD
     let fallbackname = $derived(
-        user.gh_fullname
+        (user.gh_fullname || user.gh_login_name)
             .split(" ")
             .map((word) => word.charAt(0))
             .join("")
-            .toUpperCase()
+            .toUpperCase(),
     );
 </script>
 
@@ -32,7 +28,9 @@
             <Avatar.Image src={user.gh_avatar_url} />
             <Avatar.Fallback>{fallbackname}</Avatar.Fallback>
         </Avatar>
-        <div class="flex w-30">{user.gh_fullname}</div>
+        <div class="flex w-30">
+            {user.gh_fullname || user.gh_login_name}
+        </div>
     </Popover.Trigger>
     <Portal>
         <Popover.Positioner>
@@ -52,13 +50,6 @@
                             <!--     > -->
                             <hr class="hr" />
                         {/if}
-                        <div class="flex flex-row gap-2 justify-start">
-                            <span>
-                                {m.dark_mode()}
-                            </span>
-                            <LightSwitch />
-                        </div>
-                        <hr class="hr" />
                         <span>
                             <a
                                 href={resolve("/auth/logout")}

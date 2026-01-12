@@ -1,8 +1,4 @@
-// The Intl API is not very consistent between browsers, browser versions,
-// browser editions (mobile vs non-mobile browser).. and maybe OS, and all of
-// this - hence.....
-
-const LANGNAMES = {
+const LANGNAMES: Record<string, Record<string, string>> = {
     chp: { eng: "Denesuline", nob: "Denesuline", sme: "Denesuline" },
     chr: { eng: "Cherokee", nob: "Cherokesisk", sme: "Cherokee" },
     deu: { eng: "German", nob: "Tysk", sme: "Duiskkagiella" },
@@ -66,7 +62,7 @@ const LANGNAMES = {
     yrk: { eng: "Nenets", nob: "Nenetsisk", sme: "Nenetsagiella" },
 };
 
-function get_our(of, in_) {
+function get_our(of: string, in_: string) {
     const lang = LANGNAMES[of];
     if (lang === undefined) {
         console.warn(
@@ -84,7 +80,7 @@ function get_our(of, in_) {
     return our;
 }
 
-export function langname(of, in_) {
+export function langname(of: string, in_: string) {
     if (typeof of !== "string") {
         const msg = `langname(): argument 'of': must be a string, not ${typeof of}`;
         throw new TypeError(msg);
@@ -96,10 +92,8 @@ export function langname(of, in_) {
 
     let result = get_our(of, in_);
     if (!result) {
-        result = new Intl.DisplayNames([in_], { type: "language" }).of(of);
-        if (result === of) {
-            console.warn(`Browser doesn't know how to say ${of} in ${in_}`);
-        }
+        result = of;
+        console.warn(`Browser doesn't know how to say ${of} in ${in_}`);
     }
 
     // replace normal spaces with non-breaking space to
