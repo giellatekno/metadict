@@ -12,14 +12,21 @@
 
     let { user }: Props = $props();
 
+    let fallbackname = $derived.by(() => {
+        if (user.gh_fullname) {
+            return capitalize_name(user.gh_fullname);
+        } else {
+            return user.gh_login_name;
+        }
+    });
+
     // Turns John Doe into JD
-    let fallbackname = $derived(
-        (user.gh_fullname || user.gh_login_name)
-            .split(" ")
+    function capitalize_name(name: string): string {
+        return name.split(" ")
             .map((word) => word.charAt(0))
             .join("")
-            .toUpperCase(),
-    );
+            .toUpperCase();
+    }
 </script>
 
 <Popover>
@@ -28,9 +35,7 @@
             <Avatar.Image src={user.gh_avatar_url} />
             <Avatar.Fallback>{fallbackname}</Avatar.Fallback>
         </Avatar>
-        <div class="flex w-30">
-            {user.gh_fullname || user.gh_login_name}
-        </div>
+        <div class="flex w-30">{user.gh_fullname || user.gh_login_name}</div>
     </Popover.Trigger>
     <Portal>
         <Popover.Positioner>
