@@ -1,0 +1,19 @@
+default:
+    @just --list
+
+# run dev server, assumes DB is on port 1400, and frontend is localhost:5173
+dev:
+    FRONTEND=http://localhost:5173 RUST_BACKTRACE=1 PG__HOST=localhost PG__PORT=1400 PG__PASSWORD=mysecretpassword systemfd --no-pid -s http::3000 -- cargo watch -x run
+
+# cargo build --target-dir target/ --release
+build:
+    cargo build --target-dir target/ --release
+
+# podman build -t metadict-api -f Containerfile .
+image:
+    podman build -t metadict-api -f Containerfile .
+
+# tag image as gtlabcontainerregistry.azurecr.io/metadict-api and push it
+push-labacr:
+	podman tag metadict-api gtlabcontainerregistry.azurecr.io/metadict-api
+	podman push gtlabcontainerregistry.azurecr.io/metadict-api

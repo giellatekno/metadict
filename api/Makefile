@@ -30,11 +30,11 @@ build-dev:
 
 .PHONY: image
 image: target/release/metadict-api
-	podman build -t metadict-api -f Dockerfile .
+	podman build -t metadict-api -f Containerfile .
 
 .PHONY: image-dev
 image-dev:
-	podman build -t metadict-api -f Dockerfile.dev .
+	podman build -t metadict-api -f Containerfile.dev .
 
 .PHONY: runlocal
 runlocal:
@@ -61,7 +61,7 @@ push-labacr:
 .PHONY: bap
 bap:
 	cargo build --target-dir target/ --release
-	podman build -t metadict-api -f Dockerfile .
+	podman build -t metadict-api -f Containerfile .
 	podman tag metadict-api gtlabcontainerregistry.azurecr.io/metadict-api
 	podman push gtlabcontainerregistry.azurecr.io/metadict-api
 
