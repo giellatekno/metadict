@@ -45,7 +45,7 @@ impl ConnectionPool {
         self.pool.get().await.map_err(|e| {
             let port = self.config.port.unwrap();
             let host: String = self.config.host.as_ref().unwrap().clone();
-            let connection_info = format!("host={host}:{port}");
+            let connection_info = format!("api: can't connect to db at host={host}:{port}");
             anyhow!(e).context(connection_info)
         })
     }

@@ -321,10 +321,13 @@ async fn handler_search(
         return Ok(response);
     }
 
+    tracing::trace!("retreiving connection to db from connection pool...");
     let connection = connpool.get().await?;
+    tracing::trace!("finding lemmas...");
     let rows = crate::db::find_lemmas(connection, &lang, &query, can_see_closed).await?;
     let response_body = Json(json!(rows));
     let response = (headers, response_body).into_response();
+    tracing::trace!("handler_search(): returning response");
     Ok(response)
 }
 
