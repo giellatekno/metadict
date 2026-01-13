@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { m } from "$lib/paraglide/messages";
+    import { m } from "$lib/paraglide/messages";
     import type { PageProps } from "./$types";
 
     let { data }: PageProps = $props();
@@ -8,15 +8,15 @@
     let dictionary = $derived(data.dictionary);
 </script>
 
-<div class="grid grid-cols-5 gap-20 w-full">
+<div class="grid w-full grid-cols-5 gap-20">
     <div
-        class="card col-span-3 py-2 px-2 w-full h-fit bg-surface-100-900 border border-surface-200-800"
+        class="card bg-surface-100-900 border-surface-200-800 col-span-3 h-fit w-full border px-2 py-2"
     >
         {#if neighbors && neighbors.length > 1}
             {#each neighbors as neighbor}
                 {#if neighbor === rendered}
                     <div
-                        class="px-2 py-3 text-xl border-y-2 border-primary-400-600"
+                        class="border-primary-400-600 border-y-2 px-2 py-3 text-xl"
                     >
                         {@html neighbor}
                     </div>
@@ -35,9 +35,9 @@
 
     {#if dictionary}
         <div
-            class="card col-span-2 p-5 h-fit space-y-2 bg-surface-100-900 border border-surface-200-800"
+            class="card bg-surface-100-900 border-surface-200-800 col-span-2 h-fit space-y-2 border p-5"
         >
-            <h3 class="h4 font-medium text-surface-950-50">{dictionary[0]}</h3>
+            <h3 class="h4 text-surface-950-50 font-medium">{dictionary[0]}</h3>
             <hr class="hr" />
             {#if dictionary[1]}
                 <div>

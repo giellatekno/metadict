@@ -1,36 +1,58 @@
 <script lang="ts">
-    import { getLocale, setLocale } from "$lib/paraglide/runtime";
+    import { getLocale, setLocale, locales } from "$lib/paraglide/runtime";
     import { Popover, Portal } from "@skeletonlabs/skeleton-svelte";
     import { langname } from "$lib/langname";
     import { LanguagesIcon } from "lucide-svelte";
+    import sme_flag from "$assets/flags/sme.svg";
+    import nob_flag from "$assets/flags/nob.svg";
+    import fin_flag from "$assets/flags/fin.svg";
+    import eng_flag from "$assets/flags/eng.svg";
+    import rus_flag from "$assets/flags/rus.svg";
+    import { m } from "$lib/paraglide/messages";
 
-    const locales = ["nob", "eng", "sme"] as const;
+    let flag_icons: Record<string, string> = {
+        sme: sme_flag,
+        nob: nob_flag,
+        fin: fin_flag,
+        eng: eng_flag,
+        rus: rus_flag,
+    };
 </script>
 
 <Popover>
     <Popover.Trigger class="btn preset-filled-primary-400-600">
         <LanguagesIcon />
-        <span>{langname(getLocale(), getLocale())}</span>
+        <span>{m.interface_language()}</span>
     </Popover.Trigger>
     <Portal>
         <Popover.Positioner>
             <Popover.Content
-                class="card p-4 w-fit shadow-xl preset-filled-tertiary-100-900 border border-tertiary-200-800"
+                class="card preset-filled-primary-50-950 w-fit p-4 shadow-xl"
             >
                 <Popover.Description>
                     <ul class="w-full">
                         {#each locales as iso}
                             <li>
                                 <button
-                                    class="btn hover:preset-filled-tertiary-400-600 w-full justify-start"
+                                    class="btn hover:preset-tonal w-full justify-start"
                                     onclick={() => setLocale(iso)}
                                 >
+                                    <img
+                                        src={flag_icons[iso]}
+                                        alt={iso + " flag"}
+                                        class="w-8 shadow-md"
+                                    />
                                     {langname(iso, iso)}
                                 </button>
                             </li>
                         {/each}
                     </ul>
                 </Popover.Description>
+                <Popover.Arrow
+                    class="[--arrow-background:var(--color-primary-100-900)] [--arrow-size:--spacing(2)]"
+                >
+                    <Popover.ArrowTip />
+                </Popover.Arrow>
             </Popover.Content>
         </Popover.Positioner>
     </Portal>

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getLocale } from "$lib/paraglide/runtime.js";
-    import { m } from "$lib/paraglide/messages.js";
+    import { m } from "$lib/paraglide/messages.js";
     import { langname } from "$lib/langname";
     import { onMount } from "svelte";
     import { SearchIcon } from "lucide-svelte";
@@ -16,7 +16,7 @@
 
     let search_input: HTMLInputElement;
 
-    const extra_letters: { [id: string]: Array<string> } = {
+    const extra_letters: Record<string, string[]> = {
         sme: ["á", "č", "đ", "ŋ", "š", "ŧ", "ž"],
         fin: ["ä", "ö", "å"],
         nob: ["æ", "ø", "å"],

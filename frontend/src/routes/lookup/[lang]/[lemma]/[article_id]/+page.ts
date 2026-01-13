@@ -1,9 +1,9 @@
-import type { Load } from "@sveltejs/kit";
-import { error } from '@sveltejs/kit';
+import { error } from "@sveltejs/kit";
 import { await_or_error } from "$lib/await_or_error";
-import { resolve } from "$app/paths";
+import { resolve } from "$app/paths";
+import type { PageLoad } from "./$types";
 
-export const load: Load = async ({ params, fetch }) => {
+export const load: PageLoad = async ({ params, fetch }) => {
     let { article_id } = params;
 
     const urls = [
@@ -28,11 +28,11 @@ export const load: Load = async ({ params, fetch }) => {
         }
     }
 
-    const [ articles, neighbors, dictionary ] = jsons;
+    const [articles, neighbors, dictionary] = jsons;
 
     return {
         rendered: articles[0], // only one article is returned
         neighbors,
         dictionary: dictionary[0], // only one dictionary entry is returned
     };
-}
+};

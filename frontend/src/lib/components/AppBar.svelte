@@ -6,13 +6,10 @@
     import { resolve } from "$app/paths";
     import { Info } from "lucide-svelte";
     import LightSwitch from "./LightSwitch.svelte";
+    import type { User } from "$lib/utils";
 
     interface Props {
-        user?: {
-            gh_avatar_url: string;
-            gh_fullname: string;
-            restricted_dicts: boolean;
-        };
+        user?: User;
         redirect_uri: string;
     }
 
@@ -22,9 +19,9 @@
 <AppBar>
     <AppBar.Toolbar class="grid-cols-[auto_auto] ">
         <AppBar.Headline>
-            <a class="text-4xl font-medium" href={resolve("/")}
-                >{m.page_title()}</a
-            >
+            <a class="text-4xl font-medium" href={resolve("/")}>
+                {m.page_title()}
+            </a>
         </AppBar.Headline>
         <AppBar.Trail>
             <div class="flex items-center gap-10">
@@ -42,7 +39,7 @@
                     <Profile {user}></Profile>
                 {:else}
                     <a
-                        class="btn btn-large preset-filled-primary-500"
+                        class="btn preset-filled-primary-400-600"
                         href="https://github.com/login/oauth/authorize?scope=read:user%20read:repo&client_id=Iv1.f208b6793cca35ec&redirect_uri={redirect_uri}"
                     >
                         {m.login()}

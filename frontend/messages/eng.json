@@ -1,28 +1,39 @@
 {
+    "$schema": "https://inlang.com/schema/inlang-message-format",
     "page_title": "Giellatekno Metadictionary",
     "interface_language": "Interface language",
     "login": "Log in with Github",
     "logout": "Log out",
     "dictionary_form": "Dictionary form",
     "access": "Giellatekno employee",
-    "search_result": [{
-        "declarations": ["input count", "local countPlural = count: plural"],
-        "selectors": ["countPlural"],
-        "match": {
-            "countPlural=zero": "Found no lemmas throughout all dictionaries that matched the search.",
-            "countPlural=one": "Found one lemma throughout all dictionaries that matched the search.",
-            "countPlural=other": "Found {count} lemmas throughout all dictionaries that matched the search."
+    "search_result": [
+        {
+            "declarations": [
+                "input count",
+                "local countPlural = count: plural"
+            ],
+            "selectors": ["countPlural"],
+            "match": {
+                "countPlural=zero": "Found no lemmas throughout all dictionaries that matched the search.",
+                "countPlural=one": "Found one lemma throughout all dictionaries that matched the search.",
+                "countPlural=other": "Found {count} lemmas throughout all dictionaries that matched the search."
+            }
         }
-    }],
-    "lookup_result": [{
-        "declarations": ["input count", "local countPlural = count: plural"],
-        "selectors": ["countPlural"],
-        "match": {
-            "countPlural=zero": "The lemma \"{lemma}\" was not found in any dictionaries.",
-            "countPlural=one": "The lemma \"{lemma}\" was found in one dictionary.",
-            "countPlural=other": "The lemma \"{lemma}\" was found in {count} dictionaries."
+    ],
+    "lookup_result": [
+        {
+            "declarations": [
+                "input count",
+                "local countPlural = count: plural"
+            ],
+            "selectors": ["countPlural"],
+            "match": {
+                "countPlural=zero": "The lemma \"{lemma}\" was not found in any dictionaries.",
+                "countPlural=one": "The lemma \"{lemma}\" was found in one dictionary.",
+                "countPlural=other": "The lemma \"{lemma}\" was found in {count} dictionaries."
+            }
         }
-    }],
+    ],
     "search_language": "Search language",
     "search_placeholder": "Search for words in dictionary form...",
     "about_dictionary": "About this dictionary",
@@ -40,5 +51,7 @@
     "historical_dictionaries": "Historical dictionaries",
     "search_ordbokene": "Search for \"{lemma}\" in ordbokene.no",
     "search_davvigirji": "Search for \"{lemma}\" in Davvi Girji's webpage",
-    "dark_mode": "Dark mode"
+    "dark_mode": "Dark mode",
+    "copyright": "Copyright © Centre for Sámi language technology",
+    "feedback": "Send feedback about the webpage to:"
 }

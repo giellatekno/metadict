@@ -8,6 +8,7 @@
     import Searchbar from "$lib/components/Searchbar.svelte";
     import AppBar from "$lib/components/AppBar.svelte";
     import type { User } from "$lib/utils";
+    import Footer from "$lib/components/Footer.svelte";
 
     let { children } = $props();
     let search_lang = $state("sme");
@@ -25,11 +26,18 @@
     }
 </script>
 
-<svelte:head><title>{m.page_title()}</title></svelte:head>
-<AppBar {user} {redirect_uri} />
+<svelte:head>
+    <title>{m.page_title()}</title>
+</svelte:head>
 
-<div class="p-6">
-    <Searchbar {on_new_value} bind:search_lang />
-    <hr class="hr my-6" />
-    {@render children?.()}
+<div class="app flex h-full min-h-screen flex-col">
+    <AppBar {user} {redirect_uri} />
+
+    <div class="flex h-fit flex-1 flex-col items-center p-6 pb-16">
+        <Searchbar {on_new_value} bind:search_lang />
+        <hr class="hr my-6" />
+        {@render children?.()}
+    </div>
+
+    <Footer />
 </div>
