@@ -18,8 +18,9 @@ into a live database. Refer to that script for further information.
 
 import gzip
 from pathlib import Path
-from utils.utils import articles_to_sql, dictionary_to_sql
+
 from classes import *
+from utils.utils import articles_to_sql, dictionary_to_sql
 
 parsers = {
     "gt": GTParser,
@@ -36,6 +37,7 @@ parsers = {
     "skoleordbok": SkoleordbokParser,
     "apotekordliste": ApotekordlisteParser,
     "medisinsk": MedisinskParser,
+    "gaerjiste": GaerjisteParser,
 }
 
 
@@ -43,9 +45,15 @@ def parse_dictionary(file: Path, dictionary_id):
     try:
         parser = parsers[file.stem.split("-")[0]](dictionary_id, file)
     except KeyError:
-        raise Exception("\033[93m" + f"Parsing of dictionary \"{file.stem}\" not implemented" + "\033[0m")
+        raise Exception(
+            "\033[93m"
+            + f'Parsing of dictionary "{file.stem}" not implemented'
+            + "\033[0m"
+        )
     except Exception as e:
-        raise Exception("\033[91m" + f"Error parsing dictionary \"{file.stem}\": {e}" + "\033[0m")
+        raise Exception(
+            "\033[91m" + f'Error parsing dictionary "{file.stem}": {e}' + "\033[0m"
+        )
     return parser.get_parsed_data()
 
 
@@ -61,8 +69,8 @@ def main():
     dicts_dir = Path("dicts")
 
     dictionary_id = 1
-    
-    for file in dicts_dir.iterdir():        
+
+    for file in dicts_dir.iterdir():
         print(f"Parsing {file}")
         try:
             d, a = parse_dictionary(file, dictionary_id)
@@ -74,13 +82,12 @@ def main():
         articles_to_sql(a, file.stem)
 
         # dictionaries.append(d)
-        # articles.extend(a)    
+        # articles.extend(a)
         dictionary_id += 1
 
     # lines = "\n".join(d.to_tsv_string() for d in dictionaries)
     # with gzip.open(Path(target) / "data_dictionaries.txt.gz", "wb") as f:
     #     f.write(lines.encode())
-    
 
     # article_lines = "\n".join(d.to_tsv_string() for d in articles)
     # with gzip.open(Path(target) / "data_articles.txt.gz", "wb") as f:
