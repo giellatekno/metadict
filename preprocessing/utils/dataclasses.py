@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from dataclasses import dataclass, fields
+from textwrap import dedent
+
 
 def pyobj_to_psql_data(obj):
     if obj is None:
@@ -23,6 +25,19 @@ def dataclass_to_tsv_string(dcls_inst):
     return "\t".join(strings)
 
 
+def to_sqlval(val):
+    if val is None:
+        return "NULL"
+    elif isinstance(val, str):
+        # single quotes are escaped in SQL text by doubling them
+        return "'" + val.replace("'", "''") + "'"
+    elif isinstance(val, int):
+        return str(val)
+    else:
+        # otherwise, quote the stringify item
+        return "'" + str(val) + "'"
+
+
 @dataclass
 class Dictionary:
     id: int
@@ -39,6 +54,31 @@ class Dictionary:
     def to_tsv_string(self):
         return dataclass_to_tsv_string(self)
 
+    def to_sql(self):
+        return dedent(f"""
+            INSERT INTO
+            dictionaries (
+                name,
+                lang1,
+                lang2,
+                closed,
+                is_ordered,
+                author,
+                date_published,
+                isbn,
+                source
+            ) VALUES (
+                {to_sqlval(self.name)},
+                {to_sqlval(self.lang1)},
+                {to_sqlval(self.lang2)},
+                {to_sqlval(self.closed)},
+                {to_sqlval(self.is_ordered)},
+                {to_sqlval(self.author)},
+                {to_sqlval(self.date_published)},
+                {to_sqlval(self.isbn)},
+                {to_sqlval(self.source)}
+            ) RETURNING id;""")
+
 
 @dataclass
 class Article:
@@ -54,3 +94,15 @@ class Article:
     def to_tsv_string(self):
         return dataclass_to_tsv_string(self)
 
+    def to_sql(self):
+        # The $DICTIONARY$ will be replaced later
+        return dedent(f"""
+            (
+                {to_sqlval(self.lemma)},
+                $DICTIONARY$,
+                {to_sqlval(self.rendered)},
+                {to_sqlval(self.pos)},
+                {to_sqlval(self.lang)},
+                {to_sqlval(self.article_number)},
+                {to_sqlval(self.additional_properties)}
+            )""")

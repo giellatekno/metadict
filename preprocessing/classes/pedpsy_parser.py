@@ -1,9 +1,9 @@
 from utils.dataclasses import Dictionary, Article
 import re
 
+
 class PedPsyParser:
     def __init__(self, dictionary_id, file):
-
         self.dictionary = Dictionary(
             id=dictionary_id,
             name="Pedagogalaš-psykologalaš sátnegirji",
@@ -26,34 +26,33 @@ class PedPsyParser:
 
     def parse_dict(self, file):
         articles = []
-        
+
         with open(file, "r") as f:
             lines = f.readlines()
 
         for i, line in enumerate(lines, 1):
             if line.find("|") != -1:
-                lemma = line.split("|")[0]                
+                lemma = line.split("|")[0]
             else:
                 lemma = line.split("(")[0]
 
             lemma = lemma.replace("1", "").replace("2", "").replace("3", "").strip()
 
             rendered = self.to_html(line.strip(), lemma)
-          
+
             a = Article(
                 dictionary=self.dictionary.id,
                 lemma=lemma,
                 rendered=rendered,
                 lang=self.dictionary.lang1,
-                article_number=i
+                article_number=i,
             )
 
-            articles.append(a)   
-        
+            articles.append(a)
+
         return articles
-    
+
     def to_html(self, line: str, lemma):
-        
         html = line.replace(lemma, f"<b>{lemma}</b>", 1)
 
         gradation = self.gradation_pattern.findall(line)
@@ -64,4 +63,3 @@ class PedPsyParser:
             html = html.replace("omd.:", "omd.:<i>") + "</i>"
 
         return f"<p>{html}</p>"
-

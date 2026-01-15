@@ -2,9 +2,9 @@ from xml.etree import ElementTree as ET
 from utils.dataclasses import Dictionary, Article
 from utils.utils import sort_by_sami_alphabet
 
+
 class GTSmeParser:
     def __init__(self, dictionary_id, file):
-        
         self.dictionary = Dictionary(
             id=dictionary_id,
             name="Neahttadigisánit",
@@ -23,13 +23,12 @@ class GTSmeParser:
         xml = ET.parse(file)
 
         for e in xml.iter("e"):
-            
             l_node = e.find("lg/l")
 
             if l_node is None:
                 # print("<e> node has no <lg><l>")
                 continue
-            
+
             lemma = l_node.text.strip("\n\t ").replace("\n", " ")
 
             if e.find("mg/dg") == None:
@@ -48,7 +47,7 @@ class GTSmeParser:
                 lemma=lemma,
                 rendered=rendered,
                 lang=self.dictionary.lang1,
-                pos=pos
+                pos=pos,
             )
 
             articles.append(a)
@@ -59,7 +58,7 @@ class GTSmeParser:
             article.article_number = i
 
         return articles
-    
+
     def clean_text(self, text: str):
         return text.strip().replace("\n", "").replace("\t", " ")
 
@@ -70,15 +69,22 @@ class GTSmeParser:
         # Iterate meaning groups
         mgs = e_node.findall("mg")
         for mg in mgs:
-
             # Find and add all definitions
-            ds = [self.clean_text(d.text) for d in mg.findall("dg/d") if d.text and d.text.strip()]
+            ds = [
+                self.clean_text(d.text)
+                for d in mg.findall("dg/d")
+                if d.text and d.text.strip()
+            ]
             if ds:
                 html += "; ".join(ds) + "<br/>"
 
             # Find and add all example sentences
-            xs = [self.clean_text(x.text)for x in mg.findall("xg/x") if x.text] 
-            tgxs = [self.clean_text(x.text) for x in mg.findall("tg/xg/x") if x.text and self.clean_text(x.text) not in xs]
+            xs = [self.clean_text(x.text) for x in mg.findall("xg/x") if x.text]
+            tgxs = [
+                self.clean_text(x.text)
+                for x in mg.findall("tg/xg/x")
+                if x.text and self.clean_text(x.text) not in xs
+            ]
             if xs or tgxs:
                 for x in xs:
                     html += f"<i>{x}</i>" + "<br/>"
@@ -94,4 +100,3 @@ class GTSmeParser:
         # if lemma == "fierbmi":
         #     print(html)
         return f"<p>{html}</p>"
-

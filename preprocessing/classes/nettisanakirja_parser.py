@@ -1,9 +1,9 @@
 from utils.dataclasses import Dictionary, Article
 import re
 
+
 class NettisanakirjaParser:
     def __init__(self, dictionary_id, file):
-
         self.dictionary = Dictionary(
             id=dictionary_id,
             name="Nettisanakirja",
@@ -12,7 +12,7 @@ class NettisanakirjaParser:
             closed=False,
             is_ordered=True,
             author="Jouni A. Vest",
-            date_published="2024"
+            date_published="2024",
         )
 
         self.articles = self.parse_dict(file)
@@ -22,7 +22,7 @@ class NettisanakirjaParser:
 
     def parse_dict(self, file):
         articles = []
-        
+
         with open(file, "r") as f:
             for i, line in enumerate(f.readlines(), 1):
                 m = re.search(r"\$>[^<]+<\$", line)
@@ -38,11 +38,10 @@ class NettisanakirjaParser:
                     lemma=lemma,
                     rendered=rendered,
                     lang=self.dictionary.lang1,
-                    article_number=i
+                    article_number=i,
                 )
 
                 articles.append(a)
-
 
         return articles
 

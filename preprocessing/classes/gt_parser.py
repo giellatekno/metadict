@@ -37,7 +37,6 @@ class GTParser:
         xml = ET.parse(file)
 
         for e in xml.iter("e"):
-
             l_node = e.find("lg/l")
             if l_node is None:
                 # print("<e> node has no <lg><l>")
@@ -75,7 +74,6 @@ class GTParser:
         # Make each meaning group a list element
         mgs = e_node.findall("mg")
         for mg in mgs:
-
             # Find all translations
             tgs = mg.findall("tg")
             for tg in tgs:
@@ -94,7 +92,7 @@ class GTParser:
                     "; ".join(
                         [
                             (
-                                f'{self.clean_text(t.text)} ({t.get("pos")})'
+                                f"{self.clean_text(t.text)} ({t.get('pos')})"
                                 if t.get("pos")
                                 else f"{self.clean_text(t.text)}"
                             )

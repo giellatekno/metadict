@@ -1,10 +1,10 @@
+import csv
+
 from utils.dataclasses import Dictionary, Article
-import re
-import pandas as pd
+
 
 class KonradParser:
     def __init__(self, dictionary_id, file):
-
         self.dictionary = Dictionary(
             id=dictionary_id,
             name="Lappisk ordbok",
@@ -12,7 +12,7 @@ class KonradParser:
             lang2="eng",
             is_ordered=True,
             author="Konrad Nielsen",
-            date_published="1932–1938"
+            date_published="1932–1938",
         )
 
         self.articles = self.parse_dict(file)
@@ -22,32 +22,34 @@ class KonradParser:
 
     def parse_dict(self, file):
         articles = []
-        
-        df = pd.read_csv(file, sep=",", header=None)
 
-        for i, row in df.iterrows():
-            lemma = row[1]
-            rendered = self.to_html(row[0], row[2], row[3], row[4])
+        with open(file, newline="") as fp:
+            fieldnames = ["old_lemma", "lemma", "eng", "fin", "deu"]
+            reader = csv.DictReader(fp, fieldnames=fieldnames)
 
-            a = Article(
-                lemma=lemma,
-                dictionary=self.dictionary.id,
-                rendered=rendered,
-                lang=self.dictionary.lang1,
-                article_number=i,
-            )
-            articles.append(a)
+            for i, row in enumerate(reader, start=1):
+                rendered = self.to_html(
+                    row["old_lemma"], row["eng"], row["fin"], row["deu"])
+
+                a = Article(
+                    lemma=row["lemma"],
+                    dictionary=self.dictionary.id,
+                    rendered=rendered,
+                    lang=self.dictionary.lang1,
+                    article_number=i,
+                )
+                articles.append(a)
 
         return articles
 
-    def to_html(self, lemma, eng, fin, deu):
-        html = f"<p><b>{lemma}</b>"
+    def to_html(self, old_lemma, eng, fin, deu):
+        html = f"<p><b>{old_lemma}</b>"
 
-        if not pd.isna(eng):
+        if eng:
             html += f"<br>Eng: {eng}"
-        if not pd.isna(fin):
+        if fin:
             html += f"<br>Fin: {fin}"
-        if not pd.isna(deu):
+        if deu:
             html += f"<br>Deu: {deu}"
 
         html += "</p>"

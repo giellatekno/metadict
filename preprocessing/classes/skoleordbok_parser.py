@@ -1,5 +1,6 @@
+import csv
+
 from utils.dataclasses import Dictionary, Article
-import pandas as pd
 
 
 class SkoleordbokParser:
@@ -17,34 +18,32 @@ class SkoleordbokParser:
         )
         self.articles = self.parse_dict(file)
 
-    
     def get_parsed_data(self):
         return self.dictionary, self.articles
-    
+
     def parse_dict(self, file):
         articles = []
 
-        df = pd.read_csv(file, sep=",", header=0, na_filter=False)
+        with open(file, newline="") as fp:
+            reader = csv.DictReader(fp)
 
-        for index, row in df.iterrows():
-            lemma = row["lemma"]
-            if type(lemma) == float:
-                print(row)
-            pos = row["pos"]
-            translation = row["translation"]
-            rendered = self.to_html(lemma, pos, translation)
+            for index, row in enumerate(reader, start=1):
+                lemma = row["lemma"]
+                pos = row["pos"]
+                translation = row["translation"]
+                rendered = self.to_html(lemma, pos, translation)
 
-            a = Article(
-                dictionary=self.dictionary.id,
-                lemma=lemma,
-                pos=pos,
-                rendered=rendered,
-                lang=self.dictionary.lang1,
-                article_number=index
-            )
-            articles.append(a)
+                a = Article(
+                    dictionary=self.dictionary.id,
+                    lemma=lemma,
+                    pos=pos,
+                    rendered=rendered,
+                    lang=self.dictionary.lang1,
+                    article_number=index,
+                )
+                articles.append(a)
 
         return articles
-        
+
     def to_html(self, lemma, pos, translation):
         return f"<p><b>{lemma}</b> <i>{pos}</i> {translation}</p>"

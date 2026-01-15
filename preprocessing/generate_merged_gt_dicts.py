@@ -36,17 +36,14 @@ def main():
     for directory in p.glob("dict-*"):
         # strip away the "dict-" prefix
         name = directory.name[5:]
-        if len(name) != 7:
-            # skip ...-x-private  and other such dicts
-            continue
-        l1, l2 = name.split("-")
-
         if name not in WANTED_DICTS:
             continue
 
+        l1, l2 = name.split("-")
+
         output_filename = f"dicts/gt-{l1}-{l2}.xml"
         try:
-            n_entries = merge_giella_dicts(directory / "src", output_filename)
+            merge_giella_dicts(directory / "src", output_filename)
         except FileNotFoundError:
             print(f"no src files in dict {l1}-{l2}, skipping")
         except NotADirectoryError:

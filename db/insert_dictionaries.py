@@ -59,7 +59,7 @@ def parse_args():
     parser.add_argument(
         "sql-scripts-folder",
         type=Path,
-        help="path of the folder containing the \"[a|d]-*.sql\" files",
+        help='path of the folder containing the "[a|d]-*.sql" files',
     )
     parser.add_argument(
         "-c",
@@ -78,22 +78,17 @@ def main():
     run_in_container = args["container"]
     path = args["sql-scripts-folder"]
     if not path.is_dir():
-        exit(
-            "Error: argument 'sql-scripts-folder': Not a directory "
-            f"({path})"
-        )
+        exit(f"Error: argument 'sql-scripts-folder': Not a directory ({path})")
 
     data = []
-    for dictionary_file in path.glob("d-*.sql"):
+    for dictionary_file in path.glob("d-*.sql*"):
         dict_name = dictionary_file.name[2:]
         article_file = dictionary_file.with_name("a-" + dictionary_file.name[2:])
         if not article_file.exists():
             abort(f"corresponding article file not found: {article_file}")
         articles_sql = article_file.read_bytes()
 
-        data.append(
-            (dict_name, dictionary_file.read_bytes(), articles_sql)
-        )
+        data.append((dict_name, dictionary_file.read_bytes(), articles_sql))
 
     for dict_name, dictionary_sql, articles_sql in data:
         insert_dictionary(
@@ -125,10 +120,7 @@ def insert_dictionary(dict_name, dictionary_sql, articles_sql, run_in_container)
         dict_id = _parse_id(stdout.decode("utf-8"))
     except ValueError:
         abort("could not parse id of new dictionary")
-    print(
-        f"new dictionary created, it has id: {dict_id}, "
-        "inserting articles..."
-    )
+    print(f"new dictionary created, it has id: {dict_id}, inserting articles...")
 
     articles_sql = articles_sql.replace(
         b"$DICTIONARY$",
@@ -152,12 +144,12 @@ def insert_dictionary(dict_name, dictionary_sql, articles_sql, run_in_container)
     if stderr:
         if stderr.startswith("psql:<stdin>:"):
             try:
-                err_char_pos = int(stderr[13:stderr.index(":", 13)])
+                err_char_pos = int(stderr[13 : stderr.index(":", 13)])
             except ValueError:
                 pass
             else:
                 # show input around this position, for debugging
-                print(articles_sql[err_char_pos - 50:err_char_pos + 50])
+                print(articles_sql[err_char_pos - 50 : err_char_pos + 50])
         abort(
             "non-empty stderr from psql when inserting dictionaries",
             stderr=stderr,

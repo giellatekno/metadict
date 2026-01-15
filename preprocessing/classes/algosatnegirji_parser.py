@@ -1,8 +1,8 @@
 from utils.dataclasses import Dictionary, Article
 
+
 class AlgosatnegirjiParser:
     def __init__(self, dictionary_id, file):
-
         self.dictionary = Dictionary(
             id=dictionary_id,
             name="Álgosátnegirji",
@@ -27,51 +27,49 @@ class AlgosatnegirjiParser:
 
     def parse_dict(self, file):
         articles = []
-        
+
         with open(file, "r") as f:
             lines = f.readlines()
 
         for i, line in enumerate(lines, 1):
-            
-            lemma = self.clean_lemma(line.split()[0])            
+            lemma = self.clean_lemma(line.split()[0])
 
             rendered = self.to_html(line.strip())
-        
 
             a = Article(
                 dictionary=self.dictionary.id,
                 lemma=lemma,
                 rendered=rendered,
                 lang=self.dictionary.lang1,
-                article_number=i
+                article_number=i,
             )
 
-            articles.append(a)   
-        
+            articles.append(a)
+
         return articles
-    
+
     def format_article(self, line):
         words = line.split()
 
-
         if words[0][-1] == ":" and words[1][0] == "(":
             return f"<b>{line}</b>"
-        
+
         bold = ""
         for word in words:
-            bold += word 
+            bold += word
             if word[-1] not in ",);" or word[-1] == ":":
                 # print(word,"\t\t", line)
                 break
             bold += " "
 
-        text = line.replace(bold, f"<b>{bold.replace("(", "</b>(").replace(")", ")<b>")}</b>")
+        text = line.replace(
+            bold, f"<b>{bold.replace('(', '</b>(').replace(')', ')<b>')}</b>"
+        )
 
         if text.find("(=") != -1:
             text = text.replace("(=", "<b>(=") + "</b>"
 
         return text
-    
+
     def to_html(self, line: str):
         return f"<p>{self.format_article(line)}</p>"
-

@@ -1,6 +1,8 @@
-from utils.dataclasses import Dictionary, Article
-import pandas as pd
+import csv
 import re
+
+from utils.dataclasses import Dictionary, Article
+
 
 class MedisinskParser:
     def __init__(self, dictionary_id, file):
@@ -19,29 +21,28 @@ class MedisinskParser:
 
     def get_parsed_data(self):
         return self.dictionary, self.articles
-    
+
     def parse_dict(self, file):
         articles = []
-        
-        df = pd.read_csv(file, sep=",", header=None)
-        
-        for index, row in df.iterrows():
-            lemma = re.sub(r"\([\)]+\)", "", row[0])
-            rendered = self.to_html(row[0], row[1])
 
-            a = Article(
-                dictionary=self.dictionary.id,
-                lemma=lemma,
-                rendered=rendered,
-                lang=self.dictionary.lang1,
-                article_number=index
-            )
-            articles.append(a)
+        fieldnames = ["lemma", "entry"]
+        with open(file, newline="") as fp:
+            reader = csv.DictReader(fp, fieldnames=fieldnames)
 
+            for index, row in enumerate(reader, start=1):
+                lemma = re.sub(r"\([\)]+\)", "", row["lemma"])
+                rendered = self.to_html(row["lemma"], row["entry"])
 
+                a = Article(
+                    dictionary=self.dictionary.id,
+                    lemma=lemma,
+                    rendered=rendered,
+                    lang=self.dictionary.lang1,
+                    article_number=index,
+                )
+                articles.append(a)
 
-        return articles
-        
+            return articles
+
     def to_html(self, lemma, translation):
         return f"<p><b>{lemma}</b>: {translation}</p>"
-    

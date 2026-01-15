@@ -1,5 +1,7 @@
+import csv
+
 from utils.dataclasses import Dictionary, Article
-import pandas as pd
+
 
 class GirjjalasvuodaParser:
     def __init__(self, dictionary_id, file):
@@ -25,42 +27,45 @@ class GirjjalasvuodaParser:
     def parse_dict(self, file):
         articles = []
 
-        df = pd.read_csv(file, sep=",", header=None)
+        with open(file, newline="") as fp:
+            if self.dictionary.lang1 != "sme":
+                fieldnames = ["lemma", "entry"]
+                reader = csv.DictReader(fp, fieldnames=fieldnames)
+                for index, row in enumerate(reader, start=1):
+                    lemma = row["lemma"]
+                    entry = row["entry"]
 
-        if df.shape[1] == 2:
-            for index, row in df.iterrows():
-                lemma = row[0]
-                entry = row[1]
+                    rendered = self.to_html(lemma, entry)
 
-                rendered = self.to_html(lemma, entry)
+                    a = Article(
+                        dictionary=self.dictionary.id,
+                        lemma=lemma,
+                        rendered=rendered,
+                        lang=self.dictionary.lang1,
+                        article_number=index,
+                    )
+                    articles.append(a)
+            else:
+                fieldnames = ["lemma", "entry", "translation"]
+                reader = csv.DictReader(fp, fieldnames=fieldnames)
+                for index, row in enumerate(reader, start=1):
+                    lemma = row["lemma"]
+                    entry = row["entry"]
+                    translation = row["translation"]
 
-                a = Article(
-                    dictionary=self.dictionary.id,
-                    lemma=lemma,
-                    rendered=rendered,
-                    lang=self.dictionary.lang1,
-                    article_number=index
-                )
-                articles.append(a)
-        else:
-            for index, row in df.iterrows():
-                lemma = row[0]
-                entry = row[1]
-                translation = row[2]
+                    rendered = self.to_html(lemma, entry, translation)
 
-                rendered = self.to_html(lemma, entry, translation)
-
-                a = Article(
-                    dictionary=self.dictionary.id,
-                    lemma=lemma,
-                    rendered=rendered,
-                    lang=self.dictionary.lang1,
-                    article_number=index
-                )
-                articles.append(a)
+                    a = Article(
+                        dictionary=self.dictionary.id,
+                        lemma=lemma,
+                        rendered=rendered,
+                        lang=self.dictionary.lang1,
+                        article_number=index,
+                    )
+                    articles.append(a)
 
         return articles
-    
+
     def to_html(self, lemma, entry, translation=None):
         if translation:
             return f"<p><b>{lemma}</b><br>{entry}<br>{translation}</p>"

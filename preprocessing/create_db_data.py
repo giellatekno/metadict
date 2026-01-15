@@ -16,28 +16,26 @@ Use the script "db/insert_dictionary.py" to insert these .sql files
 into a live database. Refer to that script for further information.
 """
 
-import gzip
 from pathlib import Path
-
-from classes import *
-from utils.utils import articles_to_sql, dictionary_to_sql
+from utils.utils import yellow, red
+import classes
 
 parsers = {
-    "gt": GTParser,
-    "gtsme": GTSmeParser,
-    "qvigstad": QvigstadParser,
-    "sammallahti": SammallahtiParser,
-    "fysihkka": FysihkkaParser,
-    "girjjalasvuoda": GirjjalasvuodaParser,
-    "algosatnegirji": AlgosatnegirjiParser,
-    "ruoktumet": RuoktumetParser,
-    "pedagogalas": PedPsyParser,
-    "nettisanakirja": NettisanakirjaParser,
-    "konrad_nielsen": KonradParser,
-    "skoleordbok": SkoleordbokParser,
-    "apotekordliste": ApotekordlisteParser,
-    "medisinsk": MedisinskParser,
-    "gaerjiste": GaerjisteParser,
+    "gt": classes.GTParser,
+    "gtsme": classes.GTSmeParser,
+    "qvigstad": classes.QvigstadParser,
+    "sammallahti": classes.SammallahtiParser,
+    "fysihkka": classes.FysihkkaParser,
+    "girjjalasvuoda": classes.GirjjalasvuodaParser,
+    "algosatnegirji": classes.AlgosatnegirjiParser,
+    "ruoktumet": classes.RuoktumetParser,
+    "pedagogalas": classes.PedPsyParser,
+    "nettisanakirja": classes.NettisanakirjaParser,
+    "konrad_nielsen": classes.KonradParser,
+    "skoleordbok": classes.SkoleordbokParser,
+    "apotekordliste": classes.ApotekordlisteParser,
+    "medisinsk": classes.MedisinskParser,
+    "gaerjiste": classes.GaerjisteParser,
 }
 
 
@@ -45,32 +43,20 @@ def parse_dictionary(file: Path, dictionary_id):
     try:
         parser = parsers[file.stem.split("-")[0]](dictionary_id, file)
     except KeyError:
-        raise Exception(
-            "\033[93m"
-            + f'Parsing of dictionary "{file.stem}" not implemented'
-            + "\033[0m"
-        )
+        raise Exception(yellow(f'Parsing of dictionary "{file.stem}" not implemented'))
     except Exception as e:
-        raise Exception(
-            "\033[91m" + f'Error parsing dictionary "{file.stem}": {e}' + "\033[0m"
-        )
+        raise Exception(red(f'Error parsing dictionary "{file.stem}": {e}'))
     return parser.get_parsed_data()
 
 
 def main():
-    # dictionaries = []
-    # articles = []
-
-    # target = "../db/init"
     sql_folder = Path("sql_files")
     if not sql_folder.exists():
         sql_folder.mkdir()
 
     dicts_dir = Path("dicts")
 
-    dictionary_id = 1
-
-    for file in dicts_dir.iterdir():
+    for dictionary_id, file in enumerate(dicts_dir.iterdir(), start=1):
         print(f"Parsing {file}")
         try:
             d, a = parse_dictionary(file, dictionary_id)
@@ -78,20 +64,18 @@ def main():
             print(e)
             continue
 
-        dictionary_to_sql(d, file.stem)
-        articles_to_sql(a, file.stem)
+        with open(f"sql_files/d-{file.stem}.sql", "w") as f:
+            f.write(d.to_sql())
 
-        # dictionaries.append(d)
-        # articles.extend(a)
-        dictionary_id += 1
+        with open(f"sql_files/a-{file.stem}.sql", "w") as f:
+            sql = "INSERT INTO articles (lemma, dictionary, rendered, pos, \
+                    lang, article_number, additional_properties ) VALUES"
+            f.write(sql)
 
-    # lines = "\n".join(d.to_tsv_string() for d in dictionaries)
-    # with gzip.open(Path(target) / "data_dictionaries.txt.gz", "wb") as f:
-    #     f.write(lines.encode())
-
-    # article_lines = "\n".join(d.to_tsv_string() for d in articles)
-    # with gzip.open(Path(target) / "data_articles.txt.gz", "wb") as f:
-    #     f.write(article_lines.encode())
+            last_i = len(a) - 1
+            for i, article in enumerate(a):
+                f.write(article.to_sql())
+                f.write(";\n" if i == last_i else ",\n")
 
 
 if __name__ == "__main__":

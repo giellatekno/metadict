@@ -1,14 +1,13 @@
 """
-This script prompts the user to enter a class name and generates a new Python class file with the specified name in the 'classes' directory. 
+This script prompts the user to enter a class name and generates a new Python class file with the specified name in the 'classes' directory.
 Additionally, it updates the 'classes/__init__.py' file to include an import statement for the newly created class.
-If the class file already exists, the script notifies the user. 
+If the class file already exists, the script notifies the user.
 """
-
 
 import os
 
 class_name = input("Enter the class name: ")
-file_path = f"classes/{class_name.lower().replace(" ", "_")}.py"
+file_path = f"classes/{class_name.lower().replace(' ', '_')}.py"
 
 if not os.path.exists(file_path):
     with open(file_path, "w") as f:
@@ -46,7 +45,9 @@ class {class_name.replace(" ", "")}:
     print(f"Class {class_name} created in {file_path}")
 
     with open("classes/__init__.py", "a") as f:
-        f.write(f"from .{class_name.lower().replace(' ', '_')} import {class_name.replace(' ', '')}\n")
+        f.write(
+            f"from .{class_name.lower().replace(' ', '_')} import {class_name.replace(' ', '')}\n"
+        )
     print(f"Imported {class_name} in classes/__init__.py")
 
 else:

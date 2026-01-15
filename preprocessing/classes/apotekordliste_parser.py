@@ -1,9 +1,9 @@
 from utils.dataclasses import Dictionary, Article
 import re
 
+
 class ApotekordlisteParser:
     def __init__(self, dictionary_id, file):
-
         langs = file.stem.split("-")[-3:]
         l1, l2 = langs[0], langs[1]
 
@@ -22,10 +22,10 @@ class ApotekordlisteParser:
 
     def get_parsed_data(self):
         return self.dictionary, self.articles
-    
+
     def parse_dict(self, file):
         articles = []
-        
+
         with open(file, "r") as f:
             lines = f.readlines()
 
@@ -37,14 +37,12 @@ class ApotekordlisteParser:
                 lemma=lemma,
                 rendered=rendered,
                 lang=self.dictionary.lang1,
-                article_number=i
+                article_number=i,
             )
             articles.append(a)
         return articles
-    
 
     def to_html(self, lemma, line):
-        
         formatted = re.sub(lemma, f"<b>{lemma}</b>", line, 1)
         formatted = re.sub(r"(\((lat\.[^)]*)\))", r"<i>\1</i>", formatted)
         formatted = re.sub(r"(\d(?=:))", r"<b>\1</b>", formatted)
