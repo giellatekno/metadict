@@ -4,33 +4,23 @@
     "interface_language": "Geavahanlaktagiella",
     "login": "Logge sisa Githubiin",
     "logout": "Logge olggos",
-    "dictionary_form": "Vuođđuhápmi",
+    "dictionary_form": "Vuođđohápmi",
     "access": "Giellatekno bargi",
     "search_result": [
         {
-            "declarations": [
-                "input count",
-                "local countPlural = count: plural"
-            ],
-            "selectors": ["countPlural"],
             "match": {
-                "countPlural=zero": "Ii oktage sátni mii heive ohcamii",
-                "countPlural=one": "okta sátni gávdnán mii heive ohcamii",
-                "countPlural=other": "{count} sáni gávdnán mat heivejit ohcamii"
+                "count=0": "Ii oktage sátni mii heive ohcamii",
+                "count=1": "okta sátni gávdnán mii heive ohcamii",
+                "count=*": "{count} sáni gávdnán mat heivejit ohcamii"
             }
         }
     ],
     "lookup_result": [
         {
-            "declarations": [
-                "input count",
-                "local countPlural = count: plural"
-            ],
-            "selectors": ["countPlural"],
             "match": {
-                "countPlural=zero": "Sátni {lemma} gávdnui 0 sátnegirjjis",
-                "countPlural=one": "Sátni {lemma} gávdnui 1 sátnegirjjis",
-                "countPlural=other": "Sátni {lemma} gávdnui {count} iešguđetlágan sátnegirjjis"
+                "count=0": "Sátni \"{lemma}\" ii gávdnon oktage sátnegirjjis",
+                "count=1": "Sátni \"{lemma}\" gávdnui okta sátnegirjjis",
+                "count=*": "Sátni \"{lemma}\" gávdnui {count} iešguđetlágan sátnegirjjis"
             }
         }
     ],

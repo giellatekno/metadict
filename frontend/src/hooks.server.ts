@@ -47,7 +47,7 @@ function fromBinary(encoded: any) {
 }
 */
 
-const originalHandle: Handle = async ({ event, resolve }) => {
+const jwtHandle: Handle = async ({ event, resolve }) => {
     const jwt = event.cookies.get("metadict-creds");
 
     if (jwt !== undefined) {
@@ -73,7 +73,7 @@ const handleParaglide: Handle = ({ event, resolve }) =>
         });
     });
 
-export const handle = sequence(originalHandle, handleParaglide);
+export const handle = sequence(jwtHandle, handleParaglide);
 // https://stackoverflow.com/questions/5234581/base64url-decoding-via-javascript
 // Replace non-url compatible chars with base64 standard chars
 // Pad out with standard base64 required padding characters

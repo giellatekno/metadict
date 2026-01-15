@@ -37,12 +37,12 @@
     <Portal>
         <Popover.Positioner>
             <Popover.Content
-                class="card p-4 w-fit shadow-xl preset-filled-tertiary-100-900 border border-tertiary-200-800"
+                class="card preset-filled-tertiary-100-900 border-tertiary-200-800 w-fit border p-4 shadow-xl"
             >
                 <Popover.Description>
-                    <div class="flex flex-col gap-2 justify-center text-center">
+                    <div class="flex flex-col justify-center gap-2 text-center">
                         {#if user.restricted_dicts}
-                            <div class="flex flex-row gap-2 justify-start">
+                            <div class="flex flex-row justify-start gap-2">
                                 <span>{m.access()}</span>
                                 <BadgeCheck />
                             </div>
@@ -55,7 +55,7 @@
                         <span>
                             <a
                                 href={resolve("/auth/logout")}
-                                class="btn preset-filled-secondary-400-600 w-full h-fit"
+                                class="btn preset-filled-secondary-400-600 h-fit w-full"
                             >
                                 {m.logout()}
                             </a>

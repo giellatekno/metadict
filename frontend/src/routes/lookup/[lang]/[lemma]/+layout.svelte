@@ -7,7 +7,7 @@
     import type { PageData } from "./$types";
     import type { Snippet } from "svelte";
     import { ExternalLink } from "lucide-svelte";
-    import type { DictionaryEntries } from "$lib/utils";
+    import type { LookupResponse } from "$lib/utils";
 
     interface Props {
         data: PageData;
@@ -21,7 +21,7 @@
     let n_dicts = $derived(new Set(data.entries.map((item) => item[1])).size);
 
     // Create a list of the historical dicts (e.g. published before 1979 (newest orthography))
-    let hist_dicts: DictionaryEntries = $derived(
+    let hist_dicts: LookupResponse = $derived(
         data.entries.filter((item) => {
             return item[4] !== "" && Number(item[4].slice(-4)) < 1979;
         }),
@@ -46,12 +46,11 @@
     );
 </script>
 
-<h5 class="h6 text-surface-950-50 my-2 ml-2">
-    {m.lookup_result({ lemma, count: n_dicts })}
-</h5>
-
 <main class="grid w-full grid-cols-3 gap-20">
     <div class="flex flex-col">
+        <h5 class="h6 text-surface-950-50 mb-4">
+            {m.lookup_result({ lemma, count: n_dicts })}
+        </h5>
         <div
             class="card bg-surface-100-900 border-surface-200-800 flex h-fit w-full flex-col border p-2"
         >

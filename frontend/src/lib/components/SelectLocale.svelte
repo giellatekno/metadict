@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { getLocale, setLocale, locales } from "$lib/paraglide/runtime";
+    import { setLocale, locales } from "$lib/paraglide/runtime";
     import { Popover, Portal } from "@skeletonlabs/skeleton-svelte";
     import { langname } from "$lib/langname";
     import { LanguagesIcon } from "lucide-svelte";

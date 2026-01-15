@@ -5,4 +5,9 @@ export type User = {
     restricted_dicts: boolean;
 };
 
-export type DictionaryEntries = [string, string, number, string, string][];
+// NOTE: Maybe use a schema validation library like zod to verify json responses?
+export type LookupResponse = [string, string, number, string, string][];
+export type SearchResponse = string[];
+export type ArticleResponse = string[];
+export type NeighborsResponse = string[];
+export type DictionaryResponse = [string, string, string, string][];

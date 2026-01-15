@@ -16,8 +16,8 @@
     let { user, redirect_uri }: Props = $props();
 </script>
 
-<AppBar>
-    <AppBar.Toolbar class="grid-cols-[auto_auto] ">
+<AppBar class="">
+    <AppBar.Toolbar class="mx-auto w-full max-w-480 grid-cols-[auto_auto]">
         <AppBar.Headline>
             <a class="text-4xl font-medium" href={resolve("/")}>
                 {m.page_title()}
@@ -49,4 +49,3 @@
         </AppBar.Trail>
     </AppBar.Toolbar>
 </AppBar>
-<hr class="hr" />

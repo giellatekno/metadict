@@ -35,7 +35,7 @@
 
     {#if dictionary}
         <div
-            class="card bg-surface-100-900 border-surface-200-800 col-span-2 h-fit space-y-2 border p-5"
+            class="card bg-surface-100-900 border-surface-200-800 col-span-2 h-fit w-full space-y-2 border p-5"
         >
             <h3 class="h4 text-surface-950-50 font-medium">{dictionary[0]}</h3>
             <hr class="hr" />

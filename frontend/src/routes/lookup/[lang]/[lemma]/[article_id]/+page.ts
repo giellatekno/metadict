@@ -1,9 +1,13 @@
+import type { Load } from "@sveltejs/kit";
 import { error } from "@sveltejs/kit";
-import { await_or_error } from "$lib/await_or_error";
 import { resolve } from "$app/paths";
-import type { PageLoad } from "./$types";
+import type {
+    ArticleResponse,
+    DictionaryResponse,
+    NeighborsResponse,
+} from "$lib/utils";
 
-export const load: PageLoad = async ({ params, fetch }) => {
+export const load: Load = async ({ params, fetch }) => {
     let { article_id } = params;
 
     const urls = [
@@ -12,26 +16,32 @@ export const load: PageLoad = async ({ params, fetch }) => {
         `dictionary/${article_id}`,
     ];
 
-    const responses = await await_or_error(
-        Promise.all(urls.map((url) => fetch(`${resolve("/api")}/${url}`))),
-        "fetch to api failed",
+    const responses = await Promise.all(
+        urls.map((url) => fetch(resolve(`/api/${url}`))),
     );
 
-    const jsons = await await_or_error(
-        Promise.all(responses.map((response) => response.json())),
-        "decoding json from api failed",
-    );
-
-    for (let i = 0; i < urls.length; i++) {
-        if (!Array.isArray(jsons[i])) {
-            error(500, `response from "${urls[i]}" was not an array`);
+    responses.forEach((res) => {
+        if (!res.ok) {
+            error(res.status, "fetch to api failed");
         }
-    }
+    });
 
-    const [articles, neighbors, dictionary] = jsons;
+    const jsons = await Promise.all(
+        responses.map((response) => response.json()),
+    );
+
+    urls.forEach((url, i) => {
+        if (!Array.isArray(jsons[i])) {
+            error(500, `response from "${url}" was not an array`);
+        }
+    });
+
+    const article: ArticleResponse = jsons[0];
+    const neighbors: NeighborsResponse = jsons[1];
+    const dictionary: DictionaryResponse = jsons[2];
 
     return {
-        rendered: articles[0], // only one article is returned
+        rendered: article[0], // only one article is returned
         neighbors,
         dictionary: dictionary[0], // only one dictionary entry is returned
     };

@@ -7,9 +7,6 @@ export const GET: RequestHandler = async ({ params, request, url, fetch }) => {
     const api_url = new URL(PUBLIC_API_ENDPOINT);
 
     api_url.search = url.search;
-    // Strip the leading BASE/api from the pathname before we send the query to the API
-    // note: the "base" variable (from "$app/paths") is deprecated (for some mystical
-    // reason..), hence the warning. It is impossible to silence it.
     api_url.pathname = `/${params.path}`;
 
     const headers = new Headers(request.headers);

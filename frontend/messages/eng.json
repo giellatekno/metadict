@@ -8,29 +8,19 @@
     "access": "Giellatekno employee",
     "search_result": [
         {
-            "declarations": [
-                "input count",
-                "local countPlural = count: plural"
-            ],
-            "selectors": ["countPlural"],
             "match": {
-                "countPlural=zero": "Found no lemmas throughout all dictionaries that matched the search.",
-                "countPlural=one": "Found one lemma throughout all dictionaries that matched the search.",
-                "countPlural=other": "Found {count} lemmas throughout all dictionaries that matched the search."
+                "count=0": "Found no lemmas throughout all dictionaries that matched the search.",
+                "count=1": "Found one lemma throughout all dictionaries that matched the search.",
+                "count=*": "Found {count} lemmas throughout all dictionaries that matched the search."
             }
         }
     ],
     "lookup_result": [
         {
-            "declarations": [
-                "input count",
-                "local countPlural = count: plural"
-            ],
-            "selectors": ["countPlural"],
             "match": {
-                "countPlural=zero": "The lemma \"{lemma}\" was not found in any dictionaries.",
-                "countPlural=one": "The lemma \"{lemma}\" was found in one dictionary.",
-                "countPlural=other": "The lemma \"{lemma}\" was found in {count} dictionaries."
+                "count=0": "The lemma \"{lemma}\" was not found in any dictionaries.",
+                "count=1": "The lemma \"{lemma}\" was found in one dictionary.",
+                "count=*": "The lemma \"{lemma}\" was found in {count} dictionaries."
             }
         }
     ],
