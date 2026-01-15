@@ -125,31 +125,42 @@ async fn handler_404() -> Response {
 }
 
 macro_rules! redirect_to_errorpage {
-    (msg=$msg:expr) => {
+    (msg=$msg:expr) => {{
+        let msg = $msg.to_string();
+        tracing::trace!(msg, "redirect_to_errorpage");
         AppError::Redirect(RedirectError {
-            message: Some($msg.to_string()),
+            message: Some(msg),
             description: None,
             clear_cookie: true,
             url: format!("{}/error", FRONTEND.get().unwrap()),
         })
-    };
-    (msg=$msg:expr, desc=$desc:expr) => {
+    }};
+    (msg=$msg:expr, desc=$desc:expr) => {{
+        let msg = $msg.to_string();
+        let description = $desc.to_string();
+        tracing::trace!(msg, description, "redirect_to_errorpage");
         AppError::Redirect(RedirectError {
-            message: Some($msg.to_string()),
-            description: Some($desc.to_string()),
+            message: Some(msg),
+            description: Some(description),
             clear_cookie: true,
             url: format!("{}/error", FRONTEND.get().unwrap()),
         })
-    };
-    (desc=$desc:expr) => {
+    }};
+    (desc=$desc:expr) => {{
+        let description = $desc.to_string();
+        tracing::trace!(description, "redirect_to_errorpage");
         AppError::Redirect(RedirectError {
             message: None,
-            description: Some($desc.to_string()),
+            description: Some(description),
             clear_cookie: true,
             url: format!("{}/error", FRONTEND.get().unwrap()),
         })
-    };
+    }};
     (message=$msg:expr, description=$desc:expr, clear_cookie=true) => {{
+        let msg = $msg.to_string();
+        let description = $desc.to_string();
+        tracing::trace!(msg, description, "redirect_to_errorpage, also clear cookie");
+        
         let cookie = cookie::Cookie::build(COOKIE_NAME)
             .path("/")
             .http_only(true)
@@ -175,6 +186,7 @@ macro_rules! redirect_to_errorpage {
 /// of our github app (a one time thing, unless it gets revoked) - github will
 /// redirect the users browser to this route. It includes an authorization
 /// code that we will then send to github.
+#[tracing::instrument(level = "trace")]
 async fn handler_auth_callback(
     State(AppState { iat, .. }): State<AppState>,
     Query(params): Query<HashMap<String, String>>,
@@ -182,25 +194,28 @@ async fn handler_auth_callback(
     let code = params
         .get("code")
         .ok_or_else(|| redirect_to_errorpage!(msg = "no 'code' in query params"))?;
+    tracing::trace!(code, "query param 'code'");
 
-    let access_token_future = ghapi::exchange_code_for_access_token(
-        &GH_APP_CONFIG.get().unwrap().client_id,
-        &GH_APP_CONFIG.get().unwrap().client_secret,
-        code,
-    );
+    let client_id = &GH_APP_CONFIG.get().unwrap().client_id;
+    let secret = &GH_APP_CONFIG.get().unwrap().client_secret;
+    let creds = ghapi::exchange_code_for_access_token(client_id, secret, code)
+        .await
+        .map_err(|e| {
+            use std::error::Error;
 
-    use std::error::Error;
-    let creds = access_token_future.await.map_err(|e| {
-        //tracing::error!("{:?}", e.backtrace());
-        if let Some(source) = e.source() {
-            tracing::error!(source, "source");
-        } else {
-            tracing::warn!("no source...");
-        }
-        redirect_to_errorpage!(msg = e, desc = "exchange access code")
-    })?;
+            if let Some(source) = e.source() {
+                tracing::error!(source, "source");
+            } else {
+                tracing::warn!("no source...");
+            }
+            redirect_to_errorpage!(msg = e, desc = "exchange access code")
+        })?;
 
-    let gh_user = ghapi::get_user(&creds.access_token)
+    let access_token = &creds.access_token;
+    tracing::trace!(access_token, "got access token");
+
+    tracing::trace!("get access token");
+    let gh_user = ghapi::get_user(access_token)
         .await
         .map_err(|e| redirect_to_errorpage!(msg = e, desc = "querying github api for user info"))?;
 
@@ -240,6 +255,7 @@ async fn handler_auth_callback(
     // the cookie, so that it would always send it on requests
 
     let cookie_header = (http::header::SET_COOKIE, cookie);
+    tracing::trace!("handler_auth_callback returning");
 
     //let login_route = format!("{}", FRONTEND.get().unwrap(), cookie);
     Ok(([cookie_header], Redirect::to(FRONTEND.get().unwrap())).into_response())

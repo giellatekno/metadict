@@ -22,6 +22,7 @@ pub static IAT_PRIVATE_KEY: OnceLock<Vec<u8>> = OnceLock::new();
 // TODO store this path in a Config instead?
 const IAT_PK_PATH: &str = "giellatekno-metadictionary.2024-04-26.private-key.pem";
 
+#[derive(Debug)]
 pub struct IAT(Arc<RwLock<Option<Inner>>>);
 
 impl Clone for IAT {
@@ -64,6 +65,7 @@ impl IAT {
 }
 
 /// What we need from the IAT response body that we get
+#[derive(Debug)]
 pub struct Inner {
     token: String,
     expires_at: chrono::DateTime<chrono::offset::FixedOffset>,

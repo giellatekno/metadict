@@ -72,6 +72,8 @@ pub enum RequestError {
     Upgrade {
         source: reqwest::Error
     },
+    #[error("Other request error")]
+    Other(String),
 }
 
 /*
@@ -121,7 +123,8 @@ pub async fn exchange_code_for_access_token(
     client_secret: &str,
     code: &str,
 ) -> Result<AccessTokenResponse, RequestError> {
-    Ok(reqwest::Client::new()
+    tracing::trace!("exchange_code_for_access_token");
+    let response = reqwest::Client::new()
         .post("https://github.com/login/oauth/access_token")
         .header("Accept", "application/json")
         .form(&[
@@ -132,10 +135,41 @@ pub async fn exchange_code_for_access_token(
         .timeout(TIMEOUT)
         .send()
         .await
-        .map_err(RequestError::from)?
-        .json()
-        .await
-        .map_err(|e| RequestError::Json { source: e })?)
+        .map_err(RequestError::from)?;
+
+    tracing::trace!("got response from github access_token");
+    let text = match response.text().await {
+        Ok(body_text) => {
+            tracing::trace!(body_text, "got body from response");
+            body_text
+        }
+        Err(error) => {
+            tracing::error!(?error, "could not get response body");
+            return Err(RequestError::Body { source: error });
+        }
+    };
+
+    let json: serde_json::Value = match serde_json::from_str(&text) {
+        Ok(json) => {
+            tracing::trace!(?json, "response body was json");
+            json
+        }
+        Err(error) => {
+            tracing::trace!(?error, "could not deserialize access_token response");
+            return Err(RequestError::Other(format!("{error}")));
+        }
+    };
+
+    match serde_json::from_value(json) {
+        Ok(access_token_response) => {
+            tracing::trace!(?access_token_response, "json parsed as exected access token response strucutre");
+            Ok(access_token_response)
+        }
+        Err(error) => {
+            tracing::error!(?error, "json body was not access token response structure");
+            Err(RequestError::Other(format!("json body was not access token response: {error}")))
+        }
+    }
 }
 
 #[derive(Deserialize)]
@@ -182,6 +216,7 @@ pub struct GhUserResponse {
 }
 
 /// api.github.com/user - get user info, given an access token
+#[tracing::instrument(level = "trace")]
 pub async fn get_user(access_token: &str) -> Result<GhUserResponse, RequestError> {
     Ok(reqwest::Client::new()
         .get("https://api.github.com/user")
