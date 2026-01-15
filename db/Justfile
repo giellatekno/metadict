@@ -1,0 +1,21 @@
+default:
+    @just --list
+
+image:
+    podman build --no-cache -f Containerfile -t metadict-db
+
+# run podman image "metadict-db", requires "image"
+run:
+    podman run --rm -it --name metadict-db -p 1400:5432 --mount type=volume,source=metadict-data,target=/var/lib/postgres/data metadict-db
+
+# start a shell in the running container
+shell:
+    podman exec -it metadict-db /bin/bash
+
+# start a psql session in the running container
+psql:
+    podman exec -it metadict-db psql -U postgres
+
+push-labacr:
+    podman tag metadict-db gtlabcontainerregistry.azurecr.io/metadict-db
+    podman push gtlabcontainerregistry.azurecr.io/metadict-db
