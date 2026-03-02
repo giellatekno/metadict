@@ -1,5 +1,6 @@
 <script lang="ts">
     import { m } from "$lib/paraglide/messages";
+    import { ScanTextIcon } from "lucide-svelte";
     import type { PageProps } from "./$types";
 
     let { data }: PageProps = $props();
@@ -10,13 +11,13 @@
 
 <div class="grid w-full grid-cols-5 gap-20">
     <div
-        class="card bg-surface-100-900 border-surface-200-800 col-span-3 h-fit w-full border px-2 py-2"
+        class="card bg-tertiary-50-950 col-span-3 h-fit w-full border p-4 shadow-lg"
     >
         {#if neighbors && neighbors.length > 1}
             {#each neighbors as neighbor}
                 {#if neighbor === rendered}
                     <div
-                        class="border-primary-400-600 border-y-2 px-2 py-3 text-xl"
+                        class="border-primary-500 border-y-2 px-2 py-3 text-xl"
                     >
                         {@html neighbor}
                     </div>
@@ -27,7 +28,7 @@
                 {/if}
             {/each}
         {:else if neighbors && neighbors.length === 1}
-            <div class="card">
+            <div>
                 {@html rendered}
             </div>
         {/if}
@@ -35,9 +36,9 @@
 
     {#if dictionary}
         <div
-            class="card bg-surface-100-900 border-surface-200-800 col-span-2 h-fit w-full space-y-2 border p-5"
+            class="card bg-tertiary-50-950 col-span-2 flex h-fit w-full flex-col gap-2 border p-4 shadow-lg"
         >
-            <h3 class="h4 text-surface-950-50 font-medium">{dictionary[0]}</h3>
+            <h3 class="h4 text-surface-950-50 font-bold">{dictionary[0]}</h3>
             <hr class="hr" />
             {#if dictionary[1]}
                 <div>
@@ -60,6 +61,8 @@
             {#if !(dictionary[1] || dictionary[2] || dictionary[3])}
                 <p>{m.no_additional_info()}</p>
             {/if}
+            <!-- OCR  -->
+            <!-- <ScanTextIcon /> -->
         </div>
     {/if}
 </div>

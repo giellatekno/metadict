@@ -5,9 +5,9 @@
     import { m } from "$lib/paraglide/messages";
     import { resolve } from "$app/paths";
     import type { PageData } from "./$types";
-    import type { Snippet } from "svelte";
+    import { type Snippet } from "svelte";
     import { ExternalLink } from "lucide-svelte";
-    import type { LookupResponse } from "$lib/utils";
+    import type { LookupType } from "$lib/utils";
 
     interface Props {
         data: PageData;
@@ -18,10 +18,64 @@
 
     let lang = $derived(page.params.lang ?? "");
     let lemma = $derived(page.params.lemma ?? "");
-    let n_dicts = $derived(new Set(data.entries.map((item) => item[1])).size);
+
+    const externalDicts: Record<string, { name: string; link: string }[]> = {
+        deu: [
+            {
+                name: "Wiktionary",
+                link: "https://de.wiktionary.org/wiki/{%string%}",
+            },
+        ],
+        est: [
+            {
+                name: "Sõnaveeb",
+                link: "https://sonaveeb.ee/search/unif/dlall/dsall/{%string%}/1/est",
+            },
+            {
+                name: "Wiktionary",
+                link: "https://et.wiktionary.org/wiki/{%string%}",
+            },
+        ],
+        // eng: [],
+        fin: [
+            {
+                name: "Kielitoimiston sanakirja",
+                link: "https://www.kielitoimistonsanakirja.fi/#/{%string%}",
+            },
+            {
+                name: "Wiktionary",
+                link: "https://fi.wiktionary.org/wiki/{%string%}",
+            },
+        ],
+        nob: [
+            {
+                name: "ordbøkene.no",
+                link: "https://ordbokene.no/nob/bm,nn/{%string%}",
+            },
+            {
+                name: "Davvi girji",
+                link: "https://533.davvi.no/ordbok_norsam.php?finn={%string%}",
+            },
+        ],
+        sma: [],
+        sme: [
+            {
+                name: "Davvi girji",
+                link: "https://533.davvi.no/ordbok_samnor.php?finn={%string%}",
+            },
+        ],
+        smj: [],
+        smn: [],
+        swe: [
+            {
+                name: "Svenska Akademiens ordböcker",
+                link: "https://svenska.se/?q={%string%}",
+            },
+        ],
+    };
 
     // Create a list of the historical dicts (e.g. published before 1979 (newest orthography))
-    let hist_dicts: LookupResponse = $derived(
+    let hist_dicts: LookupType = $derived(
         data.entries.filter((item) => {
             return item[4] !== "" && Number(item[4].slice(-4)) < 1979;
         }),
@@ -48,20 +102,15 @@
 
 <main class="grid w-full grid-cols-3 gap-20">
     <div class="flex flex-col">
-        <h5 class="h6 text-surface-950-50 mb-4">
-            {m.lookup_result({ lemma, count: n_dicts })}
-        </h5>
         <div
-            class="card bg-surface-100-900 border-surface-200-800 flex h-fit w-full flex-col border p-2"
+            class="card bg-tertiary-50-950 flex h-fit w-full flex-col border p-4 shadow-lg"
         >
             {#each sorted_tr_langs as tr_lang}
-                <h6 class="h6">
-                    <b>
-                        {langname(lang, getLocale())} → {langname(
-                            tr_lang,
-                            getLocale(),
-                        )}
-                    </b>
+                <h6 class="h6 font-bold">
+                    {langname(lang, getLocale())} → {langname(
+                        tr_lang,
+                        getLocale(),
+                    )}
                 </h6>
                 <div>
                     {#each dicts as [lemma, dictionary_name, article_id, lang2, _]}
@@ -82,8 +131,8 @@
             {/each}
 
             {#if hist_dicts.length > 0}
-                <h6 class="h6">
-                    <b>{m.historical_dictionaries()}</b>
+                <h6 class="h6 font-bold">
+                    {m.historical_dictionaries()}
                 </h6>
                 <nav class="list-nav">
                     {#each hist_dicts as [lemma, dictionary_name, article_id, _lang2, _]}
@@ -100,38 +149,24 @@
                     {/each}
                 </nav>
             {/if}
+            {#if externalDicts[lang] && externalDicts[lang].length > 0}
+                <h6 class="h6 font-bold">Eksterne Ordbøker</h6>
+                {#each externalDicts[lang] as { name, link }}
+                    {@const formatted_link = link.replaceAll(
+                        "{%string%}",
+                        lemma,
+                    )}
+                    <a
+                        class="btn hover:preset-tonal my-1 w-full justify-start"
+                        href={formatted_link}
+                        target="_blank"
+                    >
+                        <span>{name}</span>
+                        <ExternalLink />
+                    </a>
+                {/each}
+            {/if}
         </div>
-        {#if lang === "nob"}
-            <div class="mt-4 flex flex-col gap-2">
-                <a
-                    class="btn preset-filled-primary-400-600 w-fit"
-                    href={`https://ordbokene.no/nob/bm,nn/${lemma}`}
-                    target="_blank"
-                >
-                    <span>{m.search_ordbokene({ lemma })}</span>
-                    <ExternalLink />
-                </a>
-                <a
-                    class="btn preset-filled-primary-400-600 w-fit"
-                    href={`https://533.davvi.no/ordbok_norsam.php?finn=${lemma}`}
-                    target="_blank"
-                >
-                    <span>{m.search_davvigirji({ lemma })}</span>
-                    <ExternalLink />
-                </a>
-            </div>
-        {:else if lang === "sme"}
-            <div class="mt-4">
-                <a
-                    class="btn preset-filled-primary-400-600 w-fit"
-                    href={`https://533.davvi.no/ordbok_samnor.php?finn=${lemma}`}
-                    target="_blank"
-                >
-                    <span>{m.search_davvigirji({ lemma })}</span>
-                    <ExternalLink />
-                </a>
-            </div>
-        {/if}
     </div>
 
     <div class="row-span-2 md:col-span-2">

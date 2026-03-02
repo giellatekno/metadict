@@ -20,7 +20,7 @@
 </script>
 
 <Popover>
-    <Popover.Trigger class="btn preset-filled-primary-400-600">
+    <Popover.Trigger class="btn text-lg hover:underline">
         <LanguagesIcon />
         <span>{m.interface_language()}</span>
     </Popover.Trigger>
@@ -49,7 +49,7 @@
                     </ul>
                 </Popover.Description>
                 <Popover.Arrow
-                    class="[--arrow-background:var(--color-primary-100-900)] [--arrow-size:--spacing(2)]"
+                    class="[--arrow-background:var(--color-primary-50-950)] [--arrow-size:--spacing(2)]"
                 >
                     <Popover.ArrowTip />
                 </Popover.Arrow>

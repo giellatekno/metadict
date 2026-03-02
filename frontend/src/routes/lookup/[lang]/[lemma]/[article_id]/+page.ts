@@ -1,7 +1,7 @@
 import type { Load } from "@sveltejs/kit";
 import { error } from "@sveltejs/kit";
 import { resolve } from "$app/paths";
-import type {
+import {
     ArticleResponse,
     DictionaryResponse,
     NeighborsResponse,
@@ -36,9 +36,9 @@ export const load: Load = async ({ params, fetch }) => {
         }
     });
 
-    const article: ArticleResponse = jsons[0];
-    const neighbors: NeighborsResponse = jsons[1];
-    const dictionary: DictionaryResponse = jsons[2];
+    const article = ArticleResponse.parse(jsons[0]);
+    const neighbors = NeighborsResponse.parse(jsons[1]);
+    const dictionary = DictionaryResponse.parse(jsons[2]);
 
     return {
         rendered: article[0], // only one article is returned

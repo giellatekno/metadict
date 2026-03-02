@@ -1,13 +1,13 @@
 <script lang="ts">
     import { resolve } from "$app/paths";
     import { m } from "$lib/paraglide/messages";
-    import type { User } from "$lib/utils";
+    import type { UserType } from "$lib/utils";
     import { Popover, Portal } from "@skeletonlabs/skeleton-svelte";
     import { Avatar } from "@skeletonlabs/skeleton-svelte";
     import { BadgeCheck } from "lucide-svelte";
 
     interface Props {
-        user: User;
+        user: UserType;
     }
 
     let { user }: Props = $props();
@@ -27,7 +27,7 @@
 </script>
 
 <Popover>
-    <Popover.Trigger class="inline-flex items-center gap-2">
+    <Popover.Trigger class="inline-flex items-center hover:underline">
         <Avatar class="size-10">
             <Avatar.Image src={user.gh_avatar_url} />
             <Avatar.Fallback>{avatar_fallbackname}</Avatar.Fallback>
@@ -37,7 +37,7 @@
     <Portal>
         <Popover.Positioner>
             <Popover.Content
-                class="card preset-filled-tertiary-100-900 border-tertiary-200-800 w-fit border p-4 shadow-xl"
+                class="card preset-filled-primary-50-950 w-fit border p-4 shadow-xl"
             >
                 <Popover.Description>
                     <div class="flex flex-col justify-center gap-2 text-center">
@@ -62,6 +62,11 @@
                         </span>
                     </div>
                 </Popover.Description>
+                <Popover.Arrow
+                    class="[--arrow-background:var(--color-primary-50-950)] [--arrow-size:--spacing(2)]"
+                >
+                    <Popover.ArrowTip />
+                </Popover.Arrow>
             </Popover.Content>
         </Popover.Positioner>
     </Portal>

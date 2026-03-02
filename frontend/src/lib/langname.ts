@@ -1,3 +1,4 @@
+// prettier-ignore
 const LANGNAMES: Record<string, Record<string, string>> = {
     chp: { eng: "Denesuline", nob: "Denesuline", sme: "Denesuline" },
     chr: { eng: "Cherokee", nob: "Cherokesisk", sme: "Cherokee" },
@@ -10,11 +11,7 @@ const LANGNAMES: Record<string, Record<string, string>> = {
     hdn: { eng: "Northern Haida", nob: "Nordhaida", sme: "Davvihaidagiella" },
     hun: { eng: "Hungarian", nob: "Ungarsk", sme: "Ungáragiella" },
     izh: { eng: "Ingrian", nob: "Ingrisk", sme: "Inkeroisgiella" },
-    koi: {
-        eng: "Komi Permyak",
-        nob: "Komipermjakisk",
-        sme: "Komipermjakgiella",
-    },
+    koi: { eng: "Komi Permyak", nob: "Komipermjakisk", sme: "Komipermjakgiella" },
     kom: { eng: "Komi", nob: "Komi", sme: "Komigiella" },
     kpv: { eng: "Komi", nob: "Syrjensk", sme: "Komigiella" },
     lav: { eng: "Latvian", nob: "Latvisk", sme: "Latviagiella" },
@@ -29,25 +26,10 @@ const LANGNAMES: Record<string, Record<string, string>> = {
     otw: { eng: "Odawa", nob: "Odawa", sme: "Odawa" },
     ron: { eng: "Romanian", nob: "Rumensk", sme: "Romaniagiella" },
     rus: { eng: "Russian", nob: "Russisk", sme: "Ruoššagiella" },
-    sjd: {
-        eng: "Kildin Sámi",
-        nob: "Kildinsamisk",
-        sme: "Gielddasámegiella",
-        fin: "Kiltinänsaame",
-    },
+    sjd: { eng: "Kildin Sámi", nob: "Kildinsamisk", sme: "Gielddasámegiella", fin: "Kiltinänsaame" },
     sje: { nob: "Pitesamisk", eng: "Pite Sámi", sme: "Bihtánsámegiella" },
-    sjt: {
-        eng: "Ter Saḿi",
-        nob: "Tersamisk",
-        sme: "Darjjesámegiella",
-        fin: "Turjansaame",
-    },
-    sma: {
-        eng: "Southern Sami",
-        nob: "Sørsamisk",
-        sme: "Lullisámegiella",
-        fin: "Eteläsaame",
-    },
+    sjt: { eng: "Ter Saḿi", nob: "Tersamisk", sme: "Darjjesámegiella", fin: "Turjansaame" },
+    sma: { eng: "Southern Sami", nob: "Sørsamisk", sme: "Lullisámegiella", fin: "Eteläsaame" },
     sme: { eng: "Northern Sami", nob: "Nordsamisk", sme: "Davvisámegiella" },
     smj: { eng: "Lule Sami", nob: "Lulesamisk", sme: "Julevsámegiella" },
     smn: { eng: "Inari sami", nob: "Enaresamisk", sme: "Anárašgiella" },

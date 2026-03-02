@@ -3,6 +3,8 @@
 @import "@skeletonlabs/skeleton";
 @import "@skeletonlabs/skeleton-svelte";
 @import "@skeletonlabs/skeleton/themes/pine";
+@import "@fontsource/noto-sans";
+@import "@fontsource/noto-serif";
 /*
   Add your theme import for your theme: "my-custom-theme" here
 */
@@ -26,3 +28,9 @@
 }
 
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+
+[data-theme="pine"] {
+    --heading-font-family: "Noto Sans", sans-serif;
+    --base-font-family: "Noto Sans", sans-serif;
+    --anchor-font-family: "inherit";
+}

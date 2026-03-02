@@ -6,32 +6,32 @@
     import { resolve } from "$app/paths";
     import { Info } from "lucide-svelte";
     import LightSwitch from "./LightSwitch.svelte";
-    import type { User } from "$lib/utils";
+    import type { UserType } from "$lib/utils";
 
     interface Props {
-        user?: User;
+        user?: UserType;
         redirect_uri: string;
     }
 
     let { user, redirect_uri }: Props = $props();
 </script>
 
-<AppBar class="">
-    <AppBar.Toolbar class="mx-auto w-full max-w-480 grid-cols-[auto_auto]">
+<AppBar class="preset-filled-surface-800-200">
+    <AppBar.Toolbar class="mx-auto w-full grid-cols-[auto_auto] px-6">
         <AppBar.Headline>
-            <a class="text-4xl font-medium" href={resolve("/")}>
+            <a
+                class="h2 text-surface-50-950 font-[Noto_Serif] font-medium"
+                href={resolve("/")}
+            >
                 {m.page_title()}
             </a>
         </AppBar.Headline>
         <AppBar.Trail>
             <div class="flex items-center gap-10">
-                <LightSwitch />
+                <!-- <LightSwitch /> -->
                 <SelectLocale />
 
-                <a
-                    href={resolve("/about")}
-                    class="btn preset-filled-primary-400-600"
-                >
+                <a href={resolve("/about")} class="btn text-lg hover:underline">
                     <Info />
                     <span>Info</span>
                 </a>

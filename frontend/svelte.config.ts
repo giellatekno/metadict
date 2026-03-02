@@ -2,11 +2,6 @@ import adapter from "@sveltejs/adapter-node";
 import type { Config } from "@sveltejs/kit";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
-// If the app should be located under a subpath on the domain, such as
-// some.domain.com/subdir - then set this to "/subdir"
-// NOTE: We default to /metadict now, even for local dev build!
-const base = process.env.SK_BASE || "/metadict";
-
 const config: Config = {
     // Consult https://kit.svelte.dev/docs/integrations#preprocessors
     // for more information about preprocessors
@@ -20,7 +15,7 @@ const config: Config = {
             $components: "src/lib/components",
         },
         paths: {
-            base,
+            base: "/metadict",
         },
         // adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
         // If your environment is not supported or you settled on a specific environment, switch out the adapter.

@@ -1,5 +1,5 @@
 import { resolve } from "$app/paths";
-import type { LookupResponse } from "$lib/utils";
+import { LookupResponse } from "$lib/utils";
 import { error } from "@sveltejs/kit";
 import type { LayoutLoad } from "./$types";
 
@@ -11,7 +11,7 @@ export const load: LayoutLoad = async ({ params, fetch }) => {
     if (!res.ok) {
         error(res.status, "fetch to api failed");
     }
-    const entries: LookupResponse = await res.json();
+    const entries = LookupResponse.parse(await res.json());
 
     return { entries };
 };
