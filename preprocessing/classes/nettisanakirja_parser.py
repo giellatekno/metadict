@@ -1,5 +1,6 @@
-from utils.dataclasses import Dictionary, Article
 import re
+
+from utils.dataclasses import Article, Dictionary
 
 
 class NettisanakirjaParser:
@@ -10,7 +11,6 @@ class NettisanakirjaParser:
             lang1="fin",
             lang2="sme",
             closed=False,
-            is_ordered=True,
             author="Jouni A. Vest",
             date_published="2024",
         )

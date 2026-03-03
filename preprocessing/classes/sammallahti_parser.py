@@ -1,4 +1,4 @@
-from utils.dataclasses import Dictionary, Article
+from utils.dataclasses import Article, Dictionary
 
 """
 Letters to filter out of lemma:
@@ -18,7 +18,6 @@ class SammallahtiParser:
             lang1="sme",
             lang2="fin",
             closed=True,
-            is_ordered=True,
             author="Pekka Sammallahti",
             date_published="2020",
         )

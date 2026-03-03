@@ -1,4 +1,4 @@
-from utils.dataclasses import Dictionary, Article
+from utils.dataclasses import Article, Dictionary
 
 
 class AlgosatnegirjiParser:
@@ -9,7 +9,7 @@ class AlgosatnegirjiParser:
             lang1="sme",
             lang2="nob",
             closed=True,
-            is_ordered=True,
+            is_ocr_read=True,
             author="Nils Jernsletten",
             date_published="2007",
             isbn="82-7374-221-0",

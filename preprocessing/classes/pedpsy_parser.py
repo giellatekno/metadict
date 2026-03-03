@@ -1,5 +1,6 @@
-from utils.dataclasses import Dictionary, Article
 import re
+
+from utils.dataclasses import Article, Dictionary
 
 
 class PedPsyParser:
@@ -10,7 +11,7 @@ class PedPsyParser:
             lang1="nob",
             lang2="sme",
             closed=True,
-            is_ordered=True,
+            is_ocr_read=True,
             author="Hans Petter Boyne, Arnulf Soleng",
             date_published="2006",
             isbn="82-7374-614-3",

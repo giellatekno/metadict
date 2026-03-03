@@ -1,6 +1,6 @@
 import csv
 
-from utils.dataclasses import Dictionary, Article
+from utils.dataclasses import Article, Dictionary
 
 
 class GirjjalasvuodaParser:
@@ -13,7 +13,7 @@ class GirjjalasvuodaParser:
             lang1=l1,
             lang2=l2,
             closed=True,
-            is_ordered=True,
+            is_ocr_read=True,
             author="Harald Gaski, Vuokko Hirvonen, Ellen Näkkäläjärvi",
             date_published="1992",
             isbn="82-91047-10-3",

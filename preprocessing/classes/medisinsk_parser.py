@@ -1,7 +1,7 @@
 import csv
 import re
 
-from utils.dataclasses import Dictionary, Article
+from utils.dataclasses import Article, Dictionary
 
 
 class MedisinskParser:
@@ -12,7 +12,7 @@ class MedisinskParser:
             lang1="nob",
             lang2="sme",
             closed=True,
-            is_ordered=True,
+            is_ocr_read=True,
             author="Egil Utsi",
             date_published="1998",
             isbn="978-82-329-0564-5",

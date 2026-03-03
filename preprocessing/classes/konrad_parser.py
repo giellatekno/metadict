@@ -1,6 +1,6 @@
 import csv
 
-from utils.dataclasses import Dictionary, Article
+from utils.dataclasses import Article, Dictionary
 
 
 class KonradParser:
@@ -10,7 +10,7 @@ class KonradParser:
             name="Lappisk ordbok",
             lang1="sme",
             lang2="eng",
-            is_ordered=True,
+            is_historic=True,
             author="Konrad Nielsen",
             date_published="1932–1938",
         )

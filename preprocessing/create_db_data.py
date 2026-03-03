@@ -17,8 +17,9 @@ into a live database. Refer to that script for further information.
 """
 
 from pathlib import Path
-from utils.utils import yellow, red
+
 import classes
+from utils.utils import red, yellow
 
 parsers = {
     "gt": classes.GTParser,

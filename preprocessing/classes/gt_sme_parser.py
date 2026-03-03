@@ -1,5 +1,6 @@
 from xml.etree import ElementTree as ET
-from utils.dataclasses import Dictionary, Article
+
+from utils.dataclasses import Article, Dictionary
 from utils.utils import sort_by_sami_alphabet
 
 

@@ -1,4 +1,4 @@
-from utils.dataclasses import Dictionary, Article
+from utils.dataclasses import Article, Dictionary
 
 
 class FysihkkaParser:
@@ -11,7 +11,7 @@ class FysihkkaParser:
             lang1=l1,
             lang2=l2,
             closed=True,
-            is_ordered=True,
+            is_ocr_read=True,
             author="Arne Nystad, Nils Henrik Valkeapää",
             date_published="1993",
             isbn="82-91047-15-4",

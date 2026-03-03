@@ -45,7 +45,8 @@ class Dictionary:
     lang1: str
     lang2: str
     closed: bool = False
-    is_ordered: bool = False
+    is_ocr_read: bool = False
+    is_historic: bool = False
     author: str | None = None
     date_published: str | None = None
     isbn: str | None = None
@@ -62,7 +63,8 @@ class Dictionary:
                 lang1,
                 lang2,
                 closed,
-                is_ordered,
+                is_ocr_read,
+                is_historic,
                 author,
                 date_published,
                 isbn,
@@ -72,7 +74,8 @@ class Dictionary:
                 {to_sqlval(self.lang1)},
                 {to_sqlval(self.lang2)},
                 {to_sqlval(self.closed)},
-                {to_sqlval(self.is_ordered)},
+                {to_sqlval(self.is_ocr_read)},
+                {to_sqlval(self.is_historic)},
                 {to_sqlval(self.author)},
                 {to_sqlval(self.date_published)},
                 {to_sqlval(self.isbn)},

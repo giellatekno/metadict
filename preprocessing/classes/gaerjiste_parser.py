@@ -11,7 +11,6 @@ class GaerjisteParser:
             lang1="nob",
             lang2="sma",
             closed=True,
-            is_ordered=True,
             author="Albert Jåma",
             date_published="2001",
             isbn="",

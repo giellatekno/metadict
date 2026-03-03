@@ -1,5 +1,6 @@
-from utils.dataclasses import Dictionary, Article
 import re
+
+from utils.dataclasses import Article, Dictionary
 
 
 class ApotekordlisteParser:
@@ -13,7 +14,7 @@ class ApotekordlisteParser:
             lang1=l1,
             lang2=l2,
             closed=True,
-            is_ordered=True,
+            is_ocr_read=True,
             author="Egil Utsi, Håkon Jenssen",
             date_published="2006",
             isbn="82-7374-595-3",

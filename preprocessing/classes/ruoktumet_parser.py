@@ -1,5 +1,6 @@
-from utils.dataclasses import Dictionary, Article
 import re
+
+from utils.dataclasses import Article, Dictionary
 
 
 class RuoktumetParser:
@@ -12,7 +13,7 @@ class RuoktumetParser:
             lang1=l1,
             lang2=l2,
             closed=True,
-            is_ordered=True,
+            is_ocr_read=True,
             author="Inga Laila Hætta, Inga Hætta Skarvik",
             date_published="1997",
             isbn="82-91047-77-4",

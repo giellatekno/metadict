@@ -1,5 +1,6 @@
 import csv
-from utils.dataclasses import Dictionary, Article
+
+from utils.dataclasses import Article, Dictionary
 
 
 class QvigstadParser:
@@ -9,7 +10,7 @@ class QvigstadParser:
             name="Just Qvigstads lappiske ordbok fra Kaldfjorden og Vesterålen",
             lang1="sme",
             lang2="nob",
-            is_ordered=True,
+            is_historic=True,
             author="Just Qvigstad",
             date_published="1889",
         )
