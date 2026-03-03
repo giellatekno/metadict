@@ -16,10 +16,8 @@ use axum::{http::HeaderMap, routing::get, Json, Router};
 use listenfd::ListenFd;
 use serde_json::json;
 use std::collections::HashMap;
-use std::str::FromStr;
 use std::sync::OnceLock;
 use tokio::net::TcpListener;
-use tracing::{debug, error};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::cookie_extractor::Cookies;
@@ -62,7 +60,7 @@ impl IntoResponse for AppError {
         match self {
             AppError::Redirect(redirect) => {
                 let mut query_params = vec![];
-                error!(desc = ?redirect.description, msg = ?redirect.message, "a function caused a redirect error");
+                tracing::error!(desc = ?redirect.description, msg = ?redirect.message, "a function caused a redirect error");
                 if let Some(desc) = redirect.description {
                     query_params.push(("description", desc));
                 };
@@ -77,7 +75,7 @@ impl IntoResponse for AppError {
                 /* rust: temporary value dropped while borrowed */
                 let url = url.url().as_str();
                 if redirect.clear_cookie {
-                    let cookie = format!("metadict-api=; Max-Age=0; Path=/");
+                    let cookie = String::from("metadict-api=; Max-Age=0; Path=/");
                     let cookie_header = (http::header::SET_COOKIE, cookie);
                     ([cookie_header], Redirect::to(url)).into_response()
                 } else {
@@ -85,7 +83,7 @@ impl IntoResponse for AppError {
                 }
             }
             AppError::Other(e) => {
-                error!(error = ?e, "an error occured");
+                tracing::error!(error = ?e, "an error occured");
                 (
                     http::StatusCode::INTERNAL_SERVER_ERROR,
                     #[cfg(debug_assertions)]
@@ -162,7 +160,7 @@ macro_rules! redirect_to_errorpage {
         let msg = $msg.to_string();
         let description = $desc.to_string();
         tracing::trace!(msg, description, "redirect_to_errorpage, also clear cookie");
-        
+
         let cookie = cookie::Cookie::build(COOKIE_NAME)
             .path("/")
             .http_only(true)
@@ -306,9 +304,8 @@ pub enum Language {
     swe,
 }
 
-pub const LANGUAGES_STR_QUOTED_COMMA_SEPARATED: &'static str = const {
-    "'deu','eng','est','fin','nob','sma','sme','smj','smn','swe'"
-};
+pub const LANGUAGES_STR_QUOTED_COMMA_SEPARATED: &str =
+    "'deu','eng','est','fin','nob','sma','sme','smj','smn','swe'";
 
 #[derive(Debug, thiserror::Error)]
 pub enum LanguageError {
@@ -319,8 +316,45 @@ pub enum LanguageError {
 }
 
 fn parse_l2s(s: &str) -> Result<Vec<Language>, &'static str> {
-    const ERR: &'static str = "invalid lang, choose between 'deu,eng,est,fin,nob,sma,sme,smj,smn,swe'";
-    s.trim().split(',').map(|s| s.parse().map_err(|_| ERR)).collect()
+    const ERR: &str = "invalid lang, choose between 'deu,eng,est,fin,nob,sma,sme,smj,smn,swe'";
+    s.trim()
+        .split(',')
+        .map(|s| s.parse().map_err(|_| ERR))
+        .collect()
+}
+
+macro_rules! handle_can_see_closed {
+    ($cookies:ident, $iat:ident, $headers:ident) => {{
+        let jwt = match our_jwt::DecodedJwt::try_from($cookies) {
+            Ok(jwt) => Some(jwt),
+            Err(our_jwt::CookieParseError::NoCookies)
+            | Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => None,
+            Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
+                redirect_to_errorpage!(
+                    message = inner_error,
+                    description = "error while decoding jwt",
+                    clear_cookie = true
+                );
+            }
+        };
+        match jwt {
+            Some(jwt) => match jwt.refresh_if_needed(&$iat.get().await.unwrap()).await {
+                Ok(None) => jwt.restricted_dicts(),
+                Ok(Some(new_jwt)) => {
+                    $headers.insert(http::header::SET_COOKIE, new_jwt.to_cookie());
+                    new_jwt.restricted_dicts()
+                }
+                Err(e) => {
+                    redirect_to_errorpage!(
+                        message = e,
+                        description = "error while refreshing jwt",
+                        clear_cookie = true
+                    );
+                }
+            },
+            None => false,
+        }
+    }};
 }
 
 /// /search/:lang/:query
@@ -331,68 +365,23 @@ async fn handler_search(
     Query(SearchQueryParams { l2 }): Query<SearchQueryParams>,
     State(AppState { connpool, iat }): State<AppState>,
 ) -> Result<Response, AppError> {
-    tracing::trace!(?l2, "only want these l2 languages");
+    let db = connpool.get().await?;
+    let mut headers = HeaderMap::new();
+    let can_see_closed = handle_can_see_closed!(cookies, iat, headers);
     let l2s = match l2 {
         Some(s) => match parse_l2s(&s) {
             Ok(l2s) => Some(l2s),
             Err(e) => return Err(AppError::from(anyhow!("invalid l2: {e}"))),
-        }
+        },
         None => None,
     };
 
-    let mut headers = HeaderMap::new();
-    let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
-        Ok(jwt) => {
-            debug!(jwt = ?jwt, "jwt is");
-            if !jwt.has_expired() {
-                jwt.restricted_dicts()
-            } else {
-                let new_jwt = jwt.refresh(&iat.get().await.unwrap()).await?;
-                let can_see_closed = new_jwt.restricted_dicts();
-                let new_jwt_string = new_jwt.encode(crate::JWT_SECRET.get().unwrap()).unwrap();
-                let cookie = cookie::Cookie::build((COOKIE_NAME, new_jwt_string))
-                    .path("/")
-                    .http_only(true)
-                    .secure(true)
-                    .build()
-                    .to_string()
-                    .parse()
-                    .unwrap();
-                headers.insert(http::header::SET_COOKIE, cookie);
-                can_see_closed
-            }
-        }
-        Err(e @ our_jwt::CookieParseError::NoCookies) => {
-            debug!(errorkind = ?e, errortext = ?e.to_string(), "no cookies found");
-            false
-        }
-        Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => {
-            debug!("no metadict-creds cookie");
-            false
-        }
-        Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
-            redirect_to_errorpage!(
-                message = inner_error,
-                description = "error while decoding jwt",
-                clear_cookie = true
-            );
-        }
-    };
-
-    if query == "%" {
-        let response_body = Json(json!([]));
-        let response = (headers, response_body).into_response();
-        return Ok(response);
+    if query.bytes().all(|b| b == b'%') {
+        return Ok((headers, Json(json!({ "error": "narrow your search" }))).into_response());
     }
 
-    tracing::trace!("retreiving connection to db from connection pool...");
-    let connection = connpool.get().await?;
-    tracing::trace!("finding lemmas...");
-    let rows = crate::db::find_lemmas(connection, &lang, &query, l2s.as_deref(), can_see_closed).await?;
-    let response_body = Json(json!(rows));
-    let response = (headers, response_body).into_response();
-    tracing::trace!("handler_search(): returning response");
-    Ok(response)
+    let rows = crate::db::find_lemmas(db, &lang, &query, l2s.as_deref(), can_see_closed).await?;
+    Ok((headers, Json(json!(rows))).into_response())
 }
 
 /// /lookup/:lang/:lemma
@@ -406,47 +395,9 @@ async fn handler_lookup(
 ) -> Result<Response, AppError> {
     let db = connpool.get().await?;
     let mut headers = HeaderMap::new();
-    let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
-        Ok(jwt) => {
-            if !jwt.has_expired() {
-                jwt.restricted_dicts()
-            } else {
-                let new_jwt = jwt.refresh(&iat.get().await.unwrap()).await?;
-                let can_see_closed = new_jwt.restricted_dicts();
-                let new_jwt_string = new_jwt.encode(crate::JWT_SECRET.get().unwrap()).unwrap();
-                let cookie = cookie::Cookie::build((COOKIE_NAME, new_jwt_string))
-                    .path("/")
-                    .http_only(true)
-                    .secure(true)
-                    .build()
-                    .to_string()
-                    .parse()
-                    .unwrap();
-                headers.insert(http::header::SET_COOKIE, cookie);
-                can_see_closed
-            }
-        }
-        Err(e @ our_jwt::CookieParseError::NoCookies) => {
-            debug!(errorkind = ?e, errortext =?e.to_string(), "no cookies found");
-            false
-        }
-        Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => {
-            debug!("no metadict-creds cookie");
-            false
-        }
-        Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
-            redirect_to_errorpage!(
-                message = inner_error,
-                description = "error while decoding jwt",
-                clear_cookie = true
-            );
-        }
-    };
-
+    let can_see_closed = handle_can_see_closed!(cookies, iat, headers);
     let rows = crate::db::find_articles_for_lemma(db, &lang, &lemma, can_see_closed).await?;
-    let response_body = Json(json!(rows));
-    let response = (headers, response_body).into_response();
-    Ok(response)
+    Ok((headers, Json(json!(rows))).into_response())
 }
 
 /// /article/:id
@@ -457,41 +408,9 @@ async fn handler_article(
 ) -> Result<Response, AppError> {
     let db = connpool.get().await?;
     let mut headers = HeaderMap::new();
-    let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
-        Ok(jwt) => {
-            if !jwt.has_expired() {
-                jwt.restricted_dicts()
-            } else {
-                let new_jwt = jwt.refresh(&iat.get().await.unwrap()).await?;
-                let can_see_closed = new_jwt.restricted_dicts();
-                let new_jwt_string = new_jwt.encode(crate::JWT_SECRET.get().unwrap()).unwrap();
-                let cookie = cookie::Cookie::build((COOKIE_NAME, new_jwt_string))
-                    .path("/")
-                    .http_only(true)
-                    .secure(true)
-                    .build()
-                    .to_string()
-                    .parse()
-                    .unwrap();
-                headers.insert(http::header::SET_COOKIE, cookie);
-                can_see_closed
-            }
-        }
-        Err(our_jwt::CookieParseError::NoCookies)
-        | Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => false,
-        Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
-            redirect_to_errorpage!(
-                message = inner_error,
-                description = "error while decoding jwt",
-                clear_cookie = true
-            );
-        }
-    };
-
+    let can_see_closed = handle_can_see_closed!(cookies, iat, headers);
     let rows = crate::db::find_article_by_id(db, id, can_see_closed).await?;
-    let response_body = Json(json!(rows));
-    let response = (headers, response_body).into_response();
-    Ok(response)
+    Ok((headers, Json(json!(rows))).into_response())
 }
 
 // /neighbors/:id
@@ -502,39 +421,9 @@ async fn handler_neighbors(
 ) -> Result<Response, AppError> {
     let db = connpool.get().await?;
     let mut headers = HeaderMap::new();
-    let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
-        Ok(jwt) => {
-            if !jwt.has_expired() {
-                jwt.restricted_dicts()
-            } else {
-                let new_jwt = jwt.refresh(&iat.get().await.unwrap()).await?;
-                let can_see_closed = new_jwt.restricted_dicts();
-                let new_jwt_string = new_jwt.encode(crate::JWT_SECRET.get().unwrap()).unwrap();
-                let cookie = cookie::Cookie::build((COOKIE_NAME, new_jwt_string))
-                    .path("/")
-                    .http_only(true)
-                    .secure(true)
-                    .build()
-                    .to_string()
-                    .parse()
-                    .unwrap();
-                headers.insert(http::header::SET_COOKIE, cookie);
-                can_see_closed
-            }
-        }
-        Err(our_jwt::CookieParseError::NoCookies)
-        | Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => false,
-        Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
-            redirect_to_errorpage!(
-                message = inner_error,
-                description = "error while decoding jwt",
-                clear_cookie = true
-            );
-        }
-    };
+    let can_see_closed = handle_can_see_closed!(cookies, iat, headers);
     let rows = crate::db::find_neighboring_articles(db, id, can_see_closed).await?;
-    let response_body = Json(json!(rows));
-    Ok((headers, response_body).into_response())
+    Ok((headers, Json(json!(rows))).into_response())
 }
 
 /// /dictionary/:article_id
@@ -546,41 +435,9 @@ async fn handler_dictionary(
 ) -> Result<Response, AppError> {
     let db = connpool.get().await?;
     let mut headers = HeaderMap::new();
-    let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
-        Ok(jwt) => {
-            if !jwt.has_expired() {
-                jwt.restricted_dicts()
-            } else {
-                let new_jwt = jwt.refresh(&iat.get().await.unwrap()).await?;
-                let can_see_closed = new_jwt.restricted_dicts();
-                let new_jwt_string = new_jwt.encode(crate::JWT_SECRET.get().unwrap()).unwrap();
-                let cookie = cookie::Cookie::build((COOKIE_NAME, new_jwt_string))
-                    .path("/")
-                    .http_only(true)
-                    .secure(true)
-                    .build()
-                    .to_string()
-                    .parse()
-                    .unwrap();
-                headers.insert(http::header::SET_COOKIE, cookie);
-                can_see_closed
-            }
-        }
-        Err(our_jwt::CookieParseError::NoCookies)
-        | Err(our_jwt::CookieParseError::NoMetadictCredsCookie) => false,
-        Err(our_jwt::CookieParseError::DecodeError(inner_error)) => {
-            redirect_to_errorpage!(
-                message = inner_error,
-                description = "error while decoding jwt",
-                clear_cookie = true
-            );
-        }
-    };
-
+    let can_see_closed = handle_can_see_closed!(cookies, iat, headers);
     let rows = crate::db::find_dictionary_by_article_id(db, id, can_see_closed).await?;
-    let response_body = Json(json!(rows));
-    let response = (headers, response_body).into_response();
-    Ok(response)
+    Ok((headers, Json(json!(rows))).into_response())
 }
 
 async fn shutdown_signal() {
@@ -642,20 +499,17 @@ async fn main() -> anyhow::Result<()> {
     let _ = state.connpool.get().await.inspect_err(move |e| {
         use deadpool_postgres::PoolError;
         match e.downcast_ref::<PoolError>() {
-            Some(e) => {
-                match e {
-                    PoolError::Timeout(_timeout_type) => {
-                        tracing::warn!("timeout");
-                    }
-                    PoolError::Backend(backend_error) => {
-                        tracing::warn!(error = backend_error.to_string(), "backend");
-                    }
-                    PoolError::Closed => {}
-                    PoolError::NoRuntimeSpecified => {}
-                    PoolError::PostCreateHook(_x) => {}
+            Some(e) => match e {
+                PoolError::Timeout(_timeout_type) => {
+                    tracing::warn!("timeout");
                 }
-                //tracing::warn!(error = x.to_string(), "could downcast, at least");
-            }
+                PoolError::Backend(backend_error) => {
+                    tracing::warn!(error = backend_error.to_string(), "backend");
+                }
+                PoolError::Closed => {}
+                PoolError::NoRuntimeSpecified => {}
+                PoolError::PostCreateHook(_x) => {}
+            },
             None => unreachable!("state.connpool.get() is only PoolError"),
         }
 
@@ -694,8 +548,8 @@ async fn main() -> anyhow::Result<()> {
         .route("/auth/logout", get(handler_auth_logout))
         .fallback(handler_404)
         .layer(cors_layer)
-        //.layer(trace_layer)
-        //.layer(axum::middleware::from_fn(timing_middleware))
+        .layer(trace_layer)
+        .layer(axum::middleware::from_fn(timing_middleware))
         .with_state(state);
 
     let listener = match ListenFd::from_env().take_tcp_listener(0).unwrap() {

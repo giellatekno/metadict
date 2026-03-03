@@ -52,7 +52,7 @@ impl DecodedJwt {
         let header = jsonwebtoken::Header::default();
         let key = EncodingKey::from_secret(signing_key);
         let claims = self;
-        Ok(encode(&header, &claims, &key)?)
+        encode(&header, &claims, &key)
     }
 
     pub fn has_expired(&self) -> bool {
@@ -63,10 +63,21 @@ impl DecodedJwt {
         self.0.exp < now
     }
 
+    pub async fn refresh_if_needed(&self, iat: &str) -> anyhow::Result<Option<Self>> {
+        if !self.has_expired() {
+            return Ok(None);
+        }
+
+        match self.refresh(iat).await {
+            Ok(decoded_jwt) => Ok(Some(decoded_jwt)),
+            Err(e) => Err(e),
+        }
+    }
+
     /// Refresh our JWT. When we do, we want to check against GH if the user
     /// still has restricted access, so we need the user's login name,
     /// as well as our installation access token (iat).
-    pub async fn refresh(&self, iat: &str) -> anyhow::Result<DecodedJwt> {
+    pub async fn refresh(&self, iat: &str) -> anyhow::Result<Self> {
         assert!(self.has_expired());
         let can_see_closed = crate::ghapi::user_in_team(
             self.gh_login_name(),
@@ -86,6 +97,18 @@ impl DecodedJwt {
             .build()
             .unwrap();
         Ok(jwt)
+    }
+
+    pub fn to_cookie(&self) -> http::HeaderValue {
+        let encoded = self.encode(crate::JWT_SECRET.get().unwrap()).unwrap();
+        cookie::Cookie::build((COOKIE_NAME, encoded))
+            .path("/")
+            .http_only(true)
+            .secure(true)
+            .build()
+            .to_string()
+            .parse()
+            .unwrap()
     }
 
     pub fn gh_refresh_token(&self) -> &str {
@@ -127,11 +150,19 @@ impl TryFrom<Cookies> for DecodedJwt {
     type Error = CookieParseError;
 
     fn try_from(cookies: Cookies) -> Result<Self, Self::Error> {
-        let cookies = cookies.0.ok_or_else(|| CookieParseError::NoCookies)?;
+        TryFrom::try_from(&cookies)
+    }
+}
+
+impl TryFrom<&Cookies> for DecodedJwt {
+    type Error = CookieParseError;
+
+    fn try_from(cookies: &Cookies) -> Result<Self, Self::Error> {
+        let cookies = cookies.0.as_ref().ok_or(CookieParseError::NoCookies)?;
         let token = cookies
             .iter()
             .find(|cookie| cookie.name() == COOKIE_NAME)
-            .ok_or_else(|| CookieParseError::NoMetadictCredsCookie)?
+            .ok_or(CookieParseError::NoMetadictCredsCookie)?
             .value_trimmed();
 
         let key = DecodingKey::from_secret(crate::JWT_SECRET.get().unwrap());
@@ -144,7 +175,7 @@ impl TryFrom<Cookies> for DecodedJwt {
         validation.set_audience(&[AUDIENCE]);
 
         let our_claims = decode::<OurClaims>(token, &key, &validation)
-            .map_err(|e| CookieParseError::DecodeError(e))?
+            .map_err(CookieParseError::DecodeError)?
             .claims;
 
         Ok(DecodedJwt(our_claims))

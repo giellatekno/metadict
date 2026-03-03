@@ -2,7 +2,7 @@ use anyhow::Context;
 use serde::Deserialize;
 
 const TIMEOUT: std::time::Duration = std::time::Duration::from_secs(5);
-const USER_AGENT: &'static str = "reqwest/0.13.1";
+const USER_AGENT: &str = "reqwest/0.13.1";
 
 /// The json object returned when exchanging the code for an access token, at
 /// https://github.com/login/oauth/access_token
@@ -203,7 +203,7 @@ pub struct GhUserResponse {
 /// api.github.com/user - get user info, given an access token
 #[tracing::instrument(level = "trace")]
 pub async fn get_user(access_token: &str) -> Result<GhUserResponse, RequestError> {
-    Ok(reqwest::Client::new()
+    reqwest::Client::new()
         .get("https://api.github.com/user")
         .header("User-Agent", USER_AGENT)
         .header("Accept", "application/vnd.github+json")
@@ -216,7 +216,7 @@ pub async fn get_user(access_token: &str) -> Result<GhUserResponse, RequestError
         .error_for_status()?
         .json()
         .await
-        .map_err(|err| RequestError::Json { source: err })?)
+        .map_err(|err| RequestError::Json { source: err })
 }
 
 #[derive(Deserialize)]
@@ -346,7 +346,7 @@ pub async fn get_app_installation_access_token(
     jwt: &str,
 ) -> Result<IatResponseBody, RequestError> {
     let url = format!("https://api.github.com/app/installations/{installation_id}/access_tokens");
-    Ok(reqwest::Client::new()
+    reqwest::Client::new()
         .post(&url)
         .header("User-Agent", USER_AGENT)
         .header("Accept", "application/vnd.github+json")
@@ -354,8 +354,8 @@ pub async fn get_app_installation_access_token(
         .header("Authorization", format!("Bearer {jwt}"))
         .send()
         .await
-        .map_err(|err| RequestError::from(err))?
+        .map_err(RequestError::from)?
         .json()
         .await
-        .map_err(|err| RequestError::Json { source: err })?)
+        .map_err(|err| RequestError::Json { source: err })
 }

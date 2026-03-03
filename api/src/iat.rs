@@ -1,7 +1,7 @@
 /// IAT - Installation Access Token
 /// Code for generating the JWT we need to query the GH API for an IAT
 use serde::Serialize;
-use std::sync::{Arc, OnceLock};
+use std::sync::Arc;
 use tokio::sync::RwLock;
 
 // ID of installation of app, as in, the number in the url at
@@ -16,13 +16,11 @@ const APP_ID: u64 = 880740;
 // There is a "private key" area. This is the key we need to sign the JWT
 // that we need to get an IAT, and we store it in OnceLock, and load it
 // from a file at the beginning of the program.
-pub static IAT_PRIVATE_KEY: OnceLock<Vec<u8>> = OnceLock::new();
-
-// The key is stored in this file
-// TODO store this path in a Config instead?
-const IAT_PK_PATH: &str = "giellatekno-metadictionary.2024-04-26.private-key.pem";
+pub static IAT_PRIVATE_KEY: &[u8] =
+    include_bytes!("../giellatekno-metadictionary.2024-04-26.private-key.pem");
 
 #[derive(Debug)]
+#[allow(clippy::upper_case_acronyms)]
 pub struct IAT(Arc<RwLock<Option<Inner>>>);
 
 impl Clone for IAT {
@@ -84,10 +82,6 @@ impl Inner {
     pub fn has_expired(&self) -> bool {
         self.expires_at < chrono::offset::Utc::now()
     }
-
-    // pub fn token(&self) -> &str {
-    //     self.token.as_str()
-    // }
 }
 
 #[derive(Serialize)]
@@ -102,9 +96,7 @@ struct AppJwtClaims {
 
 pub fn generate_app_jwt() -> String {
     let header = jsonwebtoken::Header::new(jsonwebtoken::Algorithm::RS256);
-
-    let iat_private_key = IAT_PRIVATE_KEY.get_or_init(|| std::fs::read(IAT_PK_PATH).unwrap());
-    let signing_key = jsonwebtoken::EncodingKey::from_rsa_pem(iat_private_key)
+    let signing_key = jsonwebtoken::EncodingKey::from_rsa_pem(IAT_PRIVATE_KEY)
         .expect("key we gave is RS256, so key validates");
     let now = jsonwebtoken::get_current_timestamp();
 
