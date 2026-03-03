@@ -16,6 +16,12 @@ shell:
 psql:
     podman exec -it metadict-db psql -U postgres
 
+purge-local:
+    podman volume rm metadict-data
+
+fill-local:
+    uv run insert_dictionaries.py -c ../preprocessing/sql_files
+
 push-labacr:
     podman tag metadict-db gtlabcontainerregistry.azurecr.io/metadict-db
     podman push gtlabcontainerregistry.azurecr.io/metadict-db
