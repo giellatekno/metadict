@@ -48,50 +48,6 @@ pub async fn find_lemmas(
             articles.lemma
     "#);
 
-    /*
-    let statement = if can_see_closed {
-        r#"
-        SELECT DISTINCT
-            articles.lemma
-        FROM
-            articles
-        WHERE
-            articles.lang = $1
-            AND
-            LOWER(articles.lemma) LIKE LOWER($2)
-        ORDER BY 
-            articles.lemma
-        ;
-    "#
-    } else {
-        r#"
-        SELECT DISTINCT
-            articles.lemma
-        FROM
-            articles
-        INNER JOIN
-            dictionaries
-        ON
-            articles.dictionary = dictionaries.id
-        WHERE
-            lang = $1
-            AND
-            LOWER(lemma) LIKE LOWER($2)
-            AND
-            dictionaries.closed = FALSE
-        ORDER BY 
-            articles.lemma
-        ;
-    "#
-    };
-    */
-
-    /*
-    let statement = match l2 {
-        Some(l2s) => statement.for
-    };
-    */
-
     Ok(db
         .query(&statement, &[&lang, &query])
         .await
@@ -107,12 +63,21 @@ pub async fn find_lemmas(
         .collect::<Vec<String>>())
 }
 
+#[derive(serde::Serialize)]
+pub struct Article {
+    lemma: String,
+    dictionary_name: String,
+    article_id: i32,
+    lang2: crate::Language,
+    date_published: String,
+}
+
 pub async fn find_articles_for_lemma(
     db: deadpool_postgres::Object,
     lang: &str,
     lemma: &str,
     can_see_closed: bool,
-) -> anyhow::Result<Vec<(String, String, i32, String, String)>> {
+) -> anyhow::Result<Vec<Article>> {
     // TODO injection safe?
     let statement = if can_see_closed {
         r#"
@@ -168,15 +133,16 @@ pub async fn find_articles_for_lemma(
         .map_err(|e| anyhow::anyhow!(e))?
         .iter()
         .map(|row| {
-            (
-                row.get::<usize, String>(0),
-                row.get::<usize, String>(1),
-                row.get::<usize, i32>(2),
-                row.get::<usize, String>(3),
-                row.get::<usize, String>(4),
-            )
+            Article {
+                lemma: row.get::<usize, String>(0),
+                dictionary_name: row.get::<usize, String>(1),
+                article_id: row.get::<usize, i32>(2),
+                lang2: row.get::<usize, String>(3).parse()
+                    .expect("language in database not in code"),
+                date_published: row.get::<usize, String>(4),
+            }
         })
-        .collect::<Vec<_>>())
+        .collect::<Vec<Article>>())
 }
 
 pub async fn find_article_by_id(

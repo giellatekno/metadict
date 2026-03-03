@@ -292,7 +292,7 @@ struct SearchQueryParams {
 }
 
 #[allow(non_camel_case_types)]
-#[derive(strum::Display, strum::EnumString)]
+#[derive(serde::Serialize, strum::Display, strum::EnumString)]
 pub enum Language {
     deu,
     eng,
