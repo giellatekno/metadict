@@ -9,12 +9,14 @@ mod our_jwt;
 mod pg_connection_pool;
 mod timing_middleware;
 
+use anyhow::anyhow;
 use axum::extract::{Path, Query, State};
 use axum::response::{IntoResponse, Redirect, Response};
 use axum::{http::HeaderMap, routing::get, Json, Router};
 use listenfd::ListenFd;
 use serde_json::json;
 use std::collections::HashMap;
+use std::str::FromStr;
 use std::sync::OnceLock;
 use tokio::net::TcpListener;
 use tracing::{debug, error};
@@ -284,13 +286,60 @@ async fn handler_auth_logout(Query(params): Query<HashMap<String, String>>) -> R
         .into_response()
 }
 
+#[derive(Debug, serde::Deserialize)]
+struct SearchQueryParams {
+    l2: Option<String>,
+}
+
+#[allow(non_camel_case_types)]
+#[derive(strum::Display, strum::EnumString)]
+pub enum Language {
+    deu,
+    eng,
+    est,
+    fin,
+    nob,
+    sma,
+    sme,
+    smj,
+    smn,
+    swe,
+}
+
+pub const LANGUAGES_STR_QUOTED_COMMA_SEPARATED: &'static str = const {
+    "'deu','eng','est','fin','nob','sma','sme','smj','smn','swe'"
+};
+
+#[derive(Debug, thiserror::Error)]
+pub enum LanguageError {
+    #[error("not 3 characers long (was {0})")]
+    InvalidLength(usize),
+    #[error("non a-z character '{0}' at position {1}")]
+    InvalidChar(char, usize),
+}
+
+fn parse_l2s(s: &str) -> Result<Vec<Language>, &'static str> {
+    const ERR: &'static str = "invalid lang, choose between 'deu,eng,est,fin,nob,sma,sme,smj,smn,swe'";
+    s.trim().split(',').map(|s| s.parse().map_err(|_| ERR)).collect()
+}
+
 /// /search/:lang/:query
 /// Finds all matching lemmas to the :query, in all dictionaries.
 async fn handler_search(
     cookies: Cookies,
     Path((lang, query)): Path<(String, String)>,
+    Query(SearchQueryParams { l2 }): Query<SearchQueryParams>,
     State(AppState { connpool, iat }): State<AppState>,
 ) -> Result<Response, AppError> {
+    tracing::trace!(?l2, "only want these l2 languages");
+    let l2s = match l2 {
+        Some(s) => match parse_l2s(&s) {
+            Ok(l2s) => Some(l2s),
+            Err(e) => return Err(AppError::from(anyhow!("invalid l2: {e}"))),
+        }
+        None => None,
+    };
+
     let mut headers = HeaderMap::new();
     let can_see_closed = match our_jwt::DecodedJwt::try_from(cookies) {
         Ok(jwt) => {
@@ -339,7 +388,7 @@ async fn handler_search(
     tracing::trace!("retreiving connection to db from connection pool...");
     let connection = connpool.get().await?;
     tracing::trace!("finding lemmas...");
-    let rows = crate::db::find_lemmas(connection, &lang, &query, can_see_closed).await?;
+    let rows = crate::db::find_lemmas(connection, &lang, &query, l2s.as_deref(), can_see_closed).await?;
     let response_body = Json(json!(rows));
     let response = (headers, response_body).into_response();
     tracing::trace!("handler_search(): returning response");
@@ -645,8 +694,8 @@ async fn main() -> anyhow::Result<()> {
         .route("/auth/logout", get(handler_auth_logout))
         .fallback(handler_404)
         .layer(cors_layer)
-        .layer(trace_layer)
-        .layer(axum::middleware::from_fn(timing_middleware))
+        //.layer(trace_layer)
+        //.layer(axum::middleware::from_fn(timing_middleware))
         .with_state(state);
 
     let listener = match ListenFd::from_env().take_tcp_listener(0).unwrap() {

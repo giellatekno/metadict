@@ -69,3 +69,7 @@ derive_builder = "0.20.0"
 
 # time and dates
 chrono = "0.4.38"
+
+# string display and fromstr from an enum
+strum = { version = "0.28.0", features = ["derive"] }
+strum_macros = "0.28"

@@ -2,18 +2,53 @@
 //! All SQL is in this file.
 
 use anyhow::{Context, Ok};
-use tracing::debug;
 
 pub async fn find_lemmas(
     db: deadpool_postgres::Object,
     lang: &str,
     query: &str,
+    l2: Option<&[crate::Language]>,
     can_see_closed: bool,
 ) -> anyhow::Result<Vec<String>> {
     // TODO perf: prepared statement cache?
     // TODO injection safe?
-    debug!(can_see_closed = can_see_closed, "find_lemmas()");
+    use itertools::Itertools;
+    let can_see_closed = if !can_see_closed {
+        " AND dictionaries.closed = FALSE "
+    } else {
+        ""
+    };
+    let lang2_filter = match l2 {
+        Some(langs) => {
+            langs
+                .into_iter()
+                .map(|lang| format!("'{lang}'"))
+                .intersperse(String::from(","))
+                .collect()
+        }
+        None => crate::LANGUAGES_STR_QUOTED_COMMA_SEPARATED.to_string(),
+    };
+    let statement = format!(r#"
+        SELECT DISTINCT
+            articles.lemma
+        FROM
+            articles
+        INNER JOIN
+            dictionaries
+        ON
+            articles.dictionary = dictionaries.id
+        WHERE
+            lang = $1
+            AND
+            LOWER(lemma) LIKE LOWER($2)
+            {can_see_closed}
+            AND
+            dictionaries.lang2 IN ({lang2_filter})
+        ORDER BY 
+            articles.lemma
+    "#);
 
+    /*
     let statement = if can_see_closed {
         r#"
         SELECT DISTINCT
@@ -49,9 +84,16 @@ pub async fn find_lemmas(
         ;
     "#
     };
+    */
+
+    /*
+    let statement = match l2 {
+        Some(l2s) => statement.for
+    };
+    */
 
     Ok(db
-        .query(statement, &[&lang, &query])
+        .query(&statement, &[&lang, &query])
         .await
         .map_err(|e| anyhow::anyhow!(e))?
         .iter()

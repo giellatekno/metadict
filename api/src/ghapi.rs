@@ -33,45 +33,25 @@ pub struct AccessTokenResponse {
 #[derive(Debug, thiserror::Error)]
 pub enum RequestError {
     #[error("Error related to the body from https://github.com/login/oauth/access_token")]
-    Body {
-        source: reqwest::Error
-    },
+    Body { source: reqwest::Error },
     #[error("Error related to Builder from https://github.com/login/oauth/access_token")]
-    Builder {
-        source: reqwest::Error
-    },
+    Builder { source: reqwest::Error },
     #[error("Could not connect to https://github.com/login/oauth/access_token")]
-    Connect {
-        source: reqwest::Error
-    },
+    Connect { source: reqwest::Error },
     #[error("Could not connect to https://github.com/login/oauth/access_token")]
-    Decode {
-        source: reqwest::Error
-    },
+    Decode { source: reqwest::Error },
     #[error("Could not decode json body from https://github.com/login/oauth/access_token")]
-    Json {
-        source: reqwest::Error
-    },
+    Json { source: reqwest::Error },
     #[error("Query to https://github.com/login/oauth/access_token returned redirect erroronously")]
-    Redirect {
-        source: reqwest::Error
-    },
+    Redirect { source: reqwest::Error },
     #[error("Generic error related to the request to https://github.com/login/oauth/access_token")]
-    Request {
-        source: reqwest::Error
-    },
+    Request { source: reqwest::Error },
     #[error("Request to https://github.com/login/oauth/access_token had incorrect status")]
-    Status {
-        source: reqwest::Error
-    },
+    Status { source: reqwest::Error },
     #[error("query to https://github.com/login/oauth/access_token timed out")]
-    Timeout {
-        source: reqwest::Error
-    },
+    Timeout { source: reqwest::Error },
     #[error("Request to https://github.com/login/oauth/access_token asked us to Upgrade")]
-    Upgrade {
-        source: reqwest::Error
-    },
+    Upgrade { source: reqwest::Error },
     #[error("Other request error")]
     Other(String),
 }
@@ -162,12 +142,17 @@ pub async fn exchange_code_for_access_token(
 
     match serde_json::from_value(json) {
         Ok(access_token_response) => {
-            tracing::trace!(?access_token_response, "json parsed as exected access token response strucutre");
+            tracing::trace!(
+                ?access_token_response,
+                "json parsed as exected access token response strucutre"
+            );
             Ok(access_token_response)
         }
         Err(error) => {
             tracing::error!(?error, "json body was not access token response structure");
-            Err(RequestError::Other(format!("json body was not access token response: {error}")))
+            Err(RequestError::Other(format!(
+                "json body was not access token response: {error}"
+            )))
         }
     }
 }
