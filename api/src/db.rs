@@ -68,9 +68,11 @@ pub async fn find_lemmas(
 pub struct Article {
     lemma: String,
     dictionary_name: String,
-    article_id: i32,
+    article_number: i32,
     lang2: crate::Language,
     date_published: String,
+    is_historic: bool,
+    is_ocr_read: bool,
 }
 
 pub async fn find_articles_for_lemma(
@@ -90,6 +92,8 @@ pub async fn find_articles_for_lemma(
                 articles.id,
                 dictionaries.lang2,
                 COALESCE(dictionaries.date_published, '')
+                dictionaries.is_historic,
+                dictionaries.is_ocr_read,
             FROM
                 articles
             INNER JOIN
@@ -103,7 +107,6 @@ pub async fn find_articles_for_lemma(
                 {can_see_closed}
             ORDER BY 
                 dictionaries.name, articles.id
-            ;
         "#
     );
 
@@ -115,30 +118,35 @@ pub async fn find_articles_for_lemma(
         .map(|row| Article {
             lemma: row.get::<usize, String>(0),
             dictionary_name: row.get::<usize, String>(1),
-            article_id: row.get::<usize, i32>(2),
+            article_number: row.get::<usize, i32>(2),
             lang2: row
                 .get::<usize, String>(3)
                 .parse()
-                .expect("language in database not in code"),
+                .expect("rust source code knows all language codes in database"),
             date_published: row.get::<usize, String>(4),
+            is_historic: row.get::<usize, bool>(5),
+            is_ocr_read: row.get::<usize, bool>(6),
         })
         .collect::<Vec<Article>>())
 }
 
+#[derive(serde::Serialize)]
 pub struct FindArticleByIdRow {
     rendered: String,
+    article_number: i32,
 }
 
 pub async fn find_article_by_id(
     db: deadpool_postgres::Object,
     id: i32,
     can_see_closed: bool,
-) -> anyhow::Result<Vec<String>> {
+) -> anyhow::Result<Vec<FindArticleByIdRow>> {
     let can_see_closed = can_see_closed_sql(can_see_closed);
     let statement = format!(
         r#"
             SELECT
-                articles.rendered
+                articles.rendered,
+                articles.article_number
             FROM
                 articles
             INNER JOIN
@@ -157,7 +165,10 @@ pub async fn find_article_by_id(
         .map_err(|e| anyhow::anyhow!(e))
         .with_context(|| "running find_article_by_id query against db")?
         .iter()
-        .map(|row| row.get::<usize, String>(0))
+        .map(|row| FindArticleByIdRow {
+            rendered: row.get::<usize, String>(0),
+            article_number: row.get::<usize, i32>(1),
+        })
         .collect::<Vec<_>>())
 }
 
@@ -177,23 +188,23 @@ pub async fn find_neighboring_articles(
         r#"
         SELECT
             articles.article_number,
-            articles.rendered 
-        FROM 
-            articles INNER JOIN dictionaries 
-            ON articles.dictionary = dictionaries.id, 
-            (SELECT 
-                article_number, dictionary 
-            FROM 
-                articles 
-            WHERE 
-                id = $1) lemma 
-        WHERE 
-            articles.dictionary = lemma.dictionary 
-            AND 
-            articles.article_number BETWEEN lemma.article_number-5 AND lemma.article_number+5 
+            articles.rendered
+        FROM
+            articles INNER JOIN dictionaries
+            ON articles.dictionary = dictionaries.id,
+            (SELECT
+                article_number, dictionary
+            FROM
+                articles
+            WHERE
+                id = $1) lemma
+        WHERE
+            articles.dictionary = lemma.dictionary
+            AND
+            articles.article_number BETWEEN lemma.article_number-5 AND lemma.article_number+5
             {can_see_closed}
         ORDER BY
-            articles.article_number;
+            articles.article_number
     "#
     );
 
@@ -219,6 +230,8 @@ pub struct Dictionary {
     author: String,
     date_published: String,
     isbn: String,
+    is_historic: bool,
+    is_ocr_read: bool,
 }
 
 pub async fn find_dictionary_by_article_id(
@@ -229,12 +242,17 @@ pub async fn find_dictionary_by_article_id(
     let can_see_closed = can_see_closed_sql(can_see_closed);
     let statement = format!(
         r#"
-        SELECT 
-            name, COALESCE(author, ''), COALESCE(date_published, ''), COALESCE(isbn, '') 
-        FROM 
+        SELECT
+            name,
+            COALESCE(author, ''),
+            COALESCE(date_published, ''),
+            COALESCE(isbn, '')
+            is_historic,
+            is_ocr_read
+        FROM
             dictionaries,
-            (SELECT dictionary FROM articles WHERE id = $1) 
-        WHERE 
+            (SELECT dictionary FROM articles WHERE id = $1)
+        WHERE
             id = dictionary
             {can_see_closed}
     "#
@@ -250,6 +268,8 @@ pub async fn find_dictionary_by_article_id(
             author: row.get::<usize, String>(1),
             date_published: row.get::<usize, String>(2),
             isbn: row.get::<usize, String>(3),
+            is_historic: row.get::<usize, bool>(4),
+            is_ocr_read: row.get::<usize, bool>(5),
         })
         .collect())
 }

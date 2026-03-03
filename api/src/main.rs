@@ -406,38 +406,25 @@ async fn handler_article(
     Path(id): Path<i32>,
     State(AppState { connpool, iat }): State<AppState>,
 ) -> Result<Response, AppError> {
-    let db = connpool.get().await?;
     let mut headers = HeaderMap::new();
-    let can_see_closed = handle_can_see_closed!(cookies, iat, headers);
-    let rows = crate::db::find_article_by_id(db, id, can_see_closed).await?;
-    Ok((headers, Json(json!(rows))).into_response())
-}
-
-// /neighbors/:id
-async fn handler_neighbors(
-    cookies: Cookies,
-    Path(id): Path<i32>,
-    State(AppState { connpool, iat }): State<AppState>,
-) -> Result<Response, AppError> {
-    let db = connpool.get().await?;
-    let mut headers = HeaderMap::new();
-    let can_see_closed = handle_can_see_closed!(cookies, iat, headers);
-    let rows = crate::db::find_neighboring_articles(db, id, can_see_closed).await?;
-    Ok((headers, Json(json!(rows))).into_response())
-}
-
-/// /dictionary/:article_id
-/// Given an article, return information about the dictionary it belongs to
-async fn handler_dictionary(
-    cookies: Cookies,
-    Path(id): Path<i32>,
-    State(AppState { connpool, iat }): State<AppState>,
-) -> Result<Response, AppError> {
-    let db = connpool.get().await?;
-    let mut headers = HeaderMap::new();
-    let can_see_closed = handle_can_see_closed!(cookies, iat, headers);
-    let rows = crate::db::find_dictionary_by_article_id(db, id, can_see_closed).await?;
-    Ok((headers, Json(json!(rows))).into_response())
+    let closed = handle_can_see_closed!(cookies, iat, headers);
+    let conn1 = connpool.get().await?;
+    let conn2 = connpool.get().await?;
+    let conn3 = connpool.get().await?;
+    let articles = tokio::spawn(crate::db::find_article_by_id(conn1, id, closed));
+    let neighbors = tokio::spawn(crate::db::find_neighboring_articles(conn2, id, closed));
+    let dictionary = tokio::spawn(crate::db::find_dictionary_by_article_id(conn3, id, closed));
+    let joined = tokio::join!(articles, neighbors, dictionary);
+    let (articles, neighbors, dictionary) = match joined {
+        (Ok(Ok(a)), Ok(Ok(b)), Ok(Ok(c))) => (a, b, c),
+        _ => return Err(AppError::Other(anyhow::anyhow!("failed"))),
+    };
+    let body = json!({
+        "articles": articles,
+        "neighbors": neighbors,
+        "dictionary_info": dictionary,
+    });
+    Ok((headers, Json(body)).into_response())
 }
 
 async fn shutdown_signal() {
@@ -542,8 +529,6 @@ async fn main() -> anyhow::Result<()> {
         .route("/search/{lang}/{query}", get(handler_search))
         .route("/lookup/{lang}/{lemma}", get(handler_lookup))
         .route("/article/{id}", get(handler_article))
-        .route("/neighbors/{id}", get(handler_neighbors))
-        .route("/dictionary/{id}", get(handler_dictionary))
         .route("/auth/callback", get(handler_auth_callback))
         .route("/auth/logout", get(handler_auth_logout))
         .fallback(handler_404)
