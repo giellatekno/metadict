@@ -11,9 +11,15 @@ CREATE TABLE dictionaries (
     -- contents from it
     closed boolean,
 
-    -- Are the articles in the dictionary ordered, such that each article
-    -- has a defined, numerical, id
-    is_ordered boolean DEFAULT false,
+    -- this dictionary is OCR Read, useful to inform users that it may not
+    -- be 100% accurate
+    is_ocr_read boolean,
+
+    -- this dictionary is considered "historic", which makes it appear in
+    -- the "historic" section on the left menu. what makes a dictionary
+    -- "historic" is different for each source language (lang1), e.g.
+    -- for sme, it's dictionaries published before 1979
+    is_historic boolean,
 
     -- other info about the dictionary
     author text,
@@ -33,7 +39,8 @@ CREATE TABLE articles (
     rendered text,
     pos text,
     lang text,
-    -- internal ordering in the dictionary, may be NULL
+    -- internal ordering in the dictionary. source dictionaries without
+    -- a defined ordering will be alphabetizised
     article_number integer,
     -- additional properties, e.g. algu number, korp reference
     additional_properties json

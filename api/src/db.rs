@@ -246,7 +246,7 @@ pub async fn find_dictionary_by_article_id(
             name,
             COALESCE(author, ''),
             COALESCE(date_published, ''),
-            COALESCE(isbn, '')
+            COALESCE(isbn, ''),
             is_historic,
             is_ocr_read
         FROM
