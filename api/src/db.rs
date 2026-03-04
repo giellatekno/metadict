@@ -91,9 +91,9 @@ pub async fn find_articles_for_lemma(
                 dictionaries.name,
                 articles.id,
                 dictionaries.lang2,
-                COALESCE(dictionaries.date_published, '')
+                COALESCE(dictionaries.date_published, ''),
                 dictionaries.is_historic,
-                dictionaries.is_ocr_read,
+                dictionaries.is_ocr_read
             FROM
                 articles
             INNER JOIN
