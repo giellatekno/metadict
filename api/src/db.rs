@@ -140,7 +140,7 @@ pub async fn find_article_by_id(
     db: deadpool_postgres::Object,
     id: i32,
     can_see_closed: bool,
-) -> anyhow::Result<Vec<FindArticleByIdRow>> {
+) -> anyhow::Result<FindArticleByIdRow> {
     let can_see_closed = can_see_closed_sql(can_see_closed);
     let statement = format!(
         r#"
@@ -159,17 +159,15 @@ pub async fn find_article_by_id(
         "#
     );
 
-    Ok(db
-        .query(&statement, &[&id])
+    let row = db
+        .query_one(&statement, &[&id])
         .await
         .map_err(|e| anyhow::anyhow!(e))
-        .with_context(|| "running find_article_by_id query against db")?
-        .iter()
-        .map(|row| FindArticleByIdRow {
-            rendered: row.get::<usize, String>(0),
-            article_number: row.get::<usize, i32>(1),
-        })
-        .collect::<Vec<_>>())
+        .with_context(|| "running find_article_by_id query against db")?;
+    Ok(FindArticleByIdRow {
+        rendered: row.get(0),
+        article_number: row.get(1),
+    })
 }
 
 #[derive(serde::Serialize)]

@@ -411,16 +411,16 @@ async fn handler_article(
     let conn1 = connpool.get().await?;
     let conn2 = connpool.get().await?;
     let conn3 = connpool.get().await?;
-    let articles = tokio::spawn(crate::db::find_article_by_id(conn1, id, closed));
+    let article = tokio::spawn(crate::db::find_article_by_id(conn1, id, closed));
     let neighbors = tokio::spawn(crate::db::find_neighboring_articles(conn2, id, closed));
     let dictionary = tokio::spawn(crate::db::find_dictionary_by_article_id(conn3, id, closed));
-    let joined = tokio::join!(articles, neighbors, dictionary);
-    let (articles, neighbors, dictionary) = match joined {
+    let joined = tokio::join!(article, neighbors, dictionary);
+    let (article, neighbors, dictionary) = match joined {
         (Ok(Ok(a)), Ok(Ok(b)), Ok(Ok(c))) => (a, b, c),
         _ => return Err(AppError::Other(anyhow::anyhow!("failed"))),
     };
     let body = json!({
-        "articles": articles,
+        "article": article,
         "neighbors": neighbors,
         "dictionary_info": dictionary,
     });
