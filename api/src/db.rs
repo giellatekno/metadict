@@ -236,7 +236,7 @@ pub async fn find_dictionary_by_article_id(
     db: deadpool_postgres::Object,
     id: i32,
     can_see_closed: bool,
-) -> anyhow::Result<Vec<Dictionary>> {
+) -> anyhow::Result<Dictionary> {
     let can_see_closed = can_see_closed_sql(can_see_closed);
     let statement = format!(
         r#"
@@ -256,18 +256,16 @@ pub async fn find_dictionary_by_article_id(
     "#
     );
 
-    Ok(db
-        .query(&statement, &[&id])
+    let row = db
+        .query_one(&statement, &[&id])
         .await
-        .map_err(|e| anyhow::anyhow!(e))?
-        .iter()
-        .map(|row| Dictionary {
-            name: row.get::<usize, String>(0),
-            author: row.get::<usize, String>(1),
-            date_published: row.get::<usize, String>(2),
-            isbn: row.get::<usize, String>(3),
-            is_historic: row.get::<usize, bool>(4),
-            is_ocr_read: row.get::<usize, bool>(5),
-        })
-        .collect())
+        .map_err(|e| anyhow::anyhow!(e))?;
+    Ok(Dictionary {
+        name: row.get::<usize, String>(0),
+        author: row.get::<usize, String>(1),
+        date_published: row.get::<usize, String>(2),
+        isbn: row.get::<usize, String>(3),
+        is_historic: row.get::<usize, bool>(4),
+        is_ocr_read: row.get::<usize, bool>(5),
+    })
 }
