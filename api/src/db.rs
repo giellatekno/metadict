@@ -68,7 +68,7 @@ pub async fn find_lemmas(
 pub struct Article {
     lemma: String,
     dictionary_name: String,
-    article_number: i32,
+    article_id: i32,
     lang2: crate::Language,
     date_published: String,
     is_historic: bool,
@@ -118,7 +118,7 @@ pub async fn find_articles_for_lemma(
         .map(|row| Article {
             lemma: row.get::<usize, String>(0),
             dictionary_name: row.get::<usize, String>(1),
-            article_number: row.get::<usize, i32>(2),
+            article_id: row.get::<usize, i32>(2),
             lang2: row
                 .get::<usize, String>(3)
                 .parse()
