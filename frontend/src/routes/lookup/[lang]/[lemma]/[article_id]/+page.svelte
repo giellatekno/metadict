@@ -1,68 +1,104 @@
 <script lang="ts">
     import { m } from "$lib/paraglide/messages";
-    import { ScanTextIcon } from "lucide-svelte";
+    import {
+        BookIcon,
+        CalendarDaysIcon,
+        ScanTextIcon,
+        UserIcon,
+        type Icon as IconType,
+    } from "lucide-svelte";
     import type { PageProps } from "./$types";
 
     let { data }: PageProps = $props();
-    let rendered = $derived(data.rendered);
-    let neighbors = $derived(data.neighbors);
-    let dictionary = $derived(data.dictionary);
+    let article = $derived(data.article_data.article);
+    let dictionary_info = $derived(data.article_data.dictionary_info);
+    let neighbors = $derived(data.article_data.neighbors);
 </script>
 
-<div class="grid w-full grid-cols-5 gap-20">
+<div class="grid w-full grid-cols-3 gap-20">
     <div
-        class="card bg-tertiary-50-950 col-span-3 h-fit w-full border p-4 shadow-lg"
+        class="card bg-tertiary-50-950 col-span-2 w-full overflow-y-auto border p-4 shadow-lg"
     >
         {#if neighbors && neighbors.length > 1}
-            {#each neighbors as neighbor}
-                {#if neighbor === rendered}
+            {#each neighbors as neighbor, i}
+                {#if i !== 0}
+                    <hr class="hr border-primary-500" />
+                {/if}
+                {#if neighbor.article_number === article.article_number}
                     <div
-                        class="border-primary-500 border-y-2 px-2 py-3 text-xl"
+                        id="article"
+                        class="border-primary-500 border-y-3 py-4 pl-2 text-2xl"
                     >
-                        {@html neighbor}
+                        {@html neighbor.rendered}
                     </div>
                 {:else}
-                    <div class="py-1 text-sm">
-                        {@html neighbor}
+                    <div class="py-2 text-sm opacity-90">
+                        {@html neighbor.rendered}
                     </div>
                 {/if}
             {/each}
         {:else if neighbors && neighbors.length === 1}
             <div>
-                {@html rendered}
+                {@html article.rendered}
             </div>
         {/if}
     </div>
 
-    {#if dictionary}
+    {#if dictionary_info}
         <div
-            class="card bg-tertiary-50-950 col-span-2 flex h-fit w-full flex-col gap-2 border p-4 shadow-lg"
+            class="card bg-tertiary-50-950 flex h-fit w-full flex-col gap-4 border p-4 shadow-lg"
         >
-            <h3 class="h4 text-surface-950-50 font-bold">{dictionary[0]}</h3>
-            <hr class="hr" />
-            {#if dictionary[1]}
-                <div>
-                    <h4 class="h4">{m.authors()}:</h4>
-                    <p>{dictionary[1]}</p>
-                </div>
+            <div class="flex flex-col gap-2">
+                <h4 class="h4 text-surface-950-50 font-bold opacity-90">
+                    {dictionary_info.name}
+                </h4>
+                <hr class="hr" />
+            </div>
+            {#if dictionary_info.author}
+                {@render dictionary_info_group(
+                    m.dictionary_authors(),
+                    dictionary_info.author,
+                    UserIcon,
+                )}
             {/if}
-            {#if dictionary[2]}
-                <div>
-                    <h4 class="h4">{m.year_published()}:</h4>
-                    <p>{dictionary[2]}</p>
-                </div>
+            {#if dictionary_info.date_published}
+                {@render dictionary_info_group(
+                    m.dictionary_year_published(),
+                    dictionary_info.date_published,
+                    CalendarDaysIcon,
+                )}
             {/if}
-            {#if dictionary[3]}
-                <div>
-                    <h4 class="h4">ISBN:</h4>
-                    <p>{dictionary[3]}</p>
-                </div>
+            {#if dictionary_info.isbn}
+                {@render dictionary_info_group(
+                    "ISBN",
+                    dictionary_info.isbn,
+                    BookIcon,
+                )}
             {/if}
-            {#if !(dictionary[1] || dictionary[2] || dictionary[3])}
-                <p>{m.no_additional_info()}</p>
+            {#if dictionary_info.is_ocr_read}
+                {@render dictionary_info_group(
+                    "OCR",
+                    m.dictionary_ocr_read(),
+                    ScanTextIcon,
+                )}
             {/if}
-            <!-- OCR  -->
-            <!-- <ScanTextIcon /> -->
+            {#if !(dictionary_info.author || dictionary_info.date_published || dictionary_info.isbn || dictionary_info.is_ocr_read)}
+                <p>{m.dictionary_no_additional_info()}</p>
+            {/if}
         </div>
     {/if}
 </div>
+
+{#snippet dictionary_info_group(
+    header: string,
+    content: string,
+    Icon: typeof IconType,
+)}
+    <div>
+        <h4 class="h4 flex flex-row items-center gap-1">
+            <Icon />
+            {header}:
+        </h4>
+        <p class="text-lg opacity-80">{content}</p>
+    </div>
+{/snippet}

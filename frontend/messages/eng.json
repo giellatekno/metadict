@@ -2,36 +2,30 @@
     "$schema": "https://inlang.com/schema/inlang-message-format",
     "page_title": "Giellatekno Metadictionary",
     "interface_language": "Interface language",
+    "info": "Info",
     "login": "Log in with Github",
     "logout": "Log out",
-    "dictionary_form": "Dictionary form",
-    "access": "Giellatekno employee",
-    "search_result": [
-        {
-            "match": {
-                "count=0": "Found no lemmas throughout all dictionaries that matched the search.",
-                "count=1": "Found one lemma throughout all dictionaries that matched the search.",
-                "count=*": "Found {count} lemmas throughout all dictionaries that matched the search."
-            }
-        }
-    ],
-    "lookup_result": [
-        {
-            "match": {
-                "count=0": "The lemma \"{lemma}\" was not found in any dictionaries.",
-                "count=1": "The lemma \"{lemma}\" was found in one dictionary.",
-                "count=*": "The lemma \"{lemma}\" was found in {count} dictionaries."
-            }
-        }
-    ],
+    "gt_employee": "Giellatekno employee",
+    "search_hits": "{count} hits",
+    "search_hits_per_page": "Hits per page",
+    "search_no_results": "Found no lemmas that matched the search.",
     "search_language": "Search language",
-    "search_placeholder": "Search for words in dictionary form...",
-    "about_dictionary": "About this dictionary",
-    "close": "Close",
-    "authors": "Author(s)",
-    "year_published": "Year published",
-    "no_additional_info": "No additional info",
-    "howto_search_title": "How to use the metadictionary",
+    "search_placeholder": [
+        {
+            "match": {
+                "lang=sme": "Search for North Sámi lemmas...",
+                "lang=nob": "Search for Norwegian lemmas...",
+                "lang=fin": "Search for Finnish lemmas...",
+                "lang=sma": "Search for South Sámi lemmas..."
+            }
+        }
+    ],
+    "dictionary_about": "About this dictionary",
+    "dictionary_authors": "Author(s)",
+    "dictionary_year_published": "Year published",
+    "dictionary_ocr_read": "This dictionary has been scanned and read with OCR. The text may contain typos.",
+    "dictionary_no_additional_info": "No additional info",
+    "howto_search_title": "How to search the metadictionary",
     "howto_search_body": "Use the searchbox to search for a word in its dictionary form. The dropdown menu besides the search field is used to select search language. The percent character (%) is a wildcard symbol. It can be placed before, after or in the middle of a word. For example:",
     "howto_search_example_end": "gives all words ending with \"{example}\".",
     "howto_search_example_start": "gives all words starting with \"{example}\".",
@@ -39,9 +33,7 @@
     "howto_access_title": "How to access restricted dictionaries",
     "howto_access_body": "If you are a worker at Giellatekno, you can get access to restricted dictionaries. Once you have been given access, click \"Log in with Github\" and verify by clicking your name. You should see the message \"Giellatekno employee\". If you have not gotten access logging in won't make a difference in the results you see.",
     "historical_dictionaries": "Historical dictionaries",
-    "search_ordbokene": "Search for \"{lemma}\" in ordbokene.no",
-    "search_davvigirji": "Search for \"{lemma}\" in Davvi Girji's webpage",
-    "dark_mode": "Dark mode",
-    "copyright": "Copyright © Centre for Sámi language technology",
-    "feedback": "Send feedback about the webpage to:"
+    "external_dictionaries": "External dictionaries",
+    "giellatekno": "Giellatekno, Centre for Sámi language technology",
+    "uit": "UiT The Arctic University of Norway"
 }

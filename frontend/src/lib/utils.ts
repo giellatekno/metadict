@@ -8,21 +8,41 @@ export const User = z.object({
 });
 
 export const LookupResponse = z.array(
-    z.tuple([z.string(), z.string(), z.number(), z.string(), z.string()]),
+    z.object({
+        article_id: z.number(),
+        date_published: z.string(),
+        dictionary_name: z.string(),
+        is_historic: z.boolean(),
+        is_ocr_read: z.boolean(),
+        lang2: z.string(),
+        lemma: z.string(),
+    }),
 );
 
 export const SearchResponse = z.string().array();
 
-export const ArticleResponse = z.string().array();
-
-export const NeighborsResponse = z.string().array();
-
-export const DictionaryResponse = z.array(
-    z.tuple([z.string(), z.string(), z.string(), z.string()]),
-);
+export const ArticleResponse = z.object({
+    article: z.object({
+        article_number: z.number(),
+        rendered: z.string(),
+    }),
+    dictionary_info: z.object({
+        author: z.string(),
+        date_published: z.string(),
+        is_historic: z.boolean(),
+        is_ocr_read: z.boolean(),
+        isbn: z.string(),
+        name: z.string(),
+    }),
+    neighbors: z.array(
+        z.object({
+            article_number: z.number(),
+            rendered: z.string(),
+        }),
+    ),
+});
 
 export type UserType = z.infer<typeof User>;
 export type LookupType = z.infer<typeof LookupResponse>;
 export type SearchType = z.infer<typeof SearchResponse>;
 export type ArticleType = z.infer<typeof ArticleResponse>;
-export type DictionaryType = z.infer<typeof DictionaryResponse>;

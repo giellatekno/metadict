@@ -16,12 +16,12 @@
 
     const extra_letters: Record<string, string[]> = {
         sme: ["á", "č", "đ", "ŋ", "š", "ŧ", "ž"],
-        sma: ["ï", "æ", "ö"],
+        // sma: ["ï", "æ", "ö"],
         fin: ["ä", "ö", "å"],
         nob: ["æ", "ø", "å"],
     };
 
-    const search_langs = ["sme", "sma", "nob", "fin"];
+    const search_langs = ["sme", "nob", "fin"];
 
     let target_langs = $state(["sme", "sma", "nob", "fin", "hist"]);
 
@@ -102,7 +102,7 @@
             class="ig-input text-lg"
             bind:this={search_input}
             type="search"
-            placeholder={m.search_placeholder()}
+            placeholder={m.search_placeholder({ lang: search_lang })}
             bind:value
             onkeydown={on_enter_keydown}
         />
@@ -112,6 +112,10 @@
             id="searchlang"
             bind:value={search_lang}
             placeholder="Search language"
+            onchange={() => {
+                value = "";
+                search_input.focus();
+            }}
         >
             {#each search_langs as iso}
                 <option value={iso}>{langname(iso, getLocale())}</option>

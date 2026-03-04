@@ -14,52 +14,64 @@
 
     let start = $derived((page - 1) * pageSize);
     let end = $derived(start + pageSize);
-    let lemmas = $derived(data.lemmas ? data.lemmas.slice(start, end) : []);
+    let shownLemmas = $derived(
+        data.lemmas ? data.lemmas.slice(start, end) : [],
+    );
     let n_results = $derived(data.lemmas ? data.lemmas.length : 0);
 </script>
 
-<div class="flex w-fit flex-col items-center gap-4">
-    <h5 class="h5 text-surface-950-50">
-        {m.search_result({ count: n_results })}
-    </h5>
-    {#if n_results}
-        <div class="flex w-1/4 min-w-124 flex-col gap-2">
-            <div class="card bg-tertiary-50-950 w-full border py-2 shadow-lg">
-                <div class="flex flex-col gap-2">
-                    {#each lemmas as lemma}
-                        <a
-                            class="btn hover:preset-tonal mx-2 justify-start"
-                            href={resolve(
-                                `/lookup/${pagestate.params.lang}/${lemma}`,
-                            )}
-                        >
-                            {lemma}
-                        </a>
-                        {#if !(lemma === lemmas[lemmas.length - 1])}
-                            <hr class="hr border-surface-200-800" />
-                        {/if}
-                    {/each}
-                </div>
+<div class="flex w-1/4 min-w-124 flex-col items-center gap-4">
+    {#if n_results > 0}
+        <div class="flex w-full items-center justify-between">
+            <div class="text-nowrap">
+                {m.search_hits({ count: n_results })}
+            </div>
+            <div class="flex flex-row items-center gap-2">
+                <label for="hits-per-page" class="">
+                    {m.search_hits_per_page()}
+                </label>
+                <select
+                    name="hits-per-page"
+                    class="select w-fit"
+                    value={String(pageSize)}
+                    onchange={(e) => (pageSize = Number(e.currentTarget.value))}
+                >
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
             </div>
         </div>
-        {#if n_results > 10}
-            <div class="flex w-full justify-center">
-                <label class="label flex flex-row items-center gap-2">
-                    <span class="">Page Size:</span>
-                    <select
-                        class="select w-fit"
-                        value={String(pageSize)}
-                        onchange={(e) =>
-                            (pageSize = Number(e.currentTarget.value))}
-                    >
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                </label>
+        {#if n_results}
+            <div class="flex w-full flex-col gap-2">
+                <div class="card bg-tertiary-50-950 w-full shadow-lg">
+                    <div class="flex flex-col">
+                        {#each shownLemmas as lemma, i}
+                            {@const rounded_style =
+                                i === 0
+                                    ? "rounded-t-xl rounded-b-none"
+                                    : i === shownLemmas.length - 1
+                                      ? "rounded-b-xl rounded-t-none"
+                                      : "rounded-none"}
+                            {#if i !== 0}
+                                <hr class="hr border-surface-200-800" />
+                            {/if}
+                            <a
+                                class="btn hover:preset-tonal justify-start py-3 {rounded_style}"
+                                href={resolve(
+                                    `/lookup/${pagestate.params.lang}/${lemma}`,
+                                )}
+                            >
+                                {lemma}
+                            </a>
+                        {/each}
+                    </div>
+                </div>
+            </div>
+            {#if n_results > 10}
                 <Pagination
-                    class="preset-filled-surface-100-900 flex w-full justify-between"
+                    class="preset-filled-tertiary-50-950 flex w-fit min-w-1/2 justify-between"
                     count={n_results}
                     {pageSize}
                     {page}
@@ -87,7 +99,9 @@
                         <ArrowRightIcon class="size-4" />
                     </Pagination.NextTrigger>
                 </Pagination>
-            </div>
+            {/if}
         {/if}
+    {:else}
+        <span class="text-lg">{m.search_no_results()}</span>
     {/if}
 </div>

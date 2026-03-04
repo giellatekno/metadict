@@ -2,35 +2,29 @@
     "$schema": "https://inlang.com/schema/inlang-message-format",
     "page_title": "Giellatekno Metasátnegirji",
     "interface_language": "Geavahanlaktagiella",
+    "info": "Diehtu",
     "login": "Logge sisa Githubiin",
     "logout": "Logge olggos",
-    "dictionary_form": "Vuođđohápmi",
-    "access": "Giellatekno bargi",
-    "search_result": [
-        {
-            "match": {
-                "count=0": "Ii oktage sátni mii heive ohcamii",
-                "count=1": "okta sátni gávdnán mii heive ohcamii",
-                "count=*": "{count} sáni gávdnán mat heivejit ohcamii"
-            }
-        }
-    ],
-    "lookup_result": [
-        {
-            "match": {
-                "count=0": "Sátni \"{lemma}\" ii gávdnon oktage sátnegirjjis",
-                "count=1": "Sátni \"{lemma}\" gávdnui okta sátnegirjjis",
-                "count=*": "Sátni \"{lemma}\" gávdnui {count} iešguđetlágan sátnegirjjis"
-            }
-        }
-    ],
+    "gt_employee": "Giellatekno bargi",
+    "search_hits": "{count} bohtosa",
+    "search_hits_per_page": "Bohtosat juohke siiddus",
+    "search_no_results": "Ii gávdnon oktage sátni mii heive ohcamii",
     "search_language": "Ohcangiella",
-    "search_placeholder": "Oza sániid vuođđohámiid...",
-    "about_dictionary": "Dán sátnegirjji birra",
-    "close": "Gidde",
-    "authors": "Girječálli(t)",
-    "year_published": "Almmuhanjahki",
-    "no_additional_info": "Liigediehtu váilu",
+    "search_placeholder": [
+        {
+            "match": {
+                "lang=sme": "Oza davvisámegiel lemmaid...",
+                "lang=nob": "Oza dárogiel lemmaid...",
+                "lang=fin": "Oza suomagiel lemmaid...",
+                "lang=sma": "Oza lullisámegiel lemmaid..."
+            }
+        }
+    ],
+    "dictionary_about": "Dán sátnegirjji birra",
+    "dictionary_authors": "Girječálli(t)",
+    "dictionary_year_published": "Almmuhanjahki",
+    "dictionary_ocr_read": "Sátnegirji lea govvejuvvon ja lohkkojuvvon OCR:in. Teaksta sáhttá sisdoallat čállinmeattáhusaid.",
+    "dictionary_no_additional_info": "Liigediehtu váilu",
     "howto_search_title": "Movt geavahit metasátnegirjji",
     "howto_search_body": "Geavat ohcanbovssa ohcat sániid vuođđohámiid. Ohcanbovssa bálddas lea dropdown-fállu gos sáhttá váljet ohcangiela. Proseantasymbola (%) lea \"wildcard\" symbolan. Dien sáhttá bidjat sániid ovddabealde, maŋábealde dahje gasku sániid. Ovddamearkka dihte:",
     "howto_search_example_end": "addá buot sániid main lea \"{example}\" loahpas.",
@@ -39,9 +33,7 @@
     "howto_access_title": "Movt oaidnit giddejuvvon sátnegirjjiid",
     "howto_access_body": "Jus barggat Giellateknos, de sáhtát oažžut beassanlobi giddejuvvon sátnegirjjiide. Go leat ožžon beassama, deaddil \"Logge sisa Githubiin\". Deaddil de iežat nama ja iskka lohká go \"Giellatekno bargi\". Jus ii leat ožžon beassanlobi, de logget sisa ii rievdat ohcanbohtosiid.",
     "historical_dictionaries": "Historjjálaš sátnegirjjit",
-    "search_ordbokene": "Oza \"{lemma}\" ordbokene.no:s",
-    "search_davvigirji": "Oza \"{lemma}\" Davvi Girjji neahttasiiddus",
-    "dark_mode": "Sevdnjes modus",
-    "copyright": "Copyright © Sámi giellateknologiija guovddaš",
-    "feedback": "Sádde máhcahaga siiddu birra midjiide:"
+    "external_dictionaries": "Olggudas sátnegirjjit",
+    "giellatekno": "Giellatekno, Sámi giellateknologiija guovddáš",
+    "uit": "UiT Norgga árktalaš universitehta"
 }

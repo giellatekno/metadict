@@ -43,13 +43,9 @@
                     <div class="flex flex-col justify-center gap-2 text-center">
                         {#if user.restricted_dicts}
                             <div class="flex flex-row justify-start gap-2">
-                                <span>{m.access()}</span>
+                                <span>{m.gt_employee()}</span>
                                 <BadgeCheck />
                             </div>
-                            <!-- {:else} -->
-                            <!--     <span class="text-error-950-50" -->
-                            <!--         >{m.no_access()}</span -->
-                            <!--     > -->
                             <hr class="hr" />
                         {/if}
                         <span>

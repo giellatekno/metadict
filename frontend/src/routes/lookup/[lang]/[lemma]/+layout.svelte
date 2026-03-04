@@ -7,7 +7,9 @@
     import type { PageData } from "./$types";
     import { type Snippet } from "svelte";
     import { ExternalLink } from "lucide-svelte";
-    import type { LookupType } from "$lib/utils";
+    import { Accordion } from "@skeletonlabs/skeleton-svelte";
+    import LookupAccordionItem from "$lib/components/LookupAccordionItem.svelte";
+    import { externalDicts } from "$lib/external_dicts";
 
     interface Props {
         data: PageData;
@@ -19,67 +21,8 @@
     let lang = $derived(page.params.lang ?? "");
     let lemma = $derived(page.params.lemma ?? "");
 
-    const externalDicts: Record<string, { name: string; link: string }[]> = {
-        deu: [
-            {
-                name: "Wiktionary",
-                link: "https://de.wiktionary.org/wiki/{%string%}",
-            },
-        ],
-        est: [
-            {
-                name: "Sõnaveeb",
-                link: "https://sonaveeb.ee/search/unif/dlall/dsall/{%string%}/1/est",
-            },
-            {
-                name: "Wiktionary",
-                link: "https://et.wiktionary.org/wiki/{%string%}",
-            },
-        ],
-        // eng: [],
-        fin: [
-            {
-                name: "Kielitoimiston sanakirja",
-                link: "https://www.kielitoimistonsanakirja.fi/#/{%string%}",
-            },
-            {
-                name: "Wiktionary",
-                link: "https://fi.wiktionary.org/wiki/{%string%}",
-            },
-        ],
-        nob: [
-            {
-                name: "ordbøkene.no",
-                link: "https://ordbokene.no/nob/bm,nn/{%string%}",
-            },
-            {
-                name: "Davvi girji",
-                link: "https://533.davvi.no/ordbok_norsam.php?finn={%string%}",
-            },
-        ],
-        sma: [],
-        sme: [
-            {
-                name: "Davvi girji",
-                link: "https://533.davvi.no/ordbok_samnor.php?finn={%string%}",
-            },
-        ],
-        smj: [],
-        smn: [],
-        swe: [
-            {
-                name: "Svenska Akademiens ordböcker",
-                link: "https://svenska.se/?q={%string%}",
-            },
-        ],
-    };
-
-    // Create a list of the historical dicts (e.g. published before 1979 (newest orthography))
-    let hist_dicts: LookupType = $derived(
-        data.entries.filter((item) => {
-            return item[4] !== "" && Number(item[4].slice(-4)) < 1979;
-        }),
-    );
+    // Create a list of the historical dicts
+    let hist_dicts = $derived(data.entries.filter((item) => item.is_historic));
 
     // Filter out the historical dicts
     let dicts = $derived(
@@ -90,86 +33,120 @@
 
     // Find all unique translation languages and
     // sort list to show: xxx-sme, xxx-nob, xxx-fin, xxx-other-langs
-    const priority: Record<string, number> = { sme: 1, nob: 2, fin: 3 };
+    const priority: Record<string, number> = { sme: 1, sma: 2, nob: 3, fin: 4 };
     let sorted_tr_langs = $derived(
-        Array.from(new Set(dicts.map((item) => item[3]))).toSorted((a, b) => {
-            const scoreA = priority[a] ?? 3;
-            const scoreB = priority[b] ?? 3;
-            return scoreA - scoreB;
-        }),
+        Array.from(new Set(dicts.map((item) => item.lang2))).toSorted(
+            (a, b) => {
+                const scoreA = priority[a] ?? 3;
+                const scoreB = priority[b] ?? 3;
+                return scoreA - scoreB;
+            },
+        ),
     );
+
+    let accordionValues = $derived([
+        ...sorted_tr_langs,
+        "historical",
+        "external",
+    ]);
+    let highlightedId = $state("");
 </script>
 
-<main class="grid w-full grid-cols-3 gap-20">
+<main class="grid w-full grid-cols-4 gap-20">
     <div class="flex flex-col">
         <div
-            class="card bg-tertiary-50-950 flex h-fit w-full flex-col border p-4 shadow-lg"
+            class="card bg-tertiary-50-950 flex h-fit w-full flex-col gap-4 border p-4 shadow-lg"
         >
-            {#each sorted_tr_langs as tr_lang}
-                <h6 class="h6 font-bold">
-                    {langname(lang, getLocale())} → {langname(
-                        tr_lang,
-                        getLocale(),
-                    )}
-                </h6>
-                <div>
-                    {#each dicts as [lemma, dictionary_name, article_id, lang2, _]}
-                        {#if tr_lang === lang2}
-                            <a
-                                class="btn hover:preset-tonal my-1 w-full justify-start"
-                                href={resolve(
-                                    `/lookup/${lang}/${lemma}/${article_id}`,
+            <Accordion
+                multiple
+                value={accordionValues}
+                onValueChange={(details) => (accordionValues = details.value)}
+            >
+                {#each sorted_tr_langs as tr_lang (tr_lang)}
+                    {@const title =
+                        langname(lang, getLocale()) +
+                        " → " +
+                        langname(tr_lang, getLocale())}
+                    <LookupAccordionItem value={tr_lang} {title}>
+                        {#each dicts as dict}
+                            {#if tr_lang === dict.lang2}
+                                {@render link_button(
+                                    dict.article_id.toString(),
+                                    resolve(
+                                        `/lookup/${lang}/${lemma}/${dict.article_id}`,
+                                    ),
+                                    dict.dictionary_name,
                                 )}
-                            >
-                                {dictionary_name.length > 30
-                                    ? dictionary_name.slice(0, 30) + "..."
-                                    : dictionary_name} ({lemma})
-                            </a>
-                        {/if}
-                    {/each}
-                </div>
-            {/each}
-
-            {#if hist_dicts.length > 0}
-                <h6 class="h6 font-bold">
-                    {m.historical_dictionaries()}
-                </h6>
-                <nav class="list-nav">
-                    {#each hist_dicts as [lemma, dictionary_name, article_id, _lang2, _]}
-                        <a
-                            class="btn hover:preset-tonal my-1 w-full justify-start"
-                            href={resolve(
-                                `/lookup/${lang}/${lemma}/${article_id}`,
-                            )}
-                        >
-                            {dictionary_name.length > 30
-                                ? dictionary_name.slice(0, 30) + "..."
-                                : dictionary_name} ({lemma})
-                        </a>
-                    {/each}
-                </nav>
-            {/if}
-            {#if externalDicts[lang] && externalDicts[lang].length > 0}
-                <h6 class="h6 font-bold">Eksterne Ordbøker</h6>
-                {#each externalDicts[lang] as { name, link }}
-                    {@const formatted_link = link.replaceAll(
-                        "{%string%}",
-                        lemma,
-                    )}
-                    <a
-                        class="btn hover:preset-tonal my-1 w-full justify-start"
-                        href={formatted_link}
-                        target="_blank"
-                    >
-                        <span>{name}</span>
-                        <ExternalLink />
-                    </a>
+                            {/if}
+                        {/each}
+                    </LookupAccordionItem>
                 {/each}
-            {/if}
+
+                {#if hist_dicts.length > 0}
+                    <LookupAccordionItem
+                        value="historical"
+                        title={m.historical_dictionaries()}
+                    >
+                        {#each hist_dicts as dict}
+                            {@render link_button(
+                                dict.article_id.toString(),
+                                resolve(
+                                    `/lookup/${lang}/${lemma}/${dict.article_id}`,
+                                ),
+                                dict.dictionary_name,
+                            )}
+                        {/each}
+                    </LookupAccordionItem>
+                {/if}
+                {#if externalDicts[lang] && externalDicts[lang].length > 0}
+                    <LookupAccordionItem
+                        value="external"
+                        title={m.external_dictionaries()}
+                    >
+                        {#each externalDicts[lang] as { name, link }, i}
+                            {@const formatted_link = link.replaceAll(
+                                "{%string%}",
+                                lemma,
+                            )}
+                            {@render link_button(
+                                `external-${lang}-${i}`,
+                                formatted_link,
+                                name,
+                                true,
+                            )}
+                        {/each}
+                    </LookupAccordionItem>
+                {/if}
+            </Accordion>
         </div>
     </div>
 
-    <div class="row-span-2 md:col-span-2">
+    <div class="row-span-3 md:col-span-3">
         {@render children?.()}
     </div>
 </main>
+
+{#snippet link_button(
+    id: string,
+    href: string,
+    label: string,
+    external = false,
+)}
+    <a
+        {id}
+        class="btn my-1 w-full justify-start transition-colors {id ===
+        highlightedId
+            ? 'preset-filled-primary-500'
+            : 'preset-filled-primary-200-800'}"
+        {href}
+        target={external ? "_blank" : ""}
+        onclick={() => {
+            if (!external) highlightedId = id;
+        }}
+    >
+        <span class="truncate">{label}</span>
+        {#if external}
+            <ExternalLink class="size-5" />
+        {/if}
+    </a>
+{/snippet}

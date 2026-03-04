@@ -2,35 +2,30 @@
     "$schema": "https://inlang.com/schema/inlang-message-format",
     "page_title": "Giellatekno Metaordbok",
     "interface_language": "Grensesnittspråk",
+    "info": "Info",
     "login": "Logg inn med Github",
     "logout": "Logg ut",
-    "dictionary_form": "Oppslagsform",
-    "access": "Giellatekno ansatt",
-    "search_result": [
-        {
-            "match": {
-                "count=0": "Fant ingen lemma blandt alle ordbøkene som matchet søket.",
-                "count=1": "Fant ett lemma blandt alle ordbøkene som matchet søket.",
-                "count=*": "Fant {count} lemma blandt alle ordbøkene som matchet søket."
-            }
-        }
-    ],
-    "lookup_result": [
-        {
-            "match": {
-                "count=0": "Lemmaet \"{lemma}\" ble ikke funnet i noen ordbøker.",
-                "count=1": "Lemmaet \"{lemma}\" ble funnet i ei ordbok.",
-                "count=*": "Lemmaet \"{lemma}\" ble funnet i {count} forskjellige ordbøker."
-            }
-        }
-    ],
+    "gt_employee": "Giellatekno ansatt",
+    "search_hits": "{count} treff",
+    "search_hits_per_page": "Treff per side",
+    "search_no_results": "Fant ingen lemma som matchet søket.",
     "search_language": "Søkespråk",
-    "search_placeholder": "Søk etter ord i grunnform...",
-    "about_dictionary": "Om denne ordboka",
-    "close": "Lukk",
-    "authors": "Forfatter(e)",
-    "year_published": "År publisert",
-    "no_additional_info": "Ingen ekstra informasjon",
+    "search_placeholder": [
+        {
+            "match": {
+                "lang=sme": "Søk etter nordsamiske lemmaer...",
+                "lang=nob": "Søk etter norske lemmaer...",
+                "lang=fin": "Søk etter finske lemmaer...",
+                "lang=sma": "Søk etter sørsamiske lemmaer..."
+            }
+        }
+    ],
+    "dictionary_about": "Om denne ordboka",
+    "dictionary_title": "Tittel",
+    "dictionary_authors": "Forfatter(e)",
+    "dictionary_year_published": "År publisert",
+    "dictionary_ocr_read": "Denne ordboken er skannet og lest med OCR. Teksten kan inneholde skrivefeil.",
+    "dictionary_no_additional_info": "Ingen ekstra informasjon",
     "howto_search_title": "Hvordan bruke metaordboka",
     "howto_search_body": "Søkeboksen brukes til å søke etter ord i grunnform. Dropdown-menyen ved siden av søkefeltet brukes til å velge søkespråk. Prosent_tegnet (%) brukes som et \"wildcard\" symbol. Det kan plasseres foran, bak eller i midten av søk. For eksempel:",
     "howto_search_example_end": "gir alle ord som ender med \"{example}\".",
@@ -39,9 +34,7 @@
     "howto_access_title": "Hvordan få tilgang til lukkede ordbøker",
     "howto_access_body": "Hvis du jobber for Giellatekno kan du få tilgang til lukkede ordbøker i søkeresultatene. Når du har blitt gitt tilgang kan du klikke \"Logg inn med Github\" og verifisere at du har tilgang ved å klikke på navnet ditt. Du vil da se meldingen \"Giellatekno ansatt\". Hvis du ikke har fått tilgang vil ikke det å logge inn ha noen effekt på hvilke søkeresultater du ser.",
     "historical_dictionaries": "Historiske ordbøker",
-    "search_ordbokene": "Søk etter \"{lemma}\" i ordbokene.no",
-    "search_davvigirji": "Søk etter \"{lemma}\" i Davvi Girjis nettside",
-    "dark_mode": "Mørk modus",
-    "copyright": "Copyright © Senter for samisk språkteknologi",
-    "feedback": "Send tilbakemelding om nettsiden til:"
+    "external_dictionaries": "Eksterne ordbøker",
+    "giellatekno": "Giellatekno, Senter for samisk språkteknologi",
+    "uit": "UiT Norges arktiske universitet"
 }
