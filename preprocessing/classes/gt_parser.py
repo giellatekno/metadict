@@ -9,7 +9,7 @@ METADATA = {
         "author": "Lene Antonsen, Trond Trosterud & Berit Merete Nystad Eskonsipo",
         "name": "Neahttadigisánit",
     },
-    ("sme-nob", "nob-sme"): {
+    ("sme-fin", "fin-sme"): {
         "author": "Trond Trosterud",
         "name": "Neahttadigisánit",
     },
@@ -38,7 +38,7 @@ class GTParser:
 
         author, name = next(
             ((v["author"], v["name"]) for k, v in METADATA.items() if langs in k),
-            ("", "Neahttadigisánit"),
+            ("Giellatekno", "Neahttadigisánit"),
         )
 
         self.dictionary = Dictionary(
