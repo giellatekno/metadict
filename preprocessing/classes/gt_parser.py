@@ -13,7 +13,7 @@ METADATA = {
         "author": "Trond Trosterud",
         "name": "Neahttadigisánit",
     },
-    ("sme-nob", "nob-sme"): {
+    ("sma-mul", "nob-sma"): {
         "author": "Lene Antonsen, Trond Trosterud, Maja Kappfjell, Sissel Jåma, Toini Bergström & Marit Fjellheim",
         "name": "Nedtedigibaakoeh",
     },
