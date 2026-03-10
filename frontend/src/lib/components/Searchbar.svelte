@@ -16,30 +16,30 @@
 
     const extra_letters: Record<string, string[]> = {
         sme: ["á", "č", "đ", "ŋ", "š", "ŧ", "ž"],
-        // sma: ["ï", "æ", "ö"],
+        sma: ["ï", "æ", "ö"],
         fin: ["ä", "ö", "å"],
         nob: ["æ", "ø", "å"],
     };
 
-    const search_langs = ["sme", "nob", "fin"];
+    const search_langs = ["sme", "sma", "nob", "fin"] as const;
 
-    let target_langs = $state(["sme", "sma", "nob", "fin", "hist"]);
+    // let target_langs = $state(["sme", "sma", "nob", "fin", "hist"]);
 
-    onMount(() => {
-        const saved = localStorage.getItem("preferred_targets");
-        if (saved) {
-            try {
-                target_langs = JSON.parse(saved);
-            } catch (e) {
-                console.error("Failed to parse languages", e);
-            }
-        }
-        search_input.focus();
-    });
+    // onMount(() => {
+    //     const saved = localStorage.getItem("preferred_targets");
+    //     if (saved) {
+    //         try {
+    //             target_langs = JSON.parse(saved);
+    //         } catch (e) {
+    //             console.error("Failed to parse languages", e);
+    //         }
+    //     }
+    //     search_input.focus();
+    // });
 
-    $effect(() => {
-        localStorage.setItem("preferred_targets", JSON.stringify(target_langs));
-    });
+    // $effect(() => {
+    //     localStorage.setItem("preferred_targets", JSON.stringify(target_langs));
+    // });
 
     async function on_new_value(input: string) {
         await goto(
@@ -69,16 +69,16 @@
         search_input.focus();
     }
 
-    function toggleTarget(lang: string) {
-        if (target_langs.includes(lang)) {
-            // Prevent deselecting everything (optional but recommended)
-            if (target_langs.length > 1) {
-                target_langs = target_langs.filter((l) => l !== lang);
-            }
-        } else {
-            target_langs = [...target_langs, lang];
-        }
-    }
+    // function toggleTarget(lang: string) {
+    //     if (target_langs.includes(lang)) {
+    //         // Prevent deselecting everything (optional but recommended)
+    //         if (target_langs.length > 1) {
+    //             target_langs = target_langs.filter((l) => l !== lang);
+    //         }
+    //     } else {
+    //         target_langs = [...target_langs, lang];
+    //     }
+    // }
 </script>
 
 <div class="flex w-2xl flex-col gap-2">

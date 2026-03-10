@@ -7,6 +7,10 @@ export const externalDicts: Record<string, { name: string; link: string }[]> = {
     ],
     est: [
         {
+            name: "Esti-soome suursõnaraamat",
+            link: "https://arhiiv.eki.ee/dict/efi/index.cgi?Q={%string%}&F=M&C06=fi",
+        },
+        {
             name: "Sõnaveeb",
             link: "https://sonaveeb.ee/search/unif/dlall/dsall/{%string%}/1/est",
         },
@@ -15,11 +19,15 @@ export const externalDicts: Record<string, { name: string; link: string }[]> = {
             link: "https://et.wiktionary.org/wiki/{%string%}",
         },
     ],
-    // eng: [],
+    eng: [],
     fin: [
         {
             name: "Kielitoimiston sanakirja",
             link: "https://www.kielitoimistonsanakirja.fi/#/{%string%}",
+        },
+        {
+            name: "Suomi–viro-suursanakirja",
+            link: "https://arhiiv.eki.ee/dict/fie/index.cgi?Q={%string%}&F=M&C06=fi",
         },
         {
             name: "Wiktionary",

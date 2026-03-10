@@ -17,7 +17,7 @@ dev:
 build:
     PUBLIC_API_ENDPOINT=http://metadict-api:3000 pnpm run build
 
-# pnpm run build  --  
+# pnpm run build  --
 build-local:
     #!/usr/bin/env bash
     if [ ! -f .env ]; then
@@ -30,6 +30,7 @@ build-local:
     pnpm run build
 
 # podman build -t metadict-front -f Containerfile (remember to "build" first)
+
 # Build the container image using podman (NOTE: Make sure to "build" first)
 image:
     podman build -t metadict-front -f Containerfile
@@ -38,3 +39,6 @@ image:
 push-labacr:
     podman tag metadict-front gtlabcontainerregistry.azurecr.io/metadict-front
     podman push gtlabcontainerregistry.azurecr.io/metadict-front
+
+# Build and Push: runs build, image and push-labacr in order
+bap: build image push-labacr

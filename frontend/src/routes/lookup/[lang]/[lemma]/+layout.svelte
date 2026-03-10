@@ -20,6 +20,7 @@
 
     let lang = $derived(page.params.lang ?? "");
     let lemma = $derived(page.params.lemma ?? "");
+    let cur_article = $derived(page.params.article_id ?? "");
 
     // Create a list of the historical dicts
     let hist_dicts = $derived(data.entries.filter((item) => item.is_historic));
@@ -49,7 +50,6 @@
         "historical",
         "external",
     ]);
-    let highlightedId = $state("");
 </script>
 
 <main class="grid w-full grid-cols-4 gap-20">
@@ -109,7 +109,7 @@
                                 lemma,
                             )}
                             {@render link_button(
-                                `external-${lang}-${i}`,
+                                null,
                                 formatted_link,
                                 name,
                                 true,
@@ -127,7 +127,7 @@
 </main>
 
 {#snippet link_button(
-    id: string,
+    id: null | string,
     href: string,
     label: string,
     external = false,
@@ -135,14 +135,11 @@
     <a
         {id}
         class="btn my-1 w-full justify-start transition-colors {id ===
-        highlightedId
+        cur_article
             ? 'preset-filled-primary-500'
             : 'preset-filled-primary-200-800'}"
         {href}
         target={external ? "_blank" : ""}
-        onclick={() => {
-            if (!external) highlightedId = id;
-        }}
     >
         <span class="truncate">{label}</span>
         {#if external}
