@@ -35,8 +35,11 @@ def get_gut_root():
             return v
 
 
-def sort_by_sami_alphabet(input_list: list[Article]):
-    alphabet = " !\"«»#$%&'()*+,-./0123456789:;<=>?@[\\]^_`aábcčdđefghiïjklmnŋopqrsštŧuvwxyzžæäøöå{|}~"
+def sort_alphabetically(input_list: list[Article], saami=False):
+    nordic_alphabet = " !\"«»#$%&'()*+,-./0123456789:;<=>?@[\\]^_`abcdefghijklmnopqrsštuvwxyzžæäøöå{|}~"
+    saami_alphabet = " !\"«»#$%&'()*+,-./0123456789:;<=>?@[\\]^_`aáâäbcčdđefghiïjklmnŋopqrsštŧuvwxyzžæøöå{|}~"
+
+    alphabet = saami_alphabet if saami else nordic_alphabet
 
     def clean_lemma(article: Article):
         lemma = article.lemma.lower()
@@ -44,16 +47,21 @@ def sort_by_sami_alphabet(input_list: list[Article]):
         lemma = re.sub(r"[ð]", "đ", lemma)
         lemma = re.sub(r"[í]", "i", lemma)
         lemma = re.sub(r"[ñ]", "n", lemma)
-        lemma = re.sub(r"[âàã]", "a", lemma)
+        lemma = re.sub(r"[àã]", "a", lemma)
         lemma = re.sub(r"[éèê]", "e", lemma)
         lemma = re.sub(r"[üúû]", "u", lemma)
         lemma = re.sub(r"[ôõóò]", "o", lemma)
-        lemma = re.sub(r"[ʼ´ˈ’]", "'", lemma)
+        lemma = re.sub(r"[ʼ´ˈ’ʻ]", "'", lemma)
 
         # Debug if you get ValueError: substring not found
-        # for c in lemma:
-        #     if c not in alphabet:
-        #         print(f"DEBUG: Found illegal character '{c}' in lemma: '{lemma}'")
+        for c in lemma:
+            if c not in alphabet:
+                print(
+                    yellow(
+                        f"Found unknown character \"{c}\" with unicode '{hex(ord(c))}' in lemma: '{lemma}'"
+                    )
+                )
+                lemma = lemma.replace(c, "~", 1)
         return lemma
 
     return sorted(

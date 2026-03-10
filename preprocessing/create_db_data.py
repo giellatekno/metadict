@@ -37,6 +37,7 @@ parsers = {
     "apotekordliste": classes.ApotekordlisteParser,
     "medisinsk": classes.MedisinskParser,
     "gaerjiste": classes.GaerjisteParser,
+    "bergsland_magga": classes.BergslandMaggaParser,
 }
 
 

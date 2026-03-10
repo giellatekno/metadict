@@ -6,14 +6,18 @@ If the class file already exists, the script notifies the user.
 
 import os
 
-class_name = input("Enter the class name: ")
-file_path = f"classes/{class_name.lower().replace(' ', '_')}.py"
+class_name = (
+    input("Enter the name you want associated with the dictionary (one word): ")
+    .strip()
+    .replace(" ", "")
+)
+file_path = f"classes/{class_name.lower()}_parser.py"
 
 if not os.path.exists(file_path):
     with open(file_path, "w") as f:
-        f.write(f"""from utils.dataclasses import Dictionary, Article
+        f.write(f"""from utils.dataclasses import Article, Dictionary
 
-class {class_name.replace(" ", "")}:
+class {class_name.capitalize()}Parser:
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
@@ -21,7 +25,6 @@ class {class_name.replace(" ", "")}:
             lang1="",
             lang2="",
             closed=True,
-            is_ordered=True,
             author="",
             date_published="",
             isbn="",
@@ -46,7 +49,7 @@ class {class_name.replace(" ", "")}:
 
     with open("classes/__init__.py", "a") as f:
         f.write(
-            f"from .{class_name.lower().replace(' ', '_')} import {class_name.replace(' ', '')}\n"
+            f"from .{class_name.lower()}_parser import {class_name.capitalize()}Parser\n"
         )
     print(f"Imported {class_name} in classes/__init__.py")
 

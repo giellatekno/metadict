@@ -1,7 +1,7 @@
 from xml.etree import ElementTree as ET
 
 from utils.dataclasses import Article, Dictionary
-from utils.utils import sort_by_sami_alphabet
+from utils.utils import sort_alphabetically, yellow
 
 
 class GTSmeParser:
@@ -30,7 +30,11 @@ class GTSmeParser:
                 # print("<e> node has no <lg><l>")
                 continue
 
-            lemma = l_node.text.strip("\n\t ").replace("\n", " ")
+            l_text = l_node.text
+            if not l_text:
+                print(yellow("l node without lemma"))
+                continue
+            lemma = l_text.strip("\n\t ").replace("\n", " ")
 
             if e.find("mg/dg") == None:
                 continue
@@ -39,8 +43,8 @@ class GTSmeParser:
 
             try:
                 rendered = self.to_html(lemma, pos, e)
-            except Exception as e:
-                print(lemma, e)
+            except Exception as exep:
+                print(yellow(f"{file.name}: Couldn't parse '{lemma}'\n{exep}"))
                 continue
 
             a = Article(
@@ -53,8 +57,7 @@ class GTSmeParser:
 
             articles.append(a)
 
-        # articles.sort(key=lambda article: article.lemma)
-        articles = sort_by_sami_alphabet(articles)
+        articles = sort_alphabetically(articles, True)
         for i, article in enumerate(articles, start=1):
             article.article_number = i
 

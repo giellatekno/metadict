@@ -1,7 +1,32 @@
 from xml.etree import ElementTree as ET
 
 from utils.dataclasses import Article, Dictionary
-from utils.utils import sort_by_sami_alphabet
+from utils.utils import sort_alphabetically, yellow
+
+# fmt: off
+METADATA = {
+    ("sme-nob", "nob-sme"): {
+        "author": "Lene Antonsen, Trond Trosterud & Berit Merete Nystad Eskonsipo",
+        "name": "Neahttadigisánit",
+    },
+    ("sme-nob", "nob-sme"): {
+        "author": "Trond Trosterud",
+        "name": "Neahttadigisánit",
+    },
+    ("sme-nob", "nob-sme"): {
+        "author": "Lene Antonsen, Trond Trosterud, Maja Kappfjell, Sissel Jåma, Toini Bergström & Marit Fjellheim",
+        "name": "Nedtedigibaakoeh",
+    },
+    ("smn-fin", "fin-smn"): {
+        "author": "Marja-Liisa Olthuis, Taarna Valtonen, Miina Seurujärvi and Trond Trosterud",
+        "name": "Nettidigisäänih",
+    },
+    ("smn-sme", "sme-smn"): {
+        "author": "Trond Trosterud, Marja-Liisa Olthuis, Lene Antonsen and Erika Sarivaara",
+        "name": "Nettidigisäänih",
+    },
+}
+# fmt: on
 
 
 class GTParser:
@@ -11,17 +36,10 @@ class GTParser:
         if l2 == "mul":
             l2 = "nob"
 
-        author = "Giellatekno"
-        if langs == "sme-nob" or langs == "nob-sme":
-            author = "Lene Antonsen, Trond Trosterud & Berit Merete Nystad Eskonsipo"
-        elif langs == "sme-fin" or langs == "fin-sme":
-            author = "Trond Trosterud"
-        elif langs == "sma-mul" or langs == "nob-sma":
-            author = "Lene Antonsen, Trond Trosterud, Maja Kappfjell, Sissel Jåma, Toini Bergström & Marit Fjellheim"
-
-        name = "Neahttadigisánit"
-        if l1 == "sma" or l2 == "sma":
-            name = "Nedtedigibaakoeh"
+        author, name = next(
+            ((v["author"], v["name"]) for k, v in METADATA.items() if langs in k),
+            ("", "Neahttadigisánit"),
+        )
 
         self.dictionary = Dictionary(
             id=dictionary_id, name=name, lang1=l1, lang2=l2, author=author
@@ -42,10 +60,18 @@ class GTParser:
                 # print("<e> node has no <lg><l>")
                 continue
 
-            lemma = l_node.text.strip("\n\t ").replace("\n", " ")
+            l_text = l_node.text
+            if not l_text:
+                print(yellow("l node without lemma"))
+                continue
+            lemma = l_text.strip("\n\t ").replace("\n", " ")
             pos = l_node.get("pos")
 
-            rendered = self.to_html(lemma, pos, e)
+            try:
+                rendered = self.to_html(lemma, pos, e)
+            except Exception as exep:
+                print(yellow(f"{file.name}: Couldn't parse '{lemma}'\n{exep}"))
+                continue
 
             a = Article(
                 dictionary=self.dictionary.id,
@@ -57,8 +83,9 @@ class GTParser:
 
             articles.append(a)
 
-        # articles.sort(key=lambda article: article.lemma)
-        articles = sort_by_sami_alphabet(articles)
+        articles = sort_alphabetically(
+            articles, saami=self.dictionary.lang1.startswith("sm")
+        )
         for i, article in enumerate(articles, start=1):
             article.article_number = i
 

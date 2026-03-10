@@ -21,11 +21,15 @@ finally:
 
 WANTED_DICTS = [
     "sme-nob",
-    "nob-sme",
     "sme-fin",
-    "fin-sme",
+    "sme-smn",
     "sma-mul",
+    "smn-sme",
+    "smn-fin",
     "nob-sma",
+    "nob-sme",
+    "fin-sme",
+    "fin-smn",
 ]
 
 
