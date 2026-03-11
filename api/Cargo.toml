@@ -59,7 +59,7 @@ base64 = "0.22.1"
 cookie = { version = "0.18.1", features = ["percent-encode"] }
 
 # jwt parsing and creating
-jsonwebtoken = "10.3.0"
+jsonwebtoken = { version = "10.3.0", features = ["rust_crypto"] }
 
 # simplifies writing custom errors
 thiserror = "2.0.18"
