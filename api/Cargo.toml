@@ -10,65 +10,65 @@ edition = "2024"
 axum = "0.8.8"
 
 # generic http definitions
-http = "1.1.0"
+http = "1.4.0"
 
 # more iterators
 itertools = "0.14.0"
 
 # required in order to do source code hot reloading
-listenfd = "1.0.1"
+listenfd = "1.0.2"
 
 # the async runtime
-tokio = { version = "1.37.0", features = ["full"] }
+tokio = { version = "1.50.0", features = ["full"] }
 
 # postgres wrapper for use with tokio
-tokio-postgres = "0.7.10"
+tokio-postgres = "0.7.16"
 
 # async connection pool of tokio-postgres connections
 deadpool-postgres = { version = "0.14.1", features = ["serde"] }
 
 # Layered config approach. Set defaults, then override/extend through
 # other means. E.g. defaults in file, overriden by env vars.
-config = "0.15"
+config = "0.15.19"
 
 # http specific middleware on top of tower (axum uses tower)
-tower-http = { version = "0.6.6", features = ["cors", "trace"] }
+tower-http = { version = "0.6.8", features = ["cors", "trace"] }
 
 # logging for async apps, core library
-tracing = "0.1.40"
+tracing = "0.1.44"
 
 # a subscriber for tracing
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 
 # SERializing and DEserializing
-serde = { version = "1.0.198", features = ["derive"] }
+serde = { version = "1.0.228", features = ["derive"] }
 
 # serializing/deserializing json
-serde_json = "1.0.116"
+serde_json = "1.0.149"
 
 # error wrapper
-anyhow = "1.0.82"
+anyhow = "1.0.102"
 
 # http client
-reqwest = { version = "0.12.3", features = ["json"] }
+reqwest = { version = "0.12.2", features = ["json"] }
 
 # base64 encoding and decoding
-base64 = "0.22.0"
+base64 = "0.22.1"
 
 # http cookie parsing and creation
 cookie = { version = "0.18.1", features = ["percent-encode"] }
 
 # jwt parsing and creating
-jsonwebtoken = "9.3.1"
+jsonwebtoken = "10.3.0"
 
 # simplifies writing custom errors
-thiserror = "2.0.17"
+thiserror = "2.0.18"
 
 # provide #[derive(Builder)]
-derive_builder = "0.20.0"
+derive_builder = "0.20.2"
 
 # time and dates
-chrono = "0.4.38"
+chrono = "0.4.44"
 
 # string display and fromstr from an enum
 strum = { version = "0.28.0", features = ["derive"] }

@@ -15,6 +15,9 @@ impl Config {
             .set_default("pg.user", "postgres")?
             .set_default("pg.port", 3515)?
             .set_default("pg.host", "deliberately.invalid")?
+            .set_default("pg.pool.max_size", "24")?
+            .set_default("pg.pool.timeouts.wait.secs", "2")?
+            .set_default("pg.pool.timeouts.wait.nanos", "0")?
             .add_source(config::Environment::default().separator("__"))
             //.add_source(config::File::from(PathBuf::from("./config.toml")))
             .build()?
@@ -45,11 +48,14 @@ impl ConnectionPool {
     }
 
     pub async fn get(&self) -> Result<deadpool_postgres::Object, anyhow::Error> {
-        self.pool.get().await.map_err(|e| {
-            let port = self.config.port.unwrap();
-            let host: String = self.config.host.as_ref().unwrap().clone();
-            let connection_info = format!("api: can't connect to db at host={host}:{port}");
-            anyhow!(e).context(connection_info)
-        })
+        match self.pool.get().await {
+            Ok(obj) => Ok(obj),
+            Err(e) => {
+                let port = self.config.port.unwrap();
+                let host: String = self.config.host.as_ref().unwrap().clone();
+                let context = format!("api: can't connect to db at {host}:{port}: {e}");
+                Err(anyhow!(e).context(context))
+            }
+        }
     }
 }
