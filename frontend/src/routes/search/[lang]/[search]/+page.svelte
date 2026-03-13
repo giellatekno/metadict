@@ -5,10 +5,11 @@
     import { m } from "$lib/paraglide/messages";
     import { page as pagestate } from "$app/state";
     import { ArrowLeftIcon, ArrowRightIcon } from "lucide-svelte";
+    import { LANG_COLORS } from "$lib/utils";
 
     let { data }: PageProps = $props();
 
-    let pageSize = $state(10);
+    let pageSize = $state(20);
 
     let page = $state(1);
 
@@ -36,7 +37,6 @@
                     value={String(pageSize)}
                     onchange={(e) => (pageSize = Number(e.currentTarget.value))}
                 >
-                    <option value="10">10</option>
                     <option value="20">20</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
@@ -47,7 +47,7 @@
             <div class="flex w-full flex-col gap-2">
                 <div class="card bg-tertiary-50-950 w-full shadow-lg">
                     <div class="flex flex-col">
-                        {#each shownLemmas as lemma, i}
+                        {#each shownLemmas as { lang, lemma }, i}
                             {@const rounded_style =
                                 i === 0
                                     ? "rounded-t-xl rounded-b-none"
@@ -58,12 +58,19 @@
                                 <hr class="hr border-surface-200-800" />
                             {/if}
                             <a
-                                class="btn hover:preset-tonal justify-start py-3 {rounded_style}"
+                                class="btn hover:preset-tonal justify-between py-3 {rounded_style}"
                                 href={resolve(
                                     `/lookup/${pagestate.params.lang}/${lemma}`,
                                 )}
                             >
                                 {lemma}
+                                <span
+                                    class="badge preset-filled {LANG_COLORS[
+                                        lang
+                                    ]}"
+                                >
+                                    {lang.toUpperCase()}
+                                </span>
                             </a>
                         {/each}
                     </div>

@@ -1,11 +1,13 @@
 import type { PageLoad } from "./$types";
 import { error, redirect } from "@sveltejs/kit";
 import { resolve } from "$app/paths";
-import { SearchResponse } from "$lib/utils";
+import { SEARCH_LANGS, SearchResponse } from "$lib/utils";
 
 export const load: PageLoad = async ({ params, fetch }) => {
+    let langs = params.lang === "all" ? SEARCH_LANGS.join(",") : params.lang;
+
     let url = resolve(
-        `/api/search/${params.lang}/${encodeURIComponent(params.search)}`,
+        `/api/search/${langs}/${encodeURIComponent(params.search)}`,
     );
     const res = await fetch(url);
 
@@ -14,6 +16,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
         error(res.status, "fetch to api failed");
     }
     const lemmas = SearchResponse.parse(await res.json());
+    // console.log(lemmas);
 
     if (lemmas && lemmas.length === 1) {
         redirect(307, resolve(`/lookup/${params.lang}/${params.search}`));

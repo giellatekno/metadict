@@ -3,47 +3,34 @@
     import { m } from "$lib/paraglide/messages.js";
     import { langname } from "$lib/langname";
     import { onMount } from "svelte";
-    import { ChevronDown, SearchIcon } from "lucide-svelte";
+    import { EllipsisIcon, SearchIcon, XIcon } from "lucide-svelte";
     import { goto } from "$app/navigation";
     import { resolve } from "$app/paths";
-    import { Accordion } from "@skeletonlabs/skeleton-svelte";
-    import { slide } from "svelte/transition";
+    import { Dialog, Portal } from "@skeletonlabs/skeleton-svelte";
+    import { saveSettings, settings } from "$lib/settings.svelte";
+    import { SEARCH_LANGS, TARGET_LANGS } from "$lib/utils";
+    import { browser } from "$app/environment";
 
     let value = $state("");
-    let search_lang = $state("sme");
 
-    let search_input: HTMLInputElement;
+    let searchbox_elem: HTMLInputElement;
 
-    const extra_letters: Record<string, string[]> = {
-        sme: ["á", "č", "đ", "ŋ", "š", "ŧ", "ž"],
-        sma: ["ï", "æ", "ö"],
-        fin: ["ä", "ö", "å"],
-        nob: ["æ", "ø", "å"],
-    };
+    let search_param: string = $derived.by(() => {
+        if (Object.values(settings.selected_search_langs).every(Boolean))
+            return "all";
+        return Object.entries(settings.selected_search_langs)
+            .filter(([_, v]) => v === true)
+            .map(([k, _]) => k)
+            .join(",");
+    });
 
-    const search_langs = ["sme", "sma", "nob", "fin"] as const;
-
-    // let target_langs = $state(["sme", "sma", "nob", "fin", "hist"]);
-
-    // onMount(() => {
-    //     const saved = localStorage.getItem("preferred_targets");
-    //     if (saved) {
-    //         try {
-    //             target_langs = JSON.parse(saved);
-    //         } catch (e) {
-    //             console.error("Failed to parse languages", e);
-    //         }
-    //     }
-    //     search_input.focus();
-    // });
-
-    // $effect(() => {
-    //     localStorage.setItem("preferred_targets", JSON.stringify(target_langs));
-    // });
+    onMount(() => {
+        searchbox_elem.focus();
+    });
 
     async function on_new_value(input: string) {
         await goto(
-            resolve(`/search/${search_lang}/${encodeURIComponent(input)}`),
+            resolve(`/search/${search_param}/${encodeURIComponent(input)}`),
             { keepFocus: true },
         );
     }
@@ -51,132 +38,225 @@
     function on_enter_keydown(event: KeyboardEvent) {
         if (event.key !== "Enter" || value === "") return;
         on_new_value(value);
-        search_input.focus();
+        searchbox_elem.focus();
     }
 
     function on_searchbutton_click() {
         if (value === "") return;
         on_new_value(value);
-        search_input.focus();
+        searchbox_elem.focus();
     }
 
-    onMount(() => {
-        search_input.focus();
+    function toggleSearchLang(lang: string) {
+        if (Object.keys(settings.selected_search_langs).includes(lang)) {
+            settings.selected_search_langs[lang] =
+                !settings.selected_search_langs[lang];
+        }
+        saveSettings();
+    }
+
+    function toggleTargetLang(lang: string) {
+        if (Object.keys(settings.selected_target_langs).includes(lang)) {
+            settings.selected_target_langs[lang] =
+                !settings.selected_target_langs[lang];
+        }
+        saveSettings();
+    }
+
+    const isMac = $derived.by(() => {
+        const ua = browser ? window.navigator.userAgent : "";
+        return ua ? ua.includes("Mac") : false;
     });
 
-    function on_extra_letter(letter: string) {
-        value += letter;
-        search_input.focus();
+    function on_ctrl_k(e: KeyboardEvent) {
+        if (isMac) {
+            if (e.metaKey && e.key === "k") {
+                e.preventDefault();
+                searchbox_elem.focus();
+            }
+        } else {
+            if (e.ctrlKey && e.key === "k") {
+                e.preventDefault();
+                searchbox_elem.focus();
+            }
+        }
     }
-
-    // function toggleTarget(lang: string) {
-    //     if (target_langs.includes(lang)) {
-    //         // Prevent deselecting everything (optional but recommended)
-    //         if (target_langs.length > 1) {
-    //             target_langs = target_langs.filter((l) => l !== lang);
-    //         }
-    //     } else {
-    //         target_langs = [...target_langs, lang];
-    //     }
-    // }
+    // animation for search settings dialig
+    const animation =
+        "transition transition-discrete opacity-0 translate-y-[100px] starting:data-[state=open]:opacity-0 starting:data-[state=open]:translate-y-[100px] data-[state=open]:opacity-100 data-[state=open]:translate-y-0";
 </script>
 
+<svelte:window onkeydown={on_ctrl_k} />
+
 <div class="flex w-2xl flex-col gap-2">
-    <div class="grid w-fit grid-cols-7 gap-1.5">
-        {#each extra_letters[search_lang] as letter}
-            <button
-                class="btn btn-sm md:btn-base preset-outlined-primary-500 w-4 md:w-8"
-                onclick={() => on_extra_letter(letter)}
-            >
-                {letter}
-            </button>
-        {/each}
+    <div>
+        <span class="flex items-center gap-1 opacity-80">
+            {m.search_goto_1()}
+            {#if isMac}
+                <kbd class="kbd preset-filled-surface-300-700">⌘</kbd>
+            {:else}
+                <kbd class="kbd preset-filled-surface-300-700">ctrl</kbd>
+            {/if}
+            +
+            <kbd class="kbd preset-filled-surface-300-700">K</kbd>
+            {m.search_goto_2()}
+        </span>
     </div>
     <div
         class="input-group preset-filled-tertiary-50-950 h-12 w-full grid-cols-[auto_1fr_auto] md:h-16 md:w-2xl"
     >
-        <button class="ig-cell" onclick={on_searchbutton_click}>
+        <div class="ig-cell">
             <SearchIcon class="size-6" />
-        </button>
+        </div>
         <input
             class="ig-input text-lg"
-            bind:this={search_input}
             type="search"
-            placeholder={m.search_placeholder({ lang: search_lang })}
+            placeholder={m.search_placeholder()}
+            bind:this={searchbox_elem}
             bind:value
             onkeydown={on_enter_keydown}
         />
-        <select
-            class="ig-select"
-            name="searchlang"
-            id="searchlang"
-            bind:value={search_lang}
-            placeholder="Search language"
-            onchange={() => {
-                value = "";
-                search_input.focus();
-            }}
+        <button
+            class="ig-btn preset-filled-primary-500"
+            onclick={on_searchbutton_click}
         >
-            {#each search_langs as iso}
-                <option value={iso}>{langname(iso, getLocale())}</option>
-            {/each}
-        </select>
+            {m.search()}
+        </button>
     </div>
-    <!-- <div class="flex flex-col"> -->
-    <!--     <Accordion collapsible> -->
-    <!--         <Accordion.Item value="1"> -->
-    <!--             <h3> -->
-    <!--                 <Accordion.ItemTrigger -->
-    <!--                     class="preset-filled-surface-200-800 flex items-center justify-between font-bold" -->
-    <!--                 > -->
-    <!--                     Filter result languages -->
-    <!--                     <Accordion.ItemIndicator class="group"> -->
-    <!--                         <ChevronDown -->
-    <!--                             class="h-5 w-5 transition group-data-[state=open]:rotate-180" -->
-    <!--                         /> -->
-    <!--                     </Accordion.ItemIndicator> -->
-    <!--                 </Accordion.ItemTrigger> -->
-    <!--             </h3> -->
-    <!--             <Accordion.ItemContent -->
-    <!--                 class="preset-outlined-surface-200-800 flex flex-wrap gap-2 rounded p-2" -->
-    <!--             > -->
-    <!--                 {#snippet element(attributes)} -->
-    <!--                     {#if !attributes.hidden} -->
-    <!--                         <div -->
-    <!--                             {...attributes} -->
-    <!--                             transition:slide={{ duration: 150 }} -->
-    <!--                         > -->
-    <!--                             {#each search_langs as iso} -->
-    <!--                                 <button -->
-    <!--                                     class="btn preset-outlined-primary-500 flex items-center text-sm" -->
-    <!--                                     onclick={() => toggleTarget(iso)} -->
-    <!--                                 > -->
-    <!--                                     <input -->
-    <!--                                         class="checkbox" -->
-    <!--                                         type="checkbox" -->
-    <!--                                         checked={target_langs.includes(iso)} -->
-    <!--                                     /> -->
-    <!--                                     <p> -->
-    <!--                                         {langname(iso, getLocale())} -->
-    <!--                                     </p> -->
-    <!--                                 </button> -->
-    <!--                             {/each} -->
-    <!--                             <button -->
-    <!--                                 class="btn preset-outlined-primary-500 flex items-center text-sm" -->
-    <!--                                 onclick={() => toggleTarget("hist")} -->
-    <!--                             > -->
-    <!--                                 <input -->
-    <!--                                     class="checkbox" -->
-    <!--                                     type="checkbox" -->
-    <!--                                     checked={target_langs.includes("hist")} -->
-    <!--                                 /> -->
-    <!--                                 <p>Historical dictionaries</p> -->
-    <!--                             </button> -->
-    <!--                         </div> -->
-    <!--                     {/if} -->
-    <!--                 {/snippet} -->
-    <!--             </Accordion.ItemContent> -->
-    <!--         </Accordion.Item> -->
-    <!--     </Accordion> -->
-    <!-- </div> -->
+    <div class="flex flex-col">
+        <Dialog>
+            <Dialog.Trigger
+                class="preset-filled-surface-200-800 hover:preset-filled-surface-100-900 border-surface-200-800 flex items-center justify-between rounded-lg border px-4 py-2"
+            >
+                <span class="font-bold">SEARCH OPTIONS</span>
+                <EllipsisIcon class="size-4" />
+            </Dialog.Trigger>
+            <Portal>
+                <Dialog.Backdrop
+                    class="bg-surface-50-950/50 fixed inset-0 z-50"
+                />
+                <Dialog.Positioner
+                    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                >
+                    <Dialog.Content
+                        class="card bg-tertiary-50-950 border-primary-500 w-full max-w-xl space-y-4 border-2 p-6 shadow-xl {animation}"
+                    >
+                        <header class="flex items-center justify-between">
+                            <Dialog.Title class="h4 font-bold">
+                                {m.search_options()}
+                            </Dialog.Title>
+                            <Dialog.CloseTrigger
+                                class="hover:preset-tonal box-content rounded-md p-2"
+                                title="Close"
+                                aria-label="Close"
+                            >
+                                <XIcon class="size-6" />
+                            </Dialog.CloseTrigger>
+                        </header>
+                        <Dialog.Description>
+                            <div class="align-start grid grid-cols-2 gap-6">
+                                <div class="flex flex-col gap-2">
+                                    <span class="text-lg font-bold">
+                                        {m.search_languages()}
+                                    </span>
+                                    <hr class="hr" />
+                                    <div class="flex flex-col gap-2">
+                                        {#each SEARCH_LANGS as iso}
+                                            <button
+                                                class="btn hover:preset-tonal flex justify-start"
+                                                onclick={() =>
+                                                    toggleSearchLang(iso)}
+                                            >
+                                                <input
+                                                    class="checkbox"
+                                                    type="checkbox"
+                                                    bind:checked={
+                                                        settings
+                                                            .selected_search_langs[
+                                                            iso
+                                                        ]
+                                                    }
+                                                />
+                                                <p>
+                                                    {langname(iso, getLocale())}
+                                                </p>
+                                            </button>
+                                        {/each}
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <span class="text-lg font-bold">
+                                        {m.target_languages()}
+                                    </span>
+                                    <hr class="hr" />
+                                    <div class="flex flex-col gap-2">
+                                        {#each TARGET_LANGS as iso}
+                                            {#if iso !== "hst" && iso !== "ext"}
+                                                <button
+                                                    class="btn hover:preset-tonal flex justify-start"
+                                                    onclick={() =>
+                                                        toggleTargetLang(iso)}
+                                                >
+                                                    <input
+                                                        class="checkbox"
+                                                        type="checkbox"
+                                                        bind:checked={
+                                                            settings
+                                                                .selected_target_langs[
+                                                                iso
+                                                            ]
+                                                        }
+                                                    />
+                                                    <p>
+                                                        {langname(
+                                                            iso,
+                                                            getLocale(),
+                                                        )}
+                                                    </p>
+                                                </button>
+                                            {/if}
+                                        {/each}
+                                        <button
+                                            class="btn hover:preset-tonal flex justify-start"
+                                            onclick={() =>
+                                                toggleTargetLang("hst")}
+                                        >
+                                            <input
+                                                class="checkbox"
+                                                type="checkbox"
+                                                bind:checked={
+                                                    settings
+                                                        .selected_target_langs[
+                                                        "hst"
+                                                    ]
+                                                }
+                                            />
+                                            <p>{m.historical_dictionaries()}</p>
+                                        </button>
+                                        <button
+                                            class="btn hover:preset-tonal flex justify-start"
+                                            onclick={() =>
+                                                toggleTargetLang("ext")}
+                                        >
+                                            <input
+                                                class="checkbox"
+                                                type="checkbox"
+                                                bind:checked={
+                                                    settings
+                                                        .selected_target_langs[
+                                                        "ext"
+                                                    ]
+                                                }
+                                            />
+                                            <p>{m.external_dictionaries()}</p>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Dialog.Description>
+                    </Dialog.Content>
+                </Dialog.Positioner>
+            </Portal>
+        </Dialog>
+    </div>
 </div>

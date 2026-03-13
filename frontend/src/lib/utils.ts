@@ -1,5 +1,33 @@
 import * as z from "zod";
 
+export const SEARCH_OBJ = {
+    sme: true,
+    sma: true,
+    smn: true,
+    nob: true,
+    fin: true,
+};
+export const TARGET_OBJ = {
+    sme: true,
+    sma: true,
+    smn: true,
+    nob: true,
+    fin: true,
+    hst: true,
+    ext: true,
+};
+
+export const SEARCH_LANGS = Object.keys(SEARCH_OBJ);
+export const TARGET_LANGS = Object.keys(TARGET_OBJ);
+
+export const LANG_COLORS: Record<string, string> = {
+    sme: "bg-blue-800",
+    sma: "bg-green-800",
+    smn: "bg-red-800",
+    nob: "bg-orange-800",
+    fin: "bg-cyan-800",
+};
+
 export const User = z.object({
     gh_fullname: z.string(),
     gh_login_name: z.string(),
@@ -14,12 +42,18 @@ export const LookupResponse = z.array(
         dictionary_name: z.string(),
         is_historic: z.boolean(),
         is_ocr_read: z.boolean(),
+        lang1: z.string(),
         lang2: z.string(),
         lemma: z.string(),
     }),
 );
 
-export const SearchResponse = z.string().array();
+export const SearchResponse = z.array(
+    z.object({
+        lang: z.string(),
+        lemma: z.string(),
+    }),
+);
 
 export const ArticleResponse = z.object({
     article: z.object({

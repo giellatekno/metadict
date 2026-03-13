@@ -1,7 +1,7 @@
 export const externalDicts: Record<string, { name: string; link: string }[]> = {
     deu: [
         {
-            name: "Wiktionary",
+            name: "Wiktionary (deu)",
             link: "https://de.wiktionary.org/wiki/{%string%}",
         },
     ],
@@ -15,7 +15,7 @@ export const externalDicts: Record<string, { name: string; link: string }[]> = {
             link: "https://sonaveeb.ee/search/unif/dlall/dsall/{%string%}/1/est",
         },
         {
-            name: "Wiktionary",
+            name: "Wiktionary (est)",
             link: "https://et.wiktionary.org/wiki/{%string%}",
         },
     ],
@@ -30,7 +30,7 @@ export const externalDicts: Record<string, { name: string; link: string }[]> = {
             link: "https://arhiiv.eki.ee/dict/fie/index.cgi?Q={%string%}&F=M&C06=fi",
         },
         {
-            name: "Wiktionary",
+            name: "Wiktionary (fin)",
             link: "https://fi.wiktionary.org/wiki/{%string%}",
         },
     ],
@@ -40,14 +40,14 @@ export const externalDicts: Record<string, { name: string; link: string }[]> = {
             link: "https://ordbokene.no/nob/bm,nn/{%string%}",
         },
         {
-            name: "Davvi girji",
+            name: "Davvi girji (nob-sme)",
             link: "https://533.davvi.no/ordbok_norsam.php?finn={%string%}",
         },
     ],
     sma: [],
     sme: [
         {
-            name: "Davvi girji",
+            name: "Davvi girji (sme-nob)",
             link: "https://533.davvi.no/ordbok_samnor.php?finn={%string%}",
         },
     ],

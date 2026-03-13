@@ -1,11 +1,13 @@
 import { resolve } from "$app/paths";
-import { LookupResponse } from "$lib/utils";
+import { LookupResponse, SEARCH_LANGS } from "$lib/utils";
 import { error } from "@sveltejs/kit";
 import type { LayoutLoad } from "./$types";
 
 export const load: LayoutLoad = async ({ params, fetch }) => {
+    const langs = params.lang === "all" ? SEARCH_LANGS.join(",") : params.lang;
+
     let url = resolve(
-        `/api/lookup/${params.lang}/${encodeURIComponent(params.lemma)}`,
+        `/api/lookup/${langs}/${encodeURIComponent(params.lemma)}`,
     );
     const res = await fetch(url);
     if (!res.ok) {
