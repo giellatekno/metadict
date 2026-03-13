@@ -6,20 +6,18 @@
     "login": "Logg inn med Github",
     "logout": "Logg ut",
     "gt_employee": "Giellatekno ansatt",
+    "search": "Søk",
     "search_hits": "{count} treff",
     "search_hits_per_page": "Treff per side",
     "search_no_results": "Fant ingen lemma som matchet søket.",
     "search_language": "Søkespråk",
-    "search_placeholder": [
-        {
-            "match": {
-                "lang=sme": "Søk etter nordsamiske lemmaer...",
-                "lang=nob": "Søk etter norske lemmaer...",
-                "lang=fin": "Søk etter finske lemmaer...",
-                "lang=sma": "Søk etter sørsamiske lemmaer..."
-            }
-        }
-    ],
+    "search_placeholder": "Søk etter lemmaer i grunnform...",
+    "search_goto_1": "Press",
+    "search_goto_2": "for å gå til søkefeltet",
+    "navigate_entries": "Naviger oppslag",
+    "search_options": "Søkevalg",
+    "search_languages": "Søkespråk",
+    "target_languages": "Målspråk",
     "dictionary_about": "Om denne ordboka",
     "dictionary_title": "Tittel",
     "dictionary_authors": "Forfatter(e)",

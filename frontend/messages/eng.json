@@ -6,20 +6,18 @@
     "login": "Log in with Github",
     "logout": "Log out",
     "gt_employee": "Giellatekno employee",
+    "search": "Search",
     "search_hits": "{count} hits",
     "search_hits_per_page": "Hits per page",
     "search_no_results": "Found no lemmas that matched the search.",
     "search_language": "Search language",
-    "search_placeholder": [
-        {
-            "match": {
-                "lang=sme": "Search for North Sámi lemmas...",
-                "lang=nob": "Search for Norwegian lemmas...",
-                "lang=fin": "Search for Finnish lemmas...",
-                "lang=sma": "Search for South Sámi lemmas..."
-            }
-        }
-    ],
+    "search_placeholder": "Search for lemmas in base form...",
+    "search_goto_1": "Press",
+    "search_goto_2": "to focus search field",
+    "navigate_entries": "Navigate entries",
+    "search_options": "Search options",
+    "search_languages": "Search languages",
+    "target_languages": "Target languages",
     "dictionary_about": "About this dictionary",
     "dictionary_authors": "Author(s)",
     "dictionary_year_published": "Year published",

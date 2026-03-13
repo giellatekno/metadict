@@ -6,20 +6,18 @@
     "login": "Logge sisa Githubiin",
     "logout": "Logge olggos",
     "gt_employee": "Giellatekno bargi",
+    "search": "Oza",
     "search_hits": "{count} bohtosa",
     "search_hits_per_page": "Bohtosat juohke siiddus",
     "search_no_results": "Ii gávdnon oktage sátni mii heive ohcamii",
     "search_language": "Ohcangiella",
-    "search_placeholder": [
-        {
-            "match": {
-                "lang=sme": "Oza davvisámegiel lemmaid...",
-                "lang=nob": "Oza dárogiel lemmaid...",
-                "lang=fin": "Oza suomagiel lemmaid...",
-                "lang=sma": "Oza lullisámegiel lemmaid..."
-            }
-        }
-    ],
+    "search_placeholder": "Oza lemmaid vuođđohámiid...",
+    "search_goto_1": "Deaddil",
+    "search_goto_2": "mannat ohcangieddái",
+    "navigate_entries": "Navigere bohtosiid",
+    "search_options": "Ohcanváljemat",
+    "search_languages": "Ohcangielat",
+    "target_languages": "Boađusgielat",
     "dictionary_about": "Dán sátnegirjji birra",
     "dictionary_authors": "Girječálli(t)",
     "dictionary_year_published": "Almmuhanjahki",
