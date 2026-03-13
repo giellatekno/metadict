@@ -22,7 +22,7 @@ listenfd = "1.0.2"
 tokio = { version = "1.50.0", features = ["full"] }
 
 # postgres wrapper for use with tokio
-tokio-postgres = "0.7.16"
+tokio-postgres = { version = "0.7.16", features = ["array-impls"] }
 
 # async connection pool of tokio-postgres connections
 deadpool-postgres = { version = "0.14.1", features = ["serde"] }
@@ -73,3 +73,4 @@ chrono = "0.4.44"
 # string display and fromstr from an enum
 strum = { version = "0.28.0", features = ["derive"] }
 strum_macros = "0.28"
+postgres-types = { version = "0.2.12", features = ["derive"] }

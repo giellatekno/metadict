@@ -1,7 +1,11 @@
 //! Database queries
 //! All SQL is in this file.
 
-use anyhow::{Context, Ok};
+use crate::Language;
+use anyhow::Context;
+use itertools::Itertools;
+use postgres_types::ToSql;
+use tokio_postgres::types::private::BytesMut;
 
 fn can_see_closed_sql(can_see_closed: bool) -> &'static str {
     if can_see_closed {
@@ -11,26 +15,53 @@ fn can_see_closed_sql(can_see_closed: bool) -> &'static str {
     }
 }
 
-pub async fn find_lemmas(
-    db: deadpool_postgres::Object,
-    lang: &str,
-    query: &str,
-    l2: Option<&[crate::Language]>,
-    can_see_closed: bool,
-) -> anyhow::Result<Vec<String>> {
-    // TODO injection safe?
-    let can_see_closed = can_see_closed_sql(can_see_closed);
-    let lang2_filter = match l2 {
-        Some(langs) => {
-            let it = langs.iter().map(|lang| format!("'{lang}'"));
-            itertools::intersperse(it, String::from(",")).collect()
+#[derive(Debug, serde::Serialize)]
+pub struct SearchRow {
+    lang: String,
+    lemma: String,
+}
+
+impl From<tokio_postgres::Row> for SearchRow {
+    fn from(row: tokio_postgres::Row) -> Self {
+        Self {
+            lang: row.get("lang"),
+            lemma: row.get("lemma"),
         }
-        None => crate::LANGUAGES_STR_QUOTED_COMMA_SEPARATED.to_string(),
-    };
-    let statement = format!(
-        r#"
+    }
+}
+
+fn vec_language_to_sql(v: &[Language]) -> String {
+    let mut out = String::from("(");
+    let lasti = v.len() - 1;
+    let mut i = 0;
+    for lang in v.iter() {
+        out.push_str(&format!("'{lang}'"));
+        if i != lasti {
+            out.push(',');
+        }
+        i += 1;
+    }
+    out.push(')');
+    out
+}
+
+/// SQL for the /search endpoint. It finds all `(lang, lemma)` pairs such that the `lang`
+/// is in the list of input `langs`, and only those where the `(lang, lemma)` pair has
+/// a translation to any language given in `l2s`.
+pub async fn search(
+    db: deadpool_postgres::Object,
+    langs: &[Language],
+    query: &str,
+    l2s: &[Language],
+    can_see_closed: bool,
+) -> anyhow::Result<Vec<SearchRow>> {
+    Ok(db
+        .query(
+            &format!(
+                r#"
         SELECT DISTINCT
-            articles.lemma
+            articles.lang AS lang,
+            articles.lemma AS lemma
         FROM
             articles
         INNER JOIN
@@ -38,30 +69,25 @@ pub async fn find_lemmas(
         ON
             articles.dictionary = dictionaries.id
         WHERE
-            lang = $1
+            articles.lang = ANY($1)
             AND
             LOWER(lemma) LIKE LOWER($2)
-            {can_see_closed}
             AND
-            dictionaries.lang2 IN ({lang2_filter})
+            dictionaries.lang2 = ANY($3)
+            {}
         ORDER BY 
             articles.lemma
-    "#
-    );
-
-    Ok(db
-        .query(&statement, &[&lang, &query])
+    "#,
+                can_see_closed_sql(can_see_closed)
+            ),
+            &[&langs, &query, &l2s],
+        )
         .await
-        .map_err(|e| anyhow::anyhow!(e))?
-        .iter()
-        .map(|row| {
-            // tuple of row.get(index), but have to tell which type for each
-            // column (and a (or the) correct rust type that the postgres type
-            // can be converted into. E.g. if field N had pg type TEXT, then
-            // it could not be converted to f32, but it can be converted to &str.
-            row.get::<usize, String>(0)
-        })
-        .collect::<Vec<String>>())
+        .map_err(|e| anyhow::anyhow!(e))
+        .context("Running search query")?
+        .into_iter()
+        .map(SearchRow::from)
+        .collect())
 }
 
 #[derive(serde::Serialize)]
@@ -69,31 +95,54 @@ pub struct Article {
     lemma: String,
     dictionary_name: String,
     article_id: i32,
-    lang2: crate::Language,
+    lang1: Language,
+    lang2: Language,
     date_published: String,
     is_historic: bool,
     is_ocr_read: bool,
 }
 
+impl From<tokio_postgres::Row> for Article {
+    fn from(row: tokio_postgres::Row) -> Self {
+        Self {
+            lemma: row.get("lemma"),
+            dictionary_name: row.get("dictionary_name"),
+            article_id: row.get("article_id"),
+            lang1: row
+                .get::<&str, String>("lang1")
+                .parse()
+                .expect("rust source code knows all language codes in database"),
+            lang2: row
+                .get::<&str, String>("lang2")
+                .parse()
+                .expect("rust source code knows all language codes in database"),
+            date_published: row.get("date_published"),
+            is_historic: row.get("is_historic"),
+            is_ocr_read: row.get("is_ocr_read"),
+        }
+    }
+}
+
 pub async fn find_articles_for_lemma(
     db: deadpool_postgres::Object,
-    lang: &str,
+    langs: &[Language],
     lemma: &str,
+    l2s: &[Language],
     can_see_closed: bool,
 ) -> anyhow::Result<Vec<Article>> {
-    // TODO injection safe?
-    let can_see_closed = can_see_closed_sql(can_see_closed);
-
-    let statement = format!(
-        r#"
+    Ok(db
+        .query(
+            &format!(
+                r#"
             SELECT
-                articles.lemma,
-                dictionaries.name,
-                articles.id,
-                dictionaries.lang2,
-                COALESCE(dictionaries.date_published, ''),
-                dictionaries.is_historic,
-                dictionaries.is_ocr_read
+                articles.lemma AS lemma,
+                dictionaries.name AS dictionary_name,
+                articles.id AS article_id,
+                dictionaries.lang1 AS lang1,
+                dictionaries.lang2 AS lang2,
+                COALESCE(dictionaries.date_published, '') AS date_published,
+                dictionaries.is_historic AS is_historic,
+                dictionaries.is_ocr_read AS is_ocr_read
             FROM
                 articles
             INNER JOIN
@@ -101,33 +150,24 @@ pub async fn find_articles_for_lemma(
             ON
                 articles.dictionary = dictionaries.id
             WHERE
-                lang = $1
+                lang = ANY ($1)
                 AND
                 lemma LIKE $2
-                {can_see_closed}
+                AND
+                dictionaries.lang2 = ANY ($3)
+                {}
             ORDER BY 
                 dictionaries.name, articles.id
-        "#
-    );
-
-    Ok(db
-        .query(&statement, &[&lang, &lemma])
+        "#,
+                can_see_closed_sql(can_see_closed)
+            ),
+            &[&langs, &lemma, &l2s],
+        )
         .await
         .map_err(|e| anyhow::anyhow!(e))?
-        .iter()
-        .map(|row| Article {
-            lemma: row.get::<usize, String>(0),
-            dictionary_name: row.get::<usize, String>(1),
-            article_id: row.get::<usize, i32>(2),
-            lang2: row
-                .get::<usize, String>(3)
-                .parse()
-                .expect("rust source code knows all language codes in database"),
-            date_published: row.get::<usize, String>(4),
-            is_historic: row.get::<usize, bool>(5),
-            is_ocr_read: row.get::<usize, bool>(6),
-        })
-        .collect::<Vec<Article>>())
+        .into_iter()
+        .map(Article::from)
+        .collect())
 }
 
 #[derive(serde::Serialize)]
@@ -136,17 +176,27 @@ pub struct FindArticleByIdRow {
     article_number: i32,
 }
 
+impl From<tokio_postgres::Row> for FindArticleByIdRow {
+    fn from(row: tokio_postgres::Row) -> Self {
+        Self {
+            rendered: row.get("rendered"),
+            article_number: row.get("article_number"),
+        }
+    }
+}
+
 pub async fn find_article_by_id(
     db: deadpool_postgres::Object,
     id: i32,
     can_see_closed: bool,
 ) -> anyhow::Result<FindArticleByIdRow> {
-    let can_see_closed = can_see_closed_sql(can_see_closed);
-    let statement = format!(
-        r#"
+    Ok(db
+        .query_one(
+            &format!(
+                r#"
             SELECT
-                articles.rendered,
-                articles.article_number
+                articles.rendered AS rendered,
+                articles.article_number AS article_number
             FROM
                 articles
             INNER JOIN
@@ -155,38 +205,44 @@ pub async fn find_article_by_id(
                 articles.dictionary = dictionaries.id
             WHERE
                 articles.id = $1
-                {can_see_closed}
-        "#
-    );
-
-    let row = db
-        .query_one(&statement, &[&id])
+                {}
+        "#,
+                can_see_closed_sql(can_see_closed)
+            ),
+            &[&id],
+        )
         .await
-        .map_err(|e| anyhow::anyhow!(e))
-        .with_context(|| "running find_article_by_id query against db")?;
-    Ok(FindArticleByIdRow {
-        rendered: row.get(0),
-        article_number: row.get(1),
-    })
+        .map_err(|e| anyhow::anyhow!(e))?
+        .into())
 }
 
 #[derive(serde::Serialize)]
-pub struct Neighbor {
+pub struct NeighborRow {
     article_number: i32,
     rendered: String,
+}
+
+impl From<tokio_postgres::Row> for NeighborRow {
+    fn from(row: tokio_postgres::Row) -> Self {
+        Self {
+            article_number: row.get("article_number"),
+            rendered: row.get("rendered"),
+        }
+    }
 }
 
 pub async fn find_neighboring_articles(
     db: deadpool_postgres::Object,
     id: i32,
     can_see_closed: bool,
-) -> anyhow::Result<Vec<Neighbor>> {
-    let can_see_closed = can_see_closed_sql(can_see_closed);
-    let statement = format!(
-        r#"
+) -> anyhow::Result<Vec<NeighborRow>> {
+    Ok(db
+        .query(
+            &format!(
+                r#"
         SELECT
-            articles.article_number,
-            articles.rendered
+            articles.article_number AS article_number,
+            articles.rendered AS rendered
         FROM
             articles INNER JOIN dictionaries
             ON articles.dictionary = dictionaries.id,
@@ -200,30 +256,24 @@ pub async fn find_neighboring_articles(
             articles.dictionary = lemma.dictionary
             AND
             articles.article_number BETWEEN lemma.article_number-5 AND lemma.article_number+5
-            {can_see_closed}
+            {}
         ORDER BY
             articles.article_number
-    "#
-    );
-
-    let mut result: Vec<Neighbor> = db
-        .query(&statement, &[&id])
+    "#,
+                can_see_closed_sql(can_see_closed)
+            ),
+            &[&id],
+        )
         .await
-        .map_err(|e| anyhow::anyhow!(e))
-        .with_context(|| "running find_neighboring_articles query against db")?
-        .iter()
-        .map(|row| Neighbor {
-            article_number: row.get::<usize, i32>(0),
-            rendered: row.get::<usize, String>(1),
-        })
-        .collect();
-
-    result.dedup_by(|a, b| a.rendered.eq(&b.rendered));
-    Ok(result)
+        .map_err(|e| anyhow::anyhow!(e))?
+        .into_iter()
+        .map(NeighborRow::from)
+        .dedup_by(|a, b| a.rendered == b.rendered)
+        .collect())
 }
 
 #[derive(serde::Serialize)]
-pub struct Dictionary {
+pub struct DictionaryRow {
     name: String,
     author: String,
     date_published: String,
@@ -232,40 +282,46 @@ pub struct Dictionary {
     is_ocr_read: bool,
 }
 
+impl From<tokio_postgres::Row> for DictionaryRow {
+    fn from(row: tokio_postgres::Row) -> Self {
+        Self {
+            name: row.get("name"),
+            author: row.get("author"),
+            date_published: row.get("date_published"),
+            isbn: row.get("isbn"),
+            is_historic: row.get("is_historic"),
+            is_ocr_read: row.get("is_ocr_read"),
+        }
+    }
+}
+
 pub async fn find_dictionary_by_article_id(
     db: deadpool_postgres::Object,
     id: i32,
     can_see_closed: bool,
-) -> anyhow::Result<Dictionary> {
-    let can_see_closed = can_see_closed_sql(can_see_closed);
-    let statement = format!(
-        r#"
+) -> anyhow::Result<DictionaryRow> {
+    db.query_one(
+        &format!(
+            r#"
         SELECT
-            name,
-            COALESCE(author, ''),
-            COALESCE(date_published, ''),
-            COALESCE(isbn, ''),
-            is_historic,
-            is_ocr_read
+            name AS name,
+            COALESCE(author, '') AS author,
+            COALESCE(date_published, '') AS date_published,
+            COALESCE(isbn, '') AS isbn,
+            is_historic AS is_historic,
+            is_ocr_read AS is_ocr_read
         FROM
             dictionaries,
             (SELECT dictionary FROM articles WHERE id = $1)
         WHERE
             id = dictionary
-            {can_see_closed}
-    "#
-    );
-
-    let row = db
-        .query_one(&statement, &[&id])
-        .await
-        .map_err(|e| anyhow::anyhow!(e))?;
-    Ok(Dictionary {
-        name: row.get::<usize, String>(0),
-        author: row.get::<usize, String>(1),
-        date_published: row.get::<usize, String>(2),
-        isbn: row.get::<usize, String>(3),
-        is_historic: row.get::<usize, bool>(4),
-        is_ocr_read: row.get::<usize, bool>(5),
-    })
+            {}
+    "#,
+            can_see_closed_sql(can_see_closed)
+        ),
+        &[&id],
+    )
+    .await
+    .map_err(|e| anyhow::anyhow!(e))
+    .map(DictionaryRow::from)
 }

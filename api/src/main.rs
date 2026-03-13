@@ -9,7 +9,6 @@ mod our_jwt;
 mod pg_connection_pool;
 mod timing_middleware;
 
-use anyhow::anyhow;
 use axum::extract::{Path, Query, State};
 use axum::response::{IntoResponse, Redirect, Response};
 use axum::{http::HeaderMap, routing::get, Json, Router};
@@ -290,7 +289,7 @@ struct SearchQueryParams {
 }
 
 #[allow(non_camel_case_types)]
-#[derive(serde::Serialize, strum::Display, strum::EnumString)]
+#[derive(Debug, Clone, serde::Serialize, strum::Display, strum::EnumString)]
 pub enum Language {
     deu,
     eng,
@@ -304,8 +303,43 @@ pub enum Language {
     swe,
 }
 
+impl tokio_postgres::types::ToSql for Language {
+    fn to_sql(
+        &self,
+        ty: &tokio_postgres::types::Type,
+        out: &mut tokio_postgres::types::private::BytesMut,
+    ) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>>
+    where
+        Self: Sized,
+    {
+        let buf = format!("{self}");
+        out.extend_from_slice(buf.as_bytes());
+        Ok(tokio_postgres::types::IsNull::No)
+    }
+
+    fn to_sql_checked(
+        &self,
+        ty: &tokio_postgres::types::Type,
+        out: &mut tokio_postgres::types::private::BytesMut,
+    ) -> Result<tokio_postgres::types::IsNull, Box<dyn std::error::Error + Sync + Send>> {
+        self.to_sql(ty, out)
+    }
+
+    fn accepts(ty: &tokio_postgres::types::Type) -> bool
+    where
+        Self: Sized,
+    {
+        true
+    }
+}
+
 pub const LANGUAGES_STR_QUOTED_COMMA_SEPARATED: &str =
     "'deu','eng','est','fin','nob','sma','sme','smj','smn','swe'";
+
+pub const fn all_langs() -> &'static [Language] {
+    use Language::*;
+    &[deu, eng, est, fin, nob, sma, sme, smj, smn, swe]
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum LanguageError {
@@ -315,12 +349,33 @@ pub enum LanguageError {
     InvalidChar(char, usize),
 }
 
-fn parse_l2s(s: &str) -> Result<Vec<Language>, &'static str> {
-    const ERR: &str = "invalid lang, choose between 'deu,eng,est,fin,nob,sma,sme,smj,smn,swe'";
-    s.trim()
-        .split(',')
-        .map(|s| s.parse().map_err(|_| ERR))
-        .collect()
+#[derive(Debug, thiserror::Error)]
+pub enum ParseCommasepLangcodesError {
+    #[error("empty string given")]
+    EmptyString,
+    #[error("invalid language. Valid ones are deu,eng,est,fin,nob,sma,sme,smj,smn,swe")]
+    InvalidLangageCode,
+}
+
+fn parse_commasep_langcodes(s: Option<&str>) -> Result<Vec<Language>, anyhow::Error> {
+    match s {
+        Some(s) => {
+            let s = s.trim();
+            if s.is_empty() {
+                return Err(anyhow::anyhow!(ParseCommasepLangcodesError::EmptyString));
+            }
+            s.split(',')
+                .map(|substr| substr.parse::<Language>())
+                .map(|maybe_language| match maybe_language {
+                    Ok(x) => Ok(x),
+                    Err(_) => Err(anyhow::anyhow!(
+                        ParseCommasepLangcodesError::InvalidLangageCode
+                    )),
+                })
+                .collect()
+        }
+        None => Ok(all_langs().to_vec()),
+    }
 }
 
 macro_rules! handle_can_see_closed {
@@ -361,26 +416,22 @@ macro_rules! handle_can_see_closed {
 /// Finds all matching lemmas to the :query, in all dictionaries.
 async fn handler_search(
     cookies: Cookies,
-    Path((lang, query)): Path<(String, String)>,
+    Path((langs, query)): Path<(String, String)>,
     Query(SearchQueryParams { l2 }): Query<SearchQueryParams>,
     State(AppState { connpool, iat }): State<AppState>,
 ) -> Result<Response, AppError> {
-    let db = connpool.get().await?;
     let mut headers = HeaderMap::new();
     let can_see_closed = handle_can_see_closed!(cookies, iat, headers);
-    let l2s = match l2 {
-        Some(s) => match parse_l2s(&s) {
-            Ok(l2s) => Some(l2s),
-            Err(e) => return Err(AppError::from(anyhow!("invalid l2: {e}"))),
-        },
-        None => None,
-    };
+    //let langs: Vec<_> = langs.split(',').collect();
+    let langs = parse_commasep_langcodes(Some(langs.as_str()))?;
+    let l2s = parse_commasep_langcodes(l2.as_deref())?;
 
     if query.bytes().all(|b| b == b'%') {
         return Ok((headers, Json(json!({ "error": "narrow your search" }))).into_response());
     }
 
-    let rows = crate::db::find_lemmas(db, &lang, &query, l2s.as_deref(), can_see_closed).await?;
+    let db = connpool.get().await?;
+    let rows = crate::db::search(db, &langs, &query, &l2s, can_see_closed).await?;
     Ok((headers, Json(json!(rows))).into_response())
 }
 
@@ -390,13 +441,16 @@ async fn handler_search(
 ///   [ [lemma, dictionary_name, and article_id], ... ]
 async fn handler_lookup(
     cookies: Cookies,
-    Path((lang, lemma)): Path<(String, String)>,
+    Path((langs, lemma)): Path<(String, String)>,
+    Query(SearchQueryParams { l2 }): Query<SearchQueryParams>,
     State(AppState { connpool, iat }): State<AppState>,
 ) -> Result<Response, AppError> {
     let db = connpool.get().await?;
     let mut headers = HeaderMap::new();
     let can_see_closed = handle_can_see_closed!(cookies, iat, headers);
-    let rows = crate::db::find_articles_for_lemma(db, &lang, &lemma, can_see_closed).await?;
+    let langs = parse_commasep_langcodes(Some(langs.as_str()))?;
+    let l2s = parse_commasep_langcodes(l2.as_deref())?;
+    let rows = crate::db::find_articles_for_lemma(db, &langs, &lemma, &l2s, can_see_closed).await?;
     Ok((headers, Json(json!(rows))).into_response())
 }
 
@@ -502,6 +556,21 @@ async fn main() -> anyhow::Result<()> {
 
         tracing::warn!(error = e.to_string(), "Could not connect to db on startup");
     });
+
+    if std::env::var("LOG_SQL").is_ok_and(|s| s == "1") {
+        match state.connpool.get().await {
+            Ok(db) => {
+                let stmt = "UPDATE pg_settings SET setting = 'all' WHERE name = 'log_statement'";
+                match db.query(stmt, &[]).await {
+                    Ok(_) => tracing::debug!("env var LOG_SQL=1, SQL logging enabled"),
+                    Err(e) => tracing::debug!("env var LOG_SQL=1, but unable to set it: {e}"),
+                }
+            }
+            Err(e) => {
+                tracing::debug!("env var LOG_SQL=1, but could not connect to db: {e}");
+            }
+        }
+    }
 
     // does this simply work?
     let cors_layer = tower_http::cors::CorsLayer::very_permissive();
