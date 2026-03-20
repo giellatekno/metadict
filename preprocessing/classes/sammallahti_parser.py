@@ -14,7 +14,7 @@ class SammallahtiParser:
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
-            name=f"Sámi-Suoma Sátnegirji",
+            name=f"Sámi–Suoma Sátnegirji",
             lang1="sme",
             lang2="fin",
             closed=True,

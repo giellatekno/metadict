@@ -38,6 +38,7 @@ parsers = {
     "medisinsk": classes.MedisinskParser,
     "gaerjiste": classes.GaerjisteParser,
     "bergsland_magga": classes.BergslandMaggaParser,
+    "kintel": classes.KintelParser,
 }
 
 

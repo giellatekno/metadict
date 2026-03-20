@@ -14,3 +14,4 @@ from .qvigstad_parser import QvigstadParser
 from .ruoktumet_parser import RuoktumetParser
 from .sammallahti_parser import SammallahtiParser
 from .skoleordbok_parser import SkoleordbokParser
+from .kintel_parser import KintelParser

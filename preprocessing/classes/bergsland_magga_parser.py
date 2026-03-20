@@ -55,4 +55,4 @@ class BergslandMaggaParser:
         else:
             rendered += f" {translation_section}"
 
-        return rendered
+        return f"<p>{rendered}</p>"
