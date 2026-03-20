@@ -1,10 +1,10 @@
 import type { PageLoad } from "./$types";
 import { error, redirect } from "@sveltejs/kit";
 import { resolve } from "$app/paths";
-import { SEARCH_LANGS, SearchResponse } from "$lib/utils";
+import { SEARCH_OPTIONS, SearchResponse } from "$lib/utils";
 
 export const load: PageLoad = async ({ params, fetch }) => {
-    let langs = params.lang === "all" ? SEARCH_LANGS.join(",") : params.lang;
+    let langs = params.lang === "all" ? SEARCH_OPTIONS.join(",") : params.lang;
 
     let url = resolve(
         `/api/search/${langs}/${encodeURIComponent(params.search)}`,

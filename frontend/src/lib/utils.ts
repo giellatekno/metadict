@@ -1,31 +1,16 @@
 import * as z from "zod";
 
-export const SEARCH_OBJ = {
-    sme: true,
-    sma: true,
-    smn: true,
-    nob: true,
-    fin: true,
-};
-export const TARGET_OBJ = {
-    sme: true,
-    sma: true,
-    smn: true,
-    nob: true,
-    fin: true,
-    hst: true,
-    ext: true,
-};
-
-export const SEARCH_LANGS = Object.keys(SEARCH_OBJ);
-export const TARGET_LANGS = Object.keys(TARGET_OBJ);
+export const SEARCH_OPTIONS = ["sme", "sma", "smj", "smn", "fin", "nob", "est"];
+export const TARGET_OPTIONS = [...SEARCH_OPTIONS, "hst", "ext"];
 
 export const LANG_COLORS: Record<string, string> = {
     sme: "bg-blue-800",
     sma: "bg-green-800",
     smn: "bg-red-800",
+    smj: "bg-pink-800",
     nob: "bg-orange-800",
     fin: "bg-cyan-800",
+    est: "bg-lime-800",
 };
 
 export const User = z.object({

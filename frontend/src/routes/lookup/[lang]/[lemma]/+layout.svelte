@@ -8,9 +8,9 @@
     import { type Snippet } from "svelte";
     import { ExternalLink } from "lucide-svelte";
     import { externalDicts } from "$lib/external_dicts";
-    import { settings } from "$lib/settings.svelte";
+    import { settings, type LangConfig } from "$lib/settings.svelte";
     import { goto } from "$app/navigation";
-    import { SEARCH_LANGS, TARGET_LANGS, type LookupType } from "$lib/utils";
+    import { type LookupType } from "$lib/utils";
 
     interface Props {
         data: PageData;
@@ -22,19 +22,32 @@
     let lang = $derived(page.params.lang ?? "");
     let lemma = $derived(page.params.lemma ?? "");
 
+    function is_enabled(list: LangConfig[], code: string) {
+        return list.find((l) => l.iso === code)?.enabled ?? false;
+    }
+
     function sort_entries(entries: LookupType) {
         return [...entries].sort((a, b) => {
             // Sort first by lang1
-            const rankSourceA = SEARCH_LANGS.indexOf(a.lang1);
-            const rankSourceB = SEARCH_LANGS.indexOf(b.lang1);
+            const rankSourceA = settings.selected_search_langs.findIndex(
+                (l) => l.iso === a.lang1,
+            );
+            const rankSourceB = settings.selected_search_langs.findIndex(
+                (l) => l.iso === b.lang1,
+            );
             if (rankSourceA !== rankSourceB) {
                 return rankSourceA - rankSourceB;
             }
 
             // If lang1 equal, sort by lang2
-            const rankTargetA = TARGET_LANGS.indexOf(a.lang2);
-            const rankTargetB = TARGET_LANGS.indexOf(b.lang2);
+            const rankTargetA = settings.selected_target_langs.findIndex(
+                (l) => l.iso === a.lang2,
+            );
+            const rankTargetB = settings.selected_target_langs.findIndex(
+                (l) => l.iso === b.lang2,
+            );
             if (rankTargetA !== rankTargetB) return rankTargetA - rankTargetB;
+
             // If lang2 equal, sort alphabetically
             return a.dictionary_name.localeCompare(b.dictionary_name);
         });
@@ -47,27 +60,27 @@
     let dicts = $derived(
         sort_entries(
             data.entries.filter((item) => {
-                return !hist_dicts.includes(item);
+                return (
+                    !hist_dicts.includes(item) &&
+                    is_enabled(settings.selected_search_langs, item.lang1) &&
+                    is_enabled(settings.selected_target_langs, item.lang2)
+                );
             }),
         ),
     );
 
     const groupedDicts = $derived.by(() => {
-        const groups: Record<string, typeof dicts> = {};
+        const groups: Record<string, LookupType> = {};
+
         for (const d of dicts) {
-            if (
-                settings.selected_search_langs[d.lang1] &&
-                settings.selected_target_langs[d.lang2]
-            ) {
-                const key = `${d.lang1}-${d.lang2}`;
-                if (!groups[key]) groups[key] = [];
-                groups[key].push(d);
-            }
+            const key = `${d.lang1}-${d.lang2}`;
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(d);
         }
         return groups;
     });
 
-    // Get external dicts only for langs that dicts have as lang1
+    // Get external dicts only for langs that dicts have lemma as lang1
     const src_langs = $derived([...new Set(dicts.map((d) => d.lang1))]);
     const filteredExternal = $derived(
         src_langs
@@ -102,6 +115,7 @@
         ) {
             goto(resolve(`/lookup/${lang}/${lemma}/${cur_article}`), {
                 keepFocus: true,
+                replaceState: true,
             });
         }
     });
@@ -128,13 +142,6 @@
         <div
             class="card preset-filled-tertiary-50-950 flex h-fit w-full flex-col gap-1 p-4 shadow-lg"
         >
-            <span
-                class="flex w-full items-center gap-1 rounded-lg p-1 opacity-80"
-            >
-                <kbd class="kbd preset-filled-surface-300-700">🠅</kbd>
-                <kbd class="kbd preset-filled-surface-300-700">🠇</kbd>
-                - {m.navigate_entries()}
-            </span>
             <div class="flex flex-col gap-4">
                 {#each Object.values(groupedDicts) as dictionaries}
                     <div class="mb-4 flex flex-col gap-2">
@@ -158,7 +165,7 @@
                     </div>
                 {/each}
 
-                {#if hist_dicts.length > 0 && settings.selected_target_langs["hst"]}
+                {#if hist_dicts.length > 0 && is_enabled(settings.selected_target_langs, "hst")}
                     <div class="flex flex-col gap-2">
                         <h4 class="h4">{m.historical_dictionaries()}</h4>
                         <hr class="hr" />
@@ -175,7 +182,7 @@
                         </div>
                     </div>
                 {/if}
-                {#if settings.selected_target_langs["ext"]}
+                {#if is_enabled(settings.selected_target_langs, "ext")}
                     {#each filteredExternal as [lang, dicts]}
                         <div class="flex flex-col gap-2">
                             <h4 class="h4">

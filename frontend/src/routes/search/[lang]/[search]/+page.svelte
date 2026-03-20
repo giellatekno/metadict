@@ -3,11 +3,39 @@
     import { Pagination } from "@skeletonlabs/skeleton-svelte";
     import type { PageProps } from "./$types";
     import { m } from "$lib/paraglide/messages";
-    import { page as pagestate } from "$app/state";
     import { ArrowLeftIcon, ArrowRightIcon } from "lucide-svelte";
     import { LANG_COLORS } from "$lib/utils";
+    import { goto } from "$app/navigation";
 
     let { data }: PageProps = $props();
+
+    let activeIndex = $state(-1);
+
+    $effect(() => {
+        if (page || shownLemmas) activeIndex = -1;
+    });
+
+    function handleKeydown(e: KeyboardEvent) {
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            activeIndex =
+                activeIndex < shownLemmas.length - 1 ? activeIndex + 1 : 0;
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            activeIndex =
+                activeIndex > 0 ? activeIndex - 1 : shownLemmas.length - 1;
+        } else if (
+            (e.metaKey || e.ctrlKey) &&
+            e.key === "Enter" &&
+            activeIndex !== -1
+        ) {
+            e.preventDefault();
+            const target = shownLemmas[activeIndex];
+            goto(resolve(`/lookup/${target.lang}/${target.lemma}`), {
+                keepFocus: true,
+            });
+        }
+    }
 
     let pageSize = $state(20);
 
@@ -20,6 +48,8 @@
     );
     let n_results = $derived(data.lemmas ? data.lemmas.length : 0);
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <div class="flex w-1/4 min-w-124 flex-col items-center gap-4">
     {#if n_results > 0}
@@ -48,6 +78,7 @@
                 <div class="card bg-tertiary-50-950 w-full shadow-lg">
                     <div class="flex flex-col">
                         {#each shownLemmas as { lang, lemma }, i}
+                            {@const isActive = activeIndex === i}
                             {@const rounded_style =
                                 i === 0
                                     ? "rounded-t-xl rounded-b-none"
@@ -55,13 +86,13 @@
                                       ? "rounded-b-xl rounded-t-none"
                                       : "rounded-none"}
                             {#if i !== 0}
-                                <hr class="hr border-surface-200-800" />
+                                <hr class="hr border-primary-500" />
                             {/if}
                             <a
-                                class="btn hover:preset-tonal justify-between py-3 {rounded_style}"
-                                href={resolve(
-                                    `/lookup/${pagestate.params.lang}/${lemma}`,
-                                )}
+                                class="btn {isActive
+                                    ? 'preset-filled-primary-500'
+                                    : 'hover:preset-tonal'} justify-between py-3 {rounded_style}"
+                                href={resolve(`/lookup/${lang}/${lemma}`)}
                             >
                                 {lemma}
                                 <span

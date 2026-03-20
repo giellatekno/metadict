@@ -4,7 +4,7 @@
     import SelectLocale from "./SelectLocale.svelte";
     import { m } from "$lib/paraglide/messages.js";
     import { resolve } from "$app/paths";
-    import { Info, LogInIcon } from "lucide-svelte";
+    import { BookOpenText, Info, LogInIcon } from "lucide-svelte";
     import type { UserType } from "$lib/utils";
 
     interface Props {
@@ -19,9 +19,14 @@
     <AppBar.Toolbar class="mx-auto w-full grid-cols-[auto_auto] px-6">
         <AppBar.Headline>
             <a
-                class="h2 text-surface-50-950 font-[Noto_Serif] font-medium"
+                class="h2 text-surface-50-950 flex gap-2 font-[Noto_Serif] font-medium"
                 href={resolve("/")}
             >
+                <div
+                    class="preset-filled-surface-800-200 border-surface-contrast-800-200 flex size-12 shrink-0 items-center justify-center rounded-full border-2"
+                >
+                    <BookOpenText class="size-8" />
+                </div>
                 {m.page_title()}
             </a>
         </AppBar.Headline>
