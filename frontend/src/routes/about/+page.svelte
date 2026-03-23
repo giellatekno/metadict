@@ -11,7 +11,7 @@
 </script>
 
 <div
-    class="card preset-filled-tertiary-50-950 flex w-full max-w-360 flex-col gap-4 overflow-auto p-4 shadow-lg"
+    class="card preset-filled-tertiary-50-950 flex w-full max-w-360 flex-col gap-4 overflow-auto p-6 shadow-lg"
 >
     <div class="flex flex-col gap-2">
         <h3 class="h3">{m.about_metadict_title()}</h3>
@@ -21,7 +21,7 @@
         <h3 class="h3">{m.searching_title()}</h3>
         <p>{m.searching_body()}</p>
     </div>
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-3">
         <div class="flex flex-col gap-2">
             <h3 class="h3">{m.advanced_search_title()}</h3>
             <span>
@@ -33,7 +33,7 @@
             </span>
         </div>
         <div class="flex flex-col">
-            <h5 class="h5">{m.wildcard_example_title()}</h5>
+            <h5 class="h5">{m.wildcard_example_title()}:</h5>
             <ul class="ml-5 list-outside list-disc">
                 {#each examples as { query, text }}
                     <li class="py-1">

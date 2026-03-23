@@ -47,9 +47,11 @@
     }
 
     function handleKeydown(e: KeyboardEvent) {
-        if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-            e.preventDefault();
-            searchbox_elem.focus();
+        if (!(e.target instanceof HTMLInputElement)) {
+            if (((e.metaKey || e.ctrlKey) && e.key === "k") || e.key == "/") {
+                e.preventDefault();
+                searchbox_elem.focus();
+            }
         }
     }
 </script>
