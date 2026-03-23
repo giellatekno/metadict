@@ -19,7 +19,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
     // console.log(lemmas);
 
     if (lemmas && lemmas.length === 1) {
-        redirect(307, resolve(`/lookup/${params.lang}/${params.search}`));
+        redirect(307, resolve(`/lookup/${lemmas[0].lang}/${params.search}`));
     }
 
     return { lemmas };

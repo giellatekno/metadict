@@ -4,11 +4,16 @@ import { error } from "@sveltejs/kit";
 import type { LayoutLoad } from "./$types";
 
 export const load: LayoutLoad = async ({ params, fetch }) => {
-    const langs =
-        params.lang === "all" ? SEARCH_OPTIONS.join(",") : params.lang;
+    if (!SEARCH_OPTIONS.includes(params.lang)) {
+        error(
+            400,
+            "Can only lookup one of the known langs: " +
+                SEARCH_OPTIONS.join(", "),
+        );
+    }
 
     let url = resolve(
-        `/api/lookup/${langs}/${encodeURIComponent(params.lemma)}`,
+        `/api/lookup/${params.lang}/${encodeURIComponent(params.lemma)}`,
     );
     const res = await fetch(url);
     if (!res.ok) {

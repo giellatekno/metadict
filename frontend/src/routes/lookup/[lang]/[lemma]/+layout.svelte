@@ -8,7 +8,7 @@
     import { type Snippet } from "svelte";
     import { ExternalLink } from "lucide-svelte";
     import { externalDicts } from "$lib/external_dicts";
-    import { settings, type LangConfig } from "$lib/settings.svelte";
+    import { settings } from "$lib/settings.svelte";
     import { goto } from "$app/navigation";
     import { type LookupType } from "$lib/utils";
 
@@ -22,78 +22,73 @@
     let lang = $derived(page.params.lang ?? "");
     let lemma = $derived(page.params.lemma ?? "");
 
-    function is_enabled(list: LangConfig[], code: string) {
-        return list.find((l) => l.iso === code)?.enabled ?? false;
+    function getRank(iso: string) {
+        const index = settings.selected_target_langs.findIndex(
+            (l) => l.iso === iso,
+        );
+        return index === -1 ? 999 : index;
     }
 
-    function sort_entries(entries: LookupType) {
-        return [...entries].sort((a, b) => {
-            // Sort first by lang1
-            const rankSourceA = settings.selected_search_langs.findIndex(
-                (l) => l.iso === a.lang1,
-            );
-            const rankSourceB = settings.selected_search_langs.findIndex(
-                (l) => l.iso === b.lang1,
-            );
-            if (rankSourceA !== rankSourceB) {
-                return rankSourceA - rankSourceB;
-            }
-
-            // If lang1 equal, sort by lang2
-            const rankTargetA = settings.selected_target_langs.findIndex(
-                (l) => l.iso === a.lang2,
-            );
-            const rankTargetB = settings.selected_target_langs.findIndex(
-                (l) => l.iso === b.lang2,
-            );
-            if (rankTargetA !== rankTargetB) return rankTargetA - rankTargetB;
-
-            // If lang2 equal, sort alphabetically
-            return a.dictionary_name.localeCompare(b.dictionary_name);
-        });
+    function is_enabled(code: string) {
+        return (
+            settings.selected_target_langs.find((l) => l.iso === code)
+                ?.enabled ?? false
+        );
     }
 
-    // Create a list of the historical dicts
-    let hist_dicts = $derived(data.entries.filter((item) => item.is_historic));
-
-    // Filter out the historical dicts
-    let dicts = $derived(
-        sort_entries(
-            data.entries.filter((item) => {
-                return (
-                    !hist_dicts.includes(item) &&
-                    is_enabled(settings.selected_search_langs, item.lang1) &&
-                    is_enabled(settings.selected_target_langs, item.lang2)
-                );
-            }),
-        ),
-    );
-
-    const groupedDicts = $derived.by(() => {
-        const groups: Record<string, LookupType> = {};
-
-        for (const d of dicts) {
-            const key = `${d.lang1}-${d.lang2}`;
-            if (!groups[key]) groups[key] = [];
-            groups[key].push(d);
+    const groupedStandard = $derived.by(() => {
+        const groups = new Map<string, LookupType>();
+        for (const d of data.entries) {
+            if (d.is_historic || !is_enabled(d.lang2)) continue;
+            if (!groups.has(d.lang2)) groups.set(d.lang2, []);
+            groups.get(d.lang2)!.push(d);
+        }
+        for (const [_lang2, entries] of groups) {
+            entries.sort((a, b) =>
+                a.dictionary_name.localeCompare(b.dictionary_name),
+            );
         }
         return groups;
     });
 
-    // Get external dicts only for langs that dicts have lemma as lang1
-    const src_langs = $derived([...new Set(dicts.map((d) => d.lang1))]);
-    const filteredExternal = $derived(
-        src_langs
-            .filter(
-                (lang) =>
-                    externalDicts[lang] && externalDicts[lang].length !== 0,
-            )
-            .map((lang) => [lang, externalDicts[lang]] as const),
-    );
+    const sections = $derived.by(() => {
+        const list: {
+            id: string;
+            type: "standard" | "hst" | "ext";
+            rank: number;
+            data?: any;
+        }[] = [];
+
+        for (const [lang2, items] of groupedStandard) {
+            list.push({
+                id: lang2,
+                type: "standard",
+                rank: getRank(lang2),
+                data: items,
+            });
+        }
+
+        if (data.entries.some((e) => e.is_historic) && is_enabled("hst")) {
+            list.push({
+                id: "hst",
+                type: "hst",
+                rank: getRank("hst"),
+                data: data.entries.filter((e) => e.is_historic),
+            });
+        }
+
+        if (is_enabled("ext") && externalDicts[lang]) {
+            list.push({ id: "ext", type: "ext", rank: getRank("ext") });
+        }
+
+        return list.sort((a, b) => a.rank - b.rank);
+    });
 
     // Allows navigating with arrow keys
     let all_article_ids = $derived(
-        [...dicts, ...hist_dicts].map((e) => e.article_id.toString()),
+        sections
+            .filter((s) => s.type !== "ext")
+            .flatMap((s) => s.data.map((d: any) => d.article_id.toString())),
     );
 
     let cur_article_idx = $state(0);
@@ -143,54 +138,24 @@
             class="card preset-filled-tertiary-50-950 flex h-fit w-full flex-col gap-1 p-4 shadow-lg"
         >
             <div class="flex flex-col gap-4">
-                {#each Object.values(groupedDicts) as dictionaries}
+                <h4 class="h4 font-bold">{langname(lang, getLocale())}</h4>
+                {#each sections as section}
                     <div class="mb-4 flex flex-col gap-2">
-                        <h4 class="h4">
-                            {langname(dictionaries[0].lang1, getLocale())} →
-                            {langname(dictionaries[0].lang2, getLocale())}
-                        </h4>
+                        <h5 class="h5 font-bold">
+                            {#if section.type === "standard"}
+                                → {langname(section.id, getLocale())}
+                            {:else if section.type === "hst"}
+                                {m.historical_dictionaries()}
+                            {:else if section.type === "ext"}
+                                {m.external_dictionaries()}
+                            {/if}
+                        </h5>
+
                         <hr class="hr" />
 
                         <div class="flex flex-col">
-                            {#each dictionaries as dict}
-                                {@render link_button(
-                                    dict.article_id.toString(),
-                                    resolve(
-                                        `/lookup/${lang}/${lemma}/${dict.article_id}`,
-                                    ),
-                                    dict.dictionary_name,
-                                )}
-                            {/each}
-                        </div>
-                    </div>
-                {/each}
-
-                {#if hist_dicts.length > 0 && is_enabled(settings.selected_target_langs, "hst")}
-                    <div class="flex flex-col gap-2">
-                        <h4 class="h4">{m.historical_dictionaries()}</h4>
-                        <hr class="hr" />
-                        <div class="flex flex-col">
-                            {#each hist_dicts as dict}
-                                {@render link_button(
-                                    dict.article_id.toString(),
-                                    resolve(
-                                        `/lookup/${lang}/${lemma}/${dict.article_id}`,
-                                    ),
-                                    dict.dictionary_name,
-                                )}
-                            {/each}
-                        </div>
-                    </div>
-                {/if}
-                {#if is_enabled(settings.selected_target_langs, "ext")}
-                    {#each filteredExternal as [lang, dicts]}
-                        <div class="flex flex-col gap-2">
-                            <h4 class="h4">
-                                {m.external_dictionaries()} ({lang})
-                            </h4>
-                            <hr class="hr" />
-                            <div class="flex flex-col">
-                                {#each dicts as { name, link }}
+                            {#if section.type === "ext"}
+                                {#each externalDicts[lang] as { name, link }}
                                     {@const formatted_link = link.replaceAll(
                                         "{%string%}",
                                         lemma,
@@ -202,10 +167,20 @@
                                         true,
                                     )}
                                 {/each}
-                            </div>
+                            {:else}
+                                {#each section.data as dict}
+                                    {@render link_button(
+                                        dict.article_id.toString(),
+                                        resolve(
+                                            `/lookup/${lang}/${lemma}/${dict.article_id}`,
+                                        ),
+                                        dict.dictionary_name,
+                                    )}
+                                {/each}
+                            {/if}
                         </div>
-                    {/each}
-                {/if}
+                    </div>
+                {/each}
             </div>
         </div>
     </div>

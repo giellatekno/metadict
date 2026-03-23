@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-export const SEARCH_OPTIONS = ["sme", "sma", "smj", "smn", "fin", "nob", "est"];
+export const SEARCH_OPTIONS = ["sme", "sma", "smj", "smn", "fin", "nob"];
 export const TARGET_OPTIONS = [...SEARCH_OPTIONS, "hst", "ext"];
 
 export const LANG_COLORS: Record<string, string> = {
