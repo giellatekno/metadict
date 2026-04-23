@@ -19,7 +19,7 @@ export const externalDicts: Record<string, { name: string; link: string }[]> = {
             link: "https://et.wiktionary.org/wiki/{%string%}",
         },
     ],
-    eng: [],
+    // eng: [],
     fin: [
         {
             name: "Kielitoimiston sanakirja",
@@ -44,15 +44,15 @@ export const externalDicts: Record<string, { name: string; link: string }[]> = {
             link: "https://533.davvi.no/ordbok_norsam.php?finn={%string%}",
         },
     ],
-    sma: [],
+    // sma: [],
     sme: [
         {
             name: "Davvi girji (sme-nob)",
             link: "https://533.davvi.no/ordbok_samnor.php?finn={%string%}",
         },
     ],
-    smj: [],
-    smn: [],
+    // smj: [],
+    // smn: [],
     swe: [
         {
             name: "Svenska Akademiens ordböcker",
