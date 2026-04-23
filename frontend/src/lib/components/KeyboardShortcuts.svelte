@@ -12,7 +12,7 @@
     const shortcuts = [
         { keys: ["ctrl", "K"], desc: m.kbd_shortcuts_searchfield_focus },
         { keys: ["↵"], desc: m.kbd_shortcuts_searchfield_enter },
-        { keys: ["🠅", "🠇"], desc: m.kbd_shortcuts_searchresults_navigate },
+        { keys: ["↑", "↓"], desc: m.kbd_shortcuts_searchresults_navigate },
         { keys: ["ctrl", "↵"], desc: m.kbd_shortcuts_searchresults_enter },
     ];
 
