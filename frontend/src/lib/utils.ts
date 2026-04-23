@@ -25,6 +25,7 @@ export const LookupResponse = z.array(
         article_id: z.number(),
         date_published: z.string(),
         dictionary_name: z.string(),
+        dictionary_displayname: z.string(),
         is_historic: z.boolean(),
         is_ocr_read: z.boolean(),
         lang1: z.string(),

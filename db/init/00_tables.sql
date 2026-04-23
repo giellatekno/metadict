@@ -7,6 +7,10 @@ CREATE TABLE dictionaries (
     lang1 text,
     lang2 text,
 
+    -- Display name to show in the left menu when name is too generic.
+    -- Usually "Lastname: Dictionary name"
+    displayname text,
+
     -- Dictionary is closed to the public, and only logged in users can see
     -- contents from it
     closed boolean,

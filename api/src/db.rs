@@ -97,6 +97,7 @@ pub struct Article {
     article_id: i32,
     lang1: Language,
     lang2: Language,
+    dictionary_displayname: String,
     date_published: String,
     is_historic: bool,
     is_ocr_read: bool,
@@ -116,6 +117,7 @@ impl From<tokio_postgres::Row> for Article {
                 .get::<&str, String>("lang2")
                 .parse()
                 .expect("rust source code knows all language codes in database"),
+            dictionary_displayname: row.get("dictionary_displayname"),
             date_published: row.get("date_published"),
             is_historic: row.get("is_historic"),
             is_ocr_read: row.get("is_ocr_read"),
@@ -140,6 +142,7 @@ pub async fn find_articles_for_lemma(
                 articles.id AS article_id,
                 dictionaries.lang1 AS lang1,
                 dictionaries.lang2 AS lang2,
+                COALESCE(dictionaries.displayname, '') AS dictionary_displayname,
                 COALESCE(dictionaries.date_published, '') AS date_published,
                 dictionaries.is_historic AS is_historic,
                 dictionaries.is_ocr_read AS is_ocr_read

@@ -174,7 +174,9 @@
                                         resolve(
                                             `/lookup/${lang}/${lemma}/${dict.article_id}`,
                                         ),
-                                        dict.dictionary_name,
+                                        dict.dictionary_displayname === ""
+                                            ? dict.dictionary_name
+                                            : dict.dictionary_displayname,
                                     )}
                                 {/each}
                             {/if}
