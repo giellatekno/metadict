@@ -7,13 +7,13 @@ from utils.dataclasses import Article, Dictionary
 class KintelParser:
     def __init__(self, dictionary_id, file):
         l1, l2 = file.stem.split("-")[-2:]
+        name = "Norsk-lulesamisk Ordbok" if l1 == "nob" else "Lulesamisk-norsk Ordbok"
         self.dictionary = Dictionary(
             id=dictionary_id,
-            name=(
-                "Norsk-lulesamisk Ordbok" if l1 == "nob" else "Lulesamisk-norsk Ordbok"
-            ),
+            name=name,
             lang1=l1,
             lang2=l2,
+            displayname=f"Kintel: {name}",
             closed=False,
             author="Anders Kintel",
             date_published="2012",
@@ -58,4 +58,3 @@ class KintelParser:
         if translation == "":
             return f"<p>{lemma}</p>"
         return f"<p>{lemma}<br>{translation}</p>"
-

@@ -6,12 +6,12 @@ from .gaerjiste_parser import GaerjisteParser
 from .girjjalasvuoda_parser import GirjjalasvuodaParser
 from .gt_parser import GTParser
 from .gt_sme_parser import GTSmeParser
+from .kintel_parser import KintelParser
 from .konrad_parser import KonradParser
 from .medisinsk_parser import MedisinskParser
-from .nettisanakirja_parser import NettisanakirjaParser
 from .pedpsy_parser import PedPsyParser
 from .qvigstad_parser import QvigstadParser
 from .ruoktumet_parser import RuoktumetParser
 from .sammallahti_parser import SammallahtiParser
 from .skoleordbok_parser import SkoleordbokParser
-from .kintel_parser import KintelParser
+from .vest_parser import VestParser

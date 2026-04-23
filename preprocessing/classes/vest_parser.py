@@ -3,16 +3,19 @@ import re
 from utils.dataclasses import Article, Dictionary
 
 
-class NettisanakirjaParser:
+class VestParser:
     def __init__(self, dictionary_id, file):
+        l1, l2 = file.stem.split("-")[-2:]
+        name = "Nettisanakirja" if l1 == "fin" else "Neahttasátnegirji"
         self.dictionary = Dictionary(
             id=dictionary_id,
-            name="Nettisanakirja",
-            lang1="fin",
-            lang2="sme",
+            name=name,
+            lang1=l1,
+            lang2=l2,
+            displayname=(f"Vest: {name}"),
             closed=False,
-            author="Jouni A. Vest",
-            date_published="2024",
+            author="Jovnna-Ánde Vest",
+            date_published="2024" if l1 == "fin" else "2026",
         )
 
         self.articles = self.parse_dict(file)

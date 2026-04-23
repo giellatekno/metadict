@@ -44,6 +44,7 @@ class Dictionary:
     name: str
     lang1: str
     lang2: str
+    displayname: str | None = None
     closed: bool = False
     is_ocr_read: bool = False
     is_historic: bool = False
@@ -62,6 +63,7 @@ class Dictionary:
                 name,
                 lang1,
                 lang2,
+                displayname,
                 closed,
                 is_ocr_read,
                 is_historic,
@@ -73,6 +75,7 @@ class Dictionary:
                 {to_sqlval(self.name)},
                 {to_sqlval(self.lang1)},
                 {to_sqlval(self.lang2)},
+                {to_sqlval(self.displayname)},
                 {to_sqlval(self.closed)},
                 {to_sqlval(self.is_ocr_read)},
                 {to_sqlval(self.is_historic)},

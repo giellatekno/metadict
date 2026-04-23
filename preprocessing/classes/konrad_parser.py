@@ -10,6 +10,7 @@ class KonradParser:
             name="Lappisk ordbok",
             lang1="sme",
             lang2="eng",
+            displayname="Nielsen: Lappisk ordbok",
             is_historic=True,
             author="Konrad Nielsen",
             date_published="1932–1938",
@@ -29,7 +30,8 @@ class KonradParser:
 
             for i, row in enumerate(reader, start=1):
                 rendered = self.to_html(
-                    row["old_lemma"], row["eng"], row["fin"], row["deu"])
+                    row["old_lemma"], row["eng"], row["fin"], row["deu"]
+                )
 
                 a = Article(
                     lemma=row["lemma"],
