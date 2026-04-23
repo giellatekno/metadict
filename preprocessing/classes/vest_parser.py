@@ -28,25 +28,39 @@ class VestParser:
 
         with open(file, "r") as f:
             for i, line in enumerate(f.readlines(), 1):
-                m = re.search(r"\$>[^<]+<\$", line)
-                if not m:
-                    print("line has no lemma")
-                    continue
-                lemma = m.group(0).replace("$>", "").replace("<$", "")
 
+                lemmas = self.find_lemmas(line)
                 rendered = self.to_html(line)
 
-                a = Article(
-                    dictionary=self.dictionary.id,
-                    lemma=lemma,
-                    rendered=rendered,
-                    lang=self.dictionary.lang1,
-                    article_number=i,
-                )
+                for lemma in lemmas:
+                    a = Article(
+                        dictionary=self.dictionary.id,
+                        lemma=lemma,
+                        rendered=rendered,
+                        lang=self.dictionary.lang1,
+                        article_number=i,
+                    )
 
-                articles.append(a)
+                    articles.append(a)
 
         return articles
+
+    def find_lemmas(self, line: str):
+        lemmas = []
+        lemma_section = line.split("  ")[0]
+        for lemma_part in lemma_section.split("~"):
+            lemma = re.sub(r"(\$>|<\$|%>|<%)", "", lemma_part)
+            lemma = re.sub(r" \([^\)]+\)", "", lemma)
+            lemma = re.sub(r";.*", "", lemma)
+            lemma = lemma.split(",")[0].strip().replace("´", "")
+
+            if "(" in lemma:
+                lemmas.append(re.sub(r"\([^\)]*\)", "", lemma))
+                lemmas.append(re.sub(r"[\(\)]", "", lemma))
+            else:
+                lemmas.append(lemma)
+
+        return lemmas
 
     def format_article(self, text):
         text = text.replace("$>", "<b>").replace("<$", "</b>")

@@ -31,7 +31,7 @@ parsers = {
     "algosatnegirji": classes.AlgosatnegirjiParser,
     "ruoktumet": classes.RuoktumetParser,
     "pedagogalas": classes.PedPsyParser,
-    "nettisanakirja": classes.NettisanakirjaParser,
+    "vest": classes.VestParser,
     "konrad_nielsen": classes.KonradParser,
     "skoleordbok": classes.SkoleordbokParser,
     "apotekordliste": classes.ApotekordlisteParser,
