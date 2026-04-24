@@ -10,13 +10,12 @@ restrict to one. Use --purge to wipe dicts/ before gathering.
 """
 
 import argparse
-import filecmp
 import os
 import shutil
 import sys
 from pathlib import Path
 
-from utils.utils import get_gut_root, yellow
+from utils.utils import get_gut_root
 
 WANTED_GT_DICTS = [
     "sme-nob",
@@ -45,13 +44,12 @@ def gather_closed_dicts(gut_root: str, dicts_dir: Path):
         if file.is_relative_to(wip):
             continue
         dest = dicts_dir / file.name
-        if dest.exists():
-            if filecmp.cmp(file, dest, shallow=False):
-                print(f"Skipped {file.name} (unchanged)")
-                continue
-            print(yellow(f"Overwriting existing {dest.name}"))
-        shutil.copy2(file, dest)
-        print(f"Copied {file.name}")
+        if dest.is_symlink() and dest.resolve() == file.resolve():
+            continue
+        if dest.exists() or dest.is_symlink():
+            dest.unlink()
+        dest.symlink_to(file.resolve())
+        print(f"Linked {file.name}")
 
 
 def gather_gt_dicts(gut_root: str, dicts_dir: Path):

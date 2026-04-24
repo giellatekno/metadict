@@ -20,7 +20,7 @@ purge-local:
     podman volume rm metadict-data
 
 fill-local:
-    uv run insert_dictionaries.py -c ../preprocessing/sql_files
+    python3 insert_dictionaries.py -c ../preprocessing/sql_files
 
 push-labacr:
     podman tag metadict-db gtlabcontainerregistry.azurecr.io/metadict-db

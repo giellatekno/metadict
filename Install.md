@@ -15,9 +15,10 @@
 
 The Metadictionary uses dictionaries from two different sources:
 * Publicly available dictionaries from GiellaLT found at https://github.com/giellalt/?q=dict
-  * **important**: Fetch these using gut, so that your gut root directory is set correctly. This is referenced by scripts used later on.
-  * You will (for now) want the North Saami (sme), Finnish (fin) and Norwegian bokmål (nob) dictionaries. Gut can filter repos using regex, making it easy to clone the ones you want.
+  * You will (for now) want the North Saami (sme), South Saami (sma), Inari Saami (smn), Finnish (fin) and Norwegian bokmål (nob) dictionaries. Gut can filter repos using regex, making it easy to clone the ones you want.
 * Our own, closed-source dictionary files found at https://github.com/giellatekno/dictionaries-closed (requires access)
+
+**important**: Fetch these using gut, so that your gut root directory is set correctly. This is referenced by scripts used later on.
 
 ## Set up secrets and keys
 
@@ -49,31 +50,28 @@ openssl rand --hex 32 > jwt_secret.txt
 
 ## Prepare the dictionaries
 
-First create a virtual environment and install the `pandas` module:
 ```bash
 cd preprocessing/
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install pandas
 ```
-Then generate merged dictionary files from the GiellaLT dictionaries:
+In the `preprocessing/` folder we turn the various dictionary files into SQL so that they can be added to the database later.
+The script `gather_dicts.py` will try to fetch all the dictionary files and put them in the `dicts/` subfolder. 
+The closed dictionaries in `gut_root/giellatekno/dictionaries-closed` will be symlinked and the GiellaLT dicts in 
+`gut_root/giellalt/dict-*` will be merged into single files.
+
 ```bash
-python3 generate_merged_gt_dicts.py -l sme nob fin
+python3 gather_dicts.py
 ```
-`create_db_data.py` expects to find the closed source dictionaries in a subfolder of `preprocessing/` named `dicts/`. One way of doing this is adding a symlink to the folder `ocr-read-dicts/` in the `dictionaries-closed` repository:
-```bash
-ln -s path/to/dictionaries-closed/ocr_read_dicts dicts
-```
-And lastly create the sql files needed for adding all the dictionaries to the dictionary database later:
+The script `create_db_data.py` reads the dicts in the `dicts/` folder and generates SQL files. These are placed in the folder `sql_files/`.
 ```bash
 python3 create_db_data.py 
 ```
+
 ## Initialize and run the database
 If everything works as intended, this might be as easy as running the following commands:
 ```bash
 cd db/
-make image
-make run
+just image
+just run
 ```
 However, you might run into problems. If `make image` does not work as intended, you might need to add sub-userIDs and sub-groupIDs to your user for podman to use:
 ```bash
@@ -84,7 +82,7 @@ podman system migrate
 If `make run` complains that port 5432 is in use, postgres is probably running directly in your OS. As we want to run it in a container, you will need to stop the running instance.
 Find the process id (PID) of postgres using:
 ```bash
-sudo lsof -i tcp:5432
+suo lsof -i tcp:5432
 ```
 which should return something like:
 ```text
@@ -95,47 +93,48 @@ postgres 340940 postgres    6u  IPv4 1053774      0t0  TCP localhost:postgresql 
 You can then stop it using the PID you just found and then try running the containerized postgres again:
 ```bash
 sudo kill 340940
-make run
+just run
 ```
 When you have the database up and running, keep it running and open a new terminal tab/window. Staying in the same `db/` directory, run the following command to import the dictionaries into the running database:
+
 ```bash
-python3 insert_dictionaries.py ../preprocessing/sql_files --container
+just fill-local
 ```
 
-## Running the api
-Move to the `api` directory and run the following commands:
+Database contents are not saved, so the command above must be run each time you start the database.
+
+## Running the API
+Move to the `api/` directory and run the following commands:
 ```bash
-make build
-make dev
+just build
+just dev
 ```
 Keep it running and open a new terminal tab/window.
 
 ## Running the frontend
-Move to the `frontend/` directory and run the following command:
+Move to the `frontend/` directory and run the following commands:
 ```bash
-make dev
+pnpm install
+just dev
 ```
 
-Now the metadictionary should be up and running on localhost, and you should be able to log in! Note that your GitHub user will need to be added to the list of people with access to closed dictionaries to see those in the search results.
+Now the metadictionary should be up and running on `localhost:5173` and the api at `localhost:3000`, and you should be able to log in! Note that your GitHub user will need to be added to the list of people with access to closed dictionaries to see those in the search results.
 
 # Recompiling and re-adding the dictionaries
 
-To update the dictionaries in the database, create new sql files, remove the existing entries from the database, and then re-add them. 
+To update the dictionaries in the database, create new sql files, then restart the database and re-fill it. 
 
-To create new sql files, follow the instructions under "Prepare the dictionaries" above.
+To create new sql files simply retrace the steps of [Prepare the dictionaries](#prepare-the-dictionaries). 
+Re-running `gather_dicts.py` is only necessary if the dictionary files have changed. (E.g. a new closed dictionary file had been added or you want to fetch the latest GiellaLT dicts)
+```bash
+cd preprocessing/
+python3 gather_dicts.py # Otional
+python3 create_db_data.py
+```
 
-While the database is running, enter it by executing this command from another terminal tab/window while in `db/`
+Then start the database and fill it again.
 ```bash
-make psql
+cd db/
+just run
+just fill-local
 ```
-Then remove all entries from the tables:
-```sql
-DELETE FROM articles ;
-DELETE FROM dictionaries ;
-quit
-```
-Lastly, add the updated dictionaries to the database:
-```bash
-python3 insert_dictionaries.py ../preprocessing/sql_files --container
-```
-You might need to restart the database, api and/or frontend after this.
