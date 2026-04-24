@@ -1,7 +1,9 @@
 from utils.dataclasses import Article, Dictionary
 
+from .base_parser import BaseParser
 
-class FysihkkaParser:
+
+class FysihkkaParser(BaseParser):
     def __init__(self, dictionary_id, file):
         l1, l2 = file.stem.split("-")[-2:]
 
@@ -18,9 +20,6 @@ class FysihkkaParser:
         )
 
         self.articles = self.parse_dict(file)
-
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
 
     def parse_dict(self, file):
         articles = []
@@ -48,13 +47,13 @@ class FysihkkaParser:
     def to_html(self, line: str):
         # single line
         if line.find("\\") == -1:
-            return (
-                f"<p><b>{line.split('|')[0].strip()} </b>{line.split('|')[1].strip()}</p>"
-            )
+            return f"<p><b>{line.split('|')[0].strip()} </b>{line.split('|')[1].strip()}</p>"
 
         # multi line
         lines = line.split("\\")
-        html = f"<b>{lines[0].split('|')[0].strip()} </b>{lines[0].split('|')[1].strip()}"
+        html = (
+            f"<b>{lines[0].split('|')[0].strip()} </b>{lines[0].split('|')[1].strip()}"
+        )
         for l in lines[1:]:
             html += (
                 f"<br>&emsp;<b>{l.split('|')[0].strip()} </b>{l.split('|')[1].strip()}"

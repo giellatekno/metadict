@@ -2,8 +2,10 @@ import csv
 
 from utils.dataclasses import Article, Dictionary
 
+from .base_parser import BaseParser
 
-class BergslandMaggaParser:
+
+class BergslandMaggaParser(BaseParser):
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
@@ -16,9 +18,6 @@ class BergslandMaggaParser:
             isbn="978-82-7601-010-5",
         )
         self.articles = self.parse_dict(file)
-
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
 
     def parse_dict(self, file):
         articles = []

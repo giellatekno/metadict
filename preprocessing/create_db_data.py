@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 This script takes as input all files in the dicts/ folder, and creates
 output files in the sql_files/.
@@ -16,6 +15,7 @@ Use the script "db/insert_dictionary.py" to insert these .sql files
 into a live database. Refer to that script for further information.
 """
 
+import shutil
 from pathlib import Path
 
 import classes
@@ -54,8 +54,9 @@ def parse_dictionary(file: Path, dictionary_id):
 
 def main():
     sql_folder = Path("sql_files")
-    if not sql_folder.exists():
-        sql_folder.mkdir()
+    if sql_folder.exists():
+        shutil.rmtree(sql_folder)
+    sql_folder.mkdir()
 
     dicts_dir = Path("dicts")
 

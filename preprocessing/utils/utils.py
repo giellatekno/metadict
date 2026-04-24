@@ -1,7 +1,7 @@
 import os.path
 import re
 
-from utils.dataclasses import Article, Dictionary
+from utils.dataclasses import Article
 
 
 def yellow(s):
@@ -22,7 +22,7 @@ def get_gut_root():
                 continue
             try:
                 k, v = line.split("=", maxsplit=1)
-            except IndexError:
+            except ValueError:
                 continue
             k = k.strip()
             v = v.strip()

@@ -1,7 +1,9 @@
 from utils.dataclasses import Article, Dictionary
 
+from .base_parser import BaseParser
 
-class AlgosatnegirjiParser:
+
+class AlgosatnegirjiParser(BaseParser):
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
@@ -16,9 +18,6 @@ class AlgosatnegirjiParser:
         )
 
         self.articles = self.parse_dict(file)
-
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
 
     def clean_lemma(self, lemma: str):
         lemma = lemma.replace(":", "")
@@ -48,11 +47,11 @@ class AlgosatnegirjiParser:
 
         return articles
 
-    def format_article(self, line):
-        words = line.split()
+    def format_article(self, text):
+        words = text.split()
 
         if words[0][-1] == ":" and words[1][0] == "(":
-            return f"<b>{line}</b>"
+            return f"<b>{text}</b>"
 
         bold = ""
         for word in words:
@@ -62,7 +61,7 @@ class AlgosatnegirjiParser:
                 break
             bold += " "
 
-        text = line.replace(
+        text = text.replace(
             bold, f"<b>{bold.replace('(', '</b>(').replace(')', ')<b>')}</b>"
         )
 

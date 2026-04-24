@@ -3,6 +3,8 @@ from xml.etree import ElementTree as ET
 from utils.dataclasses import Article, Dictionary
 from utils.utils import sort_alphabetically, yellow
 
+from .base_parser import BaseParser
+
 # fmt: off
 METADATA = {
     ("sme-nob", "nob-sme"): {
@@ -29,7 +31,7 @@ METADATA = {
 # fmt: on
 
 
-class GTParser:
+class GTParser(BaseParser):
     def __init__(self, dictionary_id, file):
         langs = file.name[3:-4]
         l1, l2 = langs.split("-")
@@ -46,9 +48,6 @@ class GTParser:
         )
 
         self.articles = self.parse_dict(file)
-
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
 
     def parse_dict(self, file):
         articles = []
@@ -90,9 +89,6 @@ class GTParser:
             article.article_number = i
 
         return articles
-
-    def clean_text(self, text: str):
-        return text.strip().replace("\n", "").replace("\t", " ")
 
     def to_html(self, lemma, pos, e_node: ET.Element):
         # Start html string

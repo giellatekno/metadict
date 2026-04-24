@@ -3,8 +3,10 @@ import re
 
 from utils.dataclasses import Article, Dictionary
 
+from .base_parser import BaseParser
 
-class MedisinskParser:
+
+class MedisinskParser(BaseParser):
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
@@ -18,9 +20,6 @@ class MedisinskParser:
             isbn="978-82-329-0564-5",
         )
         self.articles = self.parse_dict(file)
-
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
 
     def parse_dict(self, file):
         articles = []

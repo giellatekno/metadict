@@ -3,8 +3,10 @@ import re
 
 from utils.dataclasses import Article, Dictionary
 
+from .base_parser import BaseParser
 
-class KintelParser:
+
+class KintelParser(BaseParser):
     def __init__(self, dictionary_id, file):
         l1, l2 = file.stem.split("-")[-2:]
         name = "Norsk-lulesamisk Ordbok" if l1 == "nob" else "Lulesamisk-norsk Ordbok"
@@ -17,12 +19,8 @@ class KintelParser:
             closed=False,
             author="Anders Kintel",
             date_published="2012",
-            isbn="",
         )
         self.articles = self.parse_dict(file)
-
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
 
     def parse_dict(self, file):
         articles = []
@@ -50,10 +48,8 @@ class KintelParser:
         return [lemma.split()[0]]
 
     def to_html(self, lemma: str, translation: str):
-        lemma = lemma.replace("$>", "<b>").replace("<$", "</b>")
-        lemma = lemma.replace("%>", "<i>").replace("<%", "</i>")
-        translation = translation.replace("$>", "<b>").replace("<$", "</b>")
-        translation = translation.replace("%>", "<i>").replace("<%", "</i>")
+        lemma = self.format_article(lemma)
+        translation = self.format_article(translation)
 
         if translation == "":
             return f"<p>{lemma}</p>"

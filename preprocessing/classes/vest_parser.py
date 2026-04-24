@@ -2,8 +2,10 @@ import re
 
 from utils.dataclasses import Article, Dictionary
 
+from .base_parser import BaseParser
 
-class VestParser:
+
+class VestParser(BaseParser):
     def __init__(self, dictionary_id, file):
         l1, l2 = file.stem.split("-")[-2:]
         name = "Nettisanakirja" if l1 == "fin" else "Neahttasátnegirji"
@@ -19,9 +21,6 @@ class VestParser:
         )
 
         self.articles = self.parse_dict(file)
-
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
 
     def parse_dict(self, file):
         articles = []
@@ -61,11 +60,6 @@ class VestParser:
                 lemmas.append(lemma)
 
         return lemmas
-
-    def format_article(self, text):
-        text = text.replace("$>", "<b>").replace("<$", "</b>")
-        text = text.replace("%>", "<i>").replace("<%", "</i>")
-        return text.strip()
 
     def to_html(self, line):
         return f"<p>{self.format_article(line)}</p>"

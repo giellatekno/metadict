@@ -1,5 +1,6 @@
 from .algosatnegirji_parser import AlgosatnegirjiParser
 from .apotekordliste_parser import ApotekordlisteParser
+from .base_parser import BaseParser
 from .bergsland_magga_parser import BergslandMaggaParser
 from .fysihkka_parser import FysihkkaParser
 from .gaerjiste_parser import GaerjisteParser

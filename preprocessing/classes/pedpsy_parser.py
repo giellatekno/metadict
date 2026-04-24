@@ -2,8 +2,10 @@ import re
 
 from utils.dataclasses import Article, Dictionary
 
+from .base_parser import BaseParser
 
-class PedPsyParser:
+
+class PedPsyParser(BaseParser):
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
@@ -21,9 +23,6 @@ class PedPsyParser:
         self.gradation_pattern = re.compile(r"[^\s\d]{1,4}-[^\s\d,]{1,4}")
 
         self.articles = self.parse_dict(file)
-
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
 
     def parse_dict(self, file):
         articles = []

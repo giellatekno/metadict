@@ -2,8 +2,10 @@ import csv
 
 from utils.dataclasses import Article, Dictionary
 
+from .base_parser import BaseParser
 
-class GirjjalasvuodaParser:
+
+class GirjjalasvuodaParser(BaseParser):
     def __init__(self, dictionary_id, file):
         l1, l2 = file.stem.split("-")[-2:]
 
@@ -20,9 +22,6 @@ class GirjjalasvuodaParser:
         )
 
         self.articles = self.parse_dict(file)
-
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
 
     def parse_dict(self, file):
         articles = []

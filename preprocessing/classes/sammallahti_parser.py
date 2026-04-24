@@ -1,5 +1,7 @@
 from utils.dataclasses import Article, Dictionary
 
+from .base_parser import BaseParser
+
 """
 Letters to filter out of lemma:
     ĵḷṃṇṛṿ ọạẹ ēīōū ˣꞌ
@@ -10,7 +12,7 @@ d@, g@, b@ - ḏ ḇ
 """
 
 
-class SammallahtiParser:
+class SammallahtiParser(BaseParser):
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
@@ -25,39 +27,38 @@ class SammallahtiParser:
 
         self.articles = self.parse_dict(file)
 
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
-
     def clean_lemma(self, lemma: str):
-        lemma = lemma.replace("$>", "")
-        lemma = lemma.replace("<$", "")
-        lemma = lemma.replace("ˣ", "")
-        lemma = lemma.replace("ꞌ", "")
-        lemma = lemma.replace("|", "")
-        lemma = lemma.replace("@", "")
+        lemma = (
+            lemma.replace("$>", "")
+            .replace("<$", "")
+            .replace("ˣ", "")
+            .replace("ꞌ", "")
+            .replace("|", "")
+            .replace("@", "")
+        )
 
         lemma = lemma.split(",")[0].split(":")[0]
 
-        lemma = lemma.replace("ĵ", "j")
-        lemma = lemma.replace("ḷ", "l")
-        lemma = lemma.replace("ṃ", "m")
-        lemma = lemma.replace("ṇ", "n")
-        lemma = lemma.replace("ṛ", "r")
-        lemma = lemma.replace("ṿ", "v")
-        lemma = lemma.replace("ọ", "o")
-        lemma = lemma.replace("ạ", "a")
-        lemma = lemma.replace("ẹ", "e")
-        lemma = lemma.replace("ē", "e")
-        lemma = lemma.replace("ī", "i")
-        lemma = lemma.replace("ō", "o")
-        lemma = lemma.replace("ū", "u")
+        lemma = (
+            lemma.replace("ĵ", "j")
+            .replace("ḷ", "l")
+            .replace("ṃ", "m")
+            .replace("ṇ", "n")
+            .replace("ṛ", "r")
+            .replace("ṿ", "v")
+            .replace("ọ", "o")
+            .replace("ạ", "a")
+            .replace("ẹ", "e")
+            .replace("ē", "e")
+            .replace("ī", "i")
+            .replace("ō", "o")
+            .replace("ū", "u")
+        )
 
         return lemma
 
     def format_article(self, text: str):
-        text = text.replace("$>", "<b>").replace("<$", "</b>")
-        text = text.replace("%>", "<i>").replace("<%", "</i>")
-
+        text = super().format_article(text)
         idx = text.find("@")
         while idx != -1:
             text = text[: idx - 1] + "<u>" + text[idx - 1] + "</u>" + text[idx + 1 :]

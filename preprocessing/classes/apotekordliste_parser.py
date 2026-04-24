@@ -2,8 +2,10 @@ import re
 
 from utils.dataclasses import Article, Dictionary
 
+from .base_parser import BaseParser
 
-class ApotekordlisteParser:
+
+class ApotekordlisteParser(BaseParser):
     def __init__(self, dictionary_id, file):
         langs = file.stem.split("-")[-3:]
         l1, l2 = langs[0], langs[1]
@@ -20,9 +22,6 @@ class ApotekordlisteParser:
             isbn="82-7374-595-3",
         )
         self.articles = self.parse_dict(file)
-
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
 
     def parse_dict(self, file):
         articles = []

@@ -2,8 +2,10 @@ import re
 
 from utils.dataclasses import Article, Dictionary
 
+from .base_parser import BaseParser
 
-class RuoktumetParser:
+
+class RuoktumetParser(BaseParser):
     def __init__(self, dictionary_id, file):
         l1, l2 = file.stem.split("-")[-2:]
 
@@ -22,9 +24,6 @@ class RuoktumetParser:
         self.pattern = re.compile(r"^[^ ]+(?:(?: [~-] [^ ]+)?(?: \([^ ]+\.\))?)*")
 
         self.articles = self.parse_dict(file)
-
-    def get_parsed_data(self):
-        return self.dictionary, self.articles
 
     def parse_dict(self, file):
         articles = []
