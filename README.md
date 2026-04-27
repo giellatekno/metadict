@@ -31,10 +31,10 @@ Se README i hver undermappe for detaljer.
 
 | Lag            | Teknologi                                                      |
 |----------------|----------------------------------------------------------------|
-| Frontend       | [SvelteKit](https://kit.svelte.dev/) (Svelte 5), TypeScript, Tailwind CSS, Skeleton UI, Paraglide (i18n) |
-| API            | Rust, [Axum](https://github.com/tokio-rs/axum), Tokio         |
-| Database       | PostgreSQL (via `tokio-postgres` / `deadpool-postgres`)        |
-| Autentisering  | GitHub OAuth (JWT med `jsonwebtoken`)                          |
+| Frontend       | Svelte 5 + SvelteKit, TypeScript, Tailwind CSS, Skeleton UI, Paraglide (i18n) |
+| API            | Rust, Axum, Tokio                                              |
+| Database       | PostgreSQL                                                     |
+| Autentisering  | GitHub OAuth                                                   |
 | Preprocessing  | Python                                                         |
 
 ---
