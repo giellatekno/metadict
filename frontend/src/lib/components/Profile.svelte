@@ -4,7 +4,7 @@
     import type { UserType } from "$lib/utils";
     import { Popover, Portal } from "@skeletonlabs/skeleton-svelte";
     import { Avatar } from "@skeletonlabs/skeleton-svelte";
-    import { BadgeCheck } from "lucide-svelte";
+    import { BadgeCheck } from "@lucide/svelte";
 
     interface Props {
         user: UserType;

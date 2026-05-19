@@ -11,7 +11,7 @@
         EllipsisIcon,
         RotateCcwIcon,
         XIcon,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
 
     function reset_list(listId: "search" | "target") {
         if (listId === "search") {

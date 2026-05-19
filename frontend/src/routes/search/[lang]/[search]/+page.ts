@@ -21,7 +21,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
     // console.log(lemmas);
 
     if (lemmas && lemmas.length === 1) {
-        redirect(307, resolve(`/lookup/${lemmas[0].lang}/${lemmas[0].lemma}`));
+        redirect(307, resolve('/lookup/[lang]/[lemma]', { lang: lemmas[0].lang, lemma: lemmas[0].lemma }));
     }
 
     return { lemmas };

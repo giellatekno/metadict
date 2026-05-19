@@ -4,16 +4,16 @@
     import { getLocale } from "$lib/paraglide/runtime.js";
     import { m } from "$lib/paraglide/messages";
     import { resolve } from "$app/paths";
-    import type { PageData } from "./$types";
+    import type { LayoutData } from "./$types";
     import { type Snippet } from "svelte";
-    import { ExternalLink } from "lucide-svelte";
+    import { ExternalLink } from "@lucide/svelte";
     import { externalDicts } from "$lib/external_dicts";
     import { settings } from "$lib/settings.svelte";
     import { goto } from "$app/navigation";
     import { type LookupType } from "$lib/utils";
 
     interface Props {
-        data: PageData;
+        data: LayoutData;
         children: Snippet;
     }
 
@@ -108,10 +108,17 @@
             cur_article_idx < all_article_ids.length &&
             cur_article !== ""
         ) {
-            goto(resolve(`/lookup/${lang}/${lemma}/${cur_article}`), {
-                keepFocus: true,
-                replaceState: true,
-            });
+            goto(
+                resolve("/lookup/[lang]/[lemma]/[article_id]", {
+                    lang,
+                    lemma,
+                    article_id: cur_article,
+                }),
+                {
+                    keepFocus: true,
+                    replaceState: true,
+                },
+            );
         }
     });
 
@@ -172,7 +179,13 @@
                                     {@render link_button(
                                         dict.article_id.toString(),
                                         resolve(
-                                            `/lookup/${lang}/${lemma}/${dict.article_id}`,
+                                            "/lookup/[lang]/[lemma]/[article_id]",
+                                            {
+                                                lang,
+                                                lemma,
+                                                article_id:
+                                                    dict.article_id.toString(),
+                                            },
                                         ),
                                         dict.dictionary_displayname === ""
                                             ? dict.dictionary_name

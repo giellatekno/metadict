@@ -2,7 +2,7 @@
     import { setLocale, locales } from "$lib/paraglide/runtime";
     import { Popover, Portal } from "@skeletonlabs/skeleton-svelte";
     import { langname } from "$lib/langname";
-    import { LanguagesIcon } from "lucide-svelte";
+    import { LanguagesIcon } from "@lucide/svelte";
     import sme_flag from "$assets/flags/sme.svg";
     import nob_flag from "$assets/flags/nob.svg";
     import fin_flag from "$assets/flags/fin.svg";

@@ -2,7 +2,7 @@
     import { browser } from "$app/environment";
     import { m } from "$lib/paraglide/messages.js";
     import { Dialog, Portal } from "@skeletonlabs/skeleton-svelte";
-    import { KeyboardIcon, XIcon } from "lucide-svelte";
+    import { KeyboardIcon, XIcon } from "@lucide/svelte";
 
     const isMac = $derived.by(() => {
         const ua = browser ? window.navigator.userAgent : "";

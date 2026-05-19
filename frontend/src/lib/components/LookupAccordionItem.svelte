@@ -1,6 +1,6 @@
 <script>
     import { Accordion } from "@skeletonlabs/skeleton-svelte";
-    import { ChevronDownIcon } from "lucide-svelte";
+    import { ChevronDownIcon } from "@lucide/svelte";
     import { slide } from "svelte/transition";
 
     let { value, title, children } = $props();

@@ -6,7 +6,7 @@
         ScanTextIcon,
         UserIcon,
         type Icon as IconType,
-    } from "lucide-svelte";
+    } from "@lucide/svelte";
     import type { PageProps } from "./$types";
 
     let { data }: PageProps = $props();

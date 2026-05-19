@@ -4,7 +4,7 @@
     import { goto } from "$app/navigation";
     import { resolve } from "$app/paths";
     import { settings } from "$lib/settings.svelte";
-    import { SearchIcon } from "lucide-svelte";
+    import { SearchIcon } from "@lucide/svelte";
     import SearchOptions from "./SearchOptions.svelte";
     import KeyboardShortcuts from "./KeyboardShortcuts.svelte";
 

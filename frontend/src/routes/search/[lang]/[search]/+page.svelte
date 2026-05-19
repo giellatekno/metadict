@@ -3,7 +3,7 @@
     import { Pagination } from "@skeletonlabs/skeleton-svelte";
     import type { PageProps } from "./$types";
     import { m } from "$lib/paraglide/messages";
-    import { ArrowLeftIcon, ArrowRightIcon } from "lucide-svelte";
+    import { ArrowLeftIcon, ArrowRightIcon } from "@lucide/svelte";
     import { LANG_COLORS } from "$lib/utils";
     import { goto } from "$app/navigation";
 
@@ -31,7 +31,7 @@
         ) {
             e.preventDefault();
             const target = shownLemmas[activeIndex];
-            goto(resolve(`/lookup/${target.lang}/${target.lemma}`), {
+            goto(resolve('/lookup/[lang]/[lemma]', { lang: target.lang, lemma: target.lemma }), {
                 keepFocus: true,
             });
         }
@@ -92,7 +92,7 @@
                                 class="btn {isActive
                                     ? 'preset-filled-primary-500'
                                     : 'hover:preset-tonal'} justify-between py-3 {rounded_style}"
-                                href={resolve(`/lookup/${lang}/${lemma}`)}
+                                href={resolve('/lookup/[lang]/[lemma]', { lang, lemma })}
                             >
                                 {lemma}
                                 <span
