@@ -15,9 +15,9 @@
     let neighbors = $derived(data.article_data.neighbors);
 </script>
 
-<div class="grid w-full grid-cols-3 gap-20">
+<div class="grid w-full grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-20">
     <div
-        class="card bg-tertiary-50-950 col-span-2 w-full overflow-y-auto border p-4 shadow-lg"
+        class="card bg-tertiary-50-950 w-full overflow-y-auto border p-4 shadow-lg sm:col-span-2"
     >
         {#if neighbors && neighbors.length > 1}
             {#each neighbors as neighbor, i}
@@ -27,12 +27,12 @@
                 {#if neighbor.article_number === article.article_number}
                     <div
                         id="article"
-                        class="border-primary-500 border-y-3 py-4 pl-2 text-2xl"
+                        class="border-primary-500 border-y-3 py-4 pl-2 text-lg sm:text-2xl"
                     >
                         {@html neighbor.rendered}
                     </div>
                 {:else}
-                    <div class="py-2 text-sm opacity-90">
+                    <div class="py-2 text-xs opacity-90 sm:text-sm">
                         {@html neighbor.rendered}
                     </div>
                 {/if}

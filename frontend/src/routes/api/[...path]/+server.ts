@@ -7,6 +7,7 @@ export const GET: RequestHandler = async ({ params, request, url, fetch }) => {
     const api_url = new URL(PUBLIC_API_ENDPOINT);
 
     api_url.search = url.search;
+    console.debug(params.path);
     api_url.pathname = `/${params.path}`;
 
     const headers = new Headers(request.headers);

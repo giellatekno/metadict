@@ -51,7 +51,7 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="flex w-1/4 min-w-124 flex-col items-center gap-4">
+<div class="flex w-full flex-col items-center gap-4 sm:w-1/4 sm:min-w-124">
     {#if n_results > 0}
         <div class="flex w-full items-center justify-between">
             <div class="text-nowrap">

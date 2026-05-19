@@ -16,7 +16,7 @@
 </script>
 
 <AppBar class="preset-filled-surface-800-200">
-    <AppBar.Toolbar class="mx-auto w-full grid-cols-[auto_auto] px-6">
+    <AppBar.Toolbar class="mx-auto w-full grid-cols-[auto_auto] sm:px-6">
         <AppBar.Headline>
             <a
                 class="h2 text-surface-50-950 flex gap-2 font-[Noto_Serif] font-medium"
@@ -27,16 +27,16 @@
                 >
                     <BookOpenText class="size-8" />
                 </div>
-                {m.page_title()}
+                <span class="hidden sm:inline">{m.page_title()}</span>
             </a>
         </AppBar.Headline>
         <AppBar.Trail>
-            <div class="flex items-center gap-10">
+            <div class="flex items-center gap-2 md:gap-10">
                 <SelectLocale />
 
                 <a href={resolve("/about")} class="btn text-lg hover:underline">
                     <Info />
-                    {m.info()}
+                    <span class="hidden sm:inline">{m.info()}</span>
                 </a>
                 {#if user}
                     <Profile {user}></Profile>
@@ -46,7 +46,7 @@
                         href="https://github.com/login/oauth/authorize?scope=read:user%20read:repo&client_id=Iv1.f208b6793cca35ec&redirect_uri={redirect_uri}"
                     >
                         <LogInIcon />
-                        {m.login()}
+                        <span class="hidden sm:inline">{m.login()}</span>
                     </a>
                 {/if}
             </div>

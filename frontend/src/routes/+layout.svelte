@@ -28,7 +28,9 @@
 <div class="app flex h-full min-h-screen w-full flex-col items-center">
     <AppBar {user} {redirect_uri} />
 
-    <div class="flex h-fit w-full flex-1 flex-col items-center gap-6 p-6 pb-16">
+    <div
+        class="flex h-fit w-full flex-1 flex-col items-center gap-6 p-2 pb-16 sm:p-6"
+    >
         <Searchbar />
         <hr class="hr" />
         <div class="flex w-full max-w-480 flex-col items-center">

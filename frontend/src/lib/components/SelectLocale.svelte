@@ -22,7 +22,7 @@
 <Popover>
     <Popover.Trigger class="btn text-lg hover:underline">
         <LanguagesIcon />
-        <span>{m.interface_language()}</span>
+        <span class="hidden sm:inline">{m.interface_language()}</span>
     </Popover.Trigger>
     <Portal>
         <Popover.Positioner>

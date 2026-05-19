@@ -19,7 +19,7 @@
     "target_languages": "Boađusgielat",
     "kbd_shortcuts": "Jođánisboalut",
     "kbd_shortcuts_searchfield_focus": "Mannat ohcangieddái",
-    "kbd_shortcuts_searchfield_enter": "Sadde ohcama",
+    "kbd_shortcuts_searchfield_enter": "Saddet ohcama",
     "kbd_shortcuts_searchresults_navigate": "Navigeret lemmabohtosiid dahje sátnegirjeartihkkaliid",
     "kbd_shortcuts_searchresults_enter": "Mannat deattuhuvvon lemmai (go bláđe lemmabohtosiid)",
     "dictionary_about": "Dán sátnegirjji birra",
@@ -47,6 +47,10 @@
     "howto_access_body": "Jus barggat Giellateknos, de sáhtát oažžut beassanlobi giddejuvvon sátnegirjjiide. Go leat ožžon beassama, deaddil \"Logge sisa Githubiin\". Deaddil de iežat nama ja iskka lohká go \"Giellatekno bargi\". Jus it leat ožžon beassanlobi, de sisaloggen ii rievdat ohcanbohtosiid.",
     "historical_dictionaries": "Historjjálaš sátnegirjjit",
     "external_dictionaries": "Olgguldas sátnegirjjit",
+    "options_reset_list": "Máhcat listtu",
+    "options_move_up": "Sirdde bajás",
+    "options_move_down": "Sirdde vulos",
+    "options_selected_warning": "Unnimusat okta giella ferte leat válljejuvvon",
     "giellatekno": "Giellatekno, Sámi giellateknologiija guovddáš",
     "uit": "UiT Norgga árktalaš universitehta"
 }

@@ -6,8 +6,9 @@
     import { settings, type LangConfig } from "$lib/settings.svelte";
     import { SEARCH_OPTIONS, TARGET_OPTIONS } from "$lib/utils";
     import {
+        ChevronDownIcon,
+        ChevronUpIcon,
         EllipsisIcon,
-        GripVertical,
         RotateCcwIcon,
         XIcon,
     } from "lucide-svelte";
@@ -26,14 +27,6 @@
         }
     }
 
-    let dragInfo = $state<{
-        index: number | null;
-        listId: "search" | "target" | null;
-    }>({
-        index: null,
-        listId: null,
-    });
-
     let activeSearchCount = $derived(
         settings.selected_search_langs.filter((l) => l.enabled).length,
     );
@@ -41,31 +34,12 @@
         settings.selected_target_langs.filter((l) => l.enabled).length,
     );
 
-    function handleDragStart(index: number, listId: "search" | "target") {
-        dragInfo = { index, listId };
-    }
-
-    function handleDragOver(
-        e: DragEvent,
-        index: number,
-        listId: "search" | "target",
-        list: LangConfig[],
-    ) {
-        e.preventDefault();
-        if (
-            dragInfo.index === null ||
-            dragInfo.index === index ||
-            dragInfo.listId !== listId
-        )
-            return;
-
-        const item = list.splice(dragInfo.index, 1)[0];
-        list.splice(index, 0, item);
-        dragInfo.index = index;
-    }
-
-    function handleDragEnd() {
-        dragInfo = { index: null, listId: null };
+    function move(list: LangConfig[], index: number, direction: -1 | 1) {
+        const target = index + direction;
+        if (target < 0 || target >= list.length) return;
+        const tmp = list[index];
+        list[index] = list[target];
+        list[target] = tmp;
     }
 
     // animation for search settings dialig
@@ -89,7 +63,7 @@
                 class="fixed inset-0 z-50 flex items-center justify-center p-4"
             >
                 <Dialog.Content
-                    class="card bg-tertiary-50-950 border-primary-500 w-fit space-y-4 border-2 p-6 shadow-xl {animation}"
+                    class="card bg-tertiary-50-950 border-primary-500 max-h-[90vh] w-full max-w-[95vw] space-y-4 overflow-y-auto border-2 p-6 shadow-xl sm:w-fit {animation}"
                 >
                     <header class="flex items-center justify-between">
                         <Dialog.Title class="h4 font-bold">
@@ -105,7 +79,7 @@
                     </header>
                     <Dialog.Description>
                         <div
-                            class="align-start grid grid-cols-2 gap-12 text-lg"
+                            class="align-start grid grid-cols-1 gap-4 text-lg sm:grid-cols-2 sm:gap-12"
                         >
                             <div class="flex flex-col gap-2">
                                 <span
@@ -117,7 +91,7 @@
                                         onclick={() => reset_list("search")}
                                     >
                                         <RotateCcwIcon
-                                            aria-label="[l6e] Reset list"
+                                            aria-label={m.options_reset_list()}
                                             class="size-4"
                                         />
                                     </button>
@@ -125,11 +99,10 @@
                                 <hr class="hr" />
                                 <div class="flex flex-col gap-2">
                                     {#each settings.selected_search_langs as langObj, i (langObj.iso)}
-                                        {@render dnd_checkbox(
+                                        {@render lang_row(
                                             langObj,
                                             i,
                                             settings.selected_search_langs,
-                                            "search",
                                             activeSearchCount,
                                         )}
                                     {/each}
@@ -144,16 +117,18 @@
                                         class="hover:preset-tonal box-content rounded-md p-2"
                                         onclick={() => reset_list("target")}
                                     >
-                                        <RotateCcwIcon class="size-4" />
+                                        <RotateCcwIcon
+                                            aria-label={m.options_reset_list()}
+                                            class="size-4"
+                                        />
                                     </button>
                                 </span>
                                 <hr class="hr" />
                                 {#each settings.selected_target_langs as langObj, i (langObj.iso)}
-                                    {@render dnd_checkbox(
+                                    {@render lang_row(
                                         langObj,
                                         i,
                                         settings.selected_target_langs,
-                                        "target",
                                         activeTargetCount,
                                     )}
                                 {/each}
@@ -167,32 +142,24 @@
     </Dialog>
 </div>
 
-{#snippet dnd_checkbox(
+{#snippet lang_row(
     langObj: LangConfig,
     index: number,
     list: LangConfig[],
-    listId: "search" | "target",
     totalActive: number,
 )}
-    <button
-        ondragover={(e) => handleDragOver(e, index, listId, list)}
-        onclick={() => (langObj.enabled = !langObj.enabled)}
-        class="hover:bg-surface-100-900 flex items-center justify-between rounded p-1 transition-colors
-        {dragInfo.index === index && dragInfo.listId === listId
-            ? 'opacity-30'
-            : ''}"
-    >
-        <span class="flex items-center gap-2">
+    <div class="flex items-center justify-between gap-1 rounded p-1">
+        <label class="flex cursor-pointer items-center gap-2 select-none">
             <input
                 type="checkbox"
                 class="checkbox"
                 bind:checked={langObj.enabled}
                 disabled={langObj.enabled && totalActive <= 1}
                 title={langObj.enabled && totalActive <= 1
-                    ? "[l6e] At least one language must be selected"
+                    ? m.options_selected_warning()
                     : ""}
             />
-            <span class="text-base select-none">
+            <span class="text-base">
                 {#if langObj.iso === "hst"}
                     {m.historical_dictionaries()}
                 {:else if langObj.iso === "ext"}
@@ -201,17 +168,24 @@
                     {langname(langObj.iso, getLocale())}
                 {/if}
             </span>
-        </span>
-        <div
-            draggable="true"
-            role="button"
-            tabindex="0"
-            aria-label="[l6e] Drag to reorder"
-            class="cursor-grab p-1 active:cursor-grabbing"
-            ondragstart={() => handleDragStart(index, listId)}
-            ondragend={handleDragEnd}
-        >
-            <GripVertical class="size-4 shrink-0 opacity-40" />
+        </label>
+        <div class="flex flex-row">
+            <button
+                class="hover:preset-tonal rounded p-0.5 disabled:opacity-20"
+                disabled={index === 0}
+                onclick={() => move(list, index, -1)}
+                aria-label={m.options_move_up()}
+            >
+                <ChevronUpIcon class="size-4" />
+            </button>
+            <button
+                class="hover:preset-tonal rounded p-0.5 disabled:opacity-20"
+                disabled={index === list.length - 1}
+                onclick={() => move(list, index, 1)}
+                aria-label={m.options_move_down()}
+            >
+                <ChevronDownIcon class="size-4" />
+            </button>
         </div>
-    </button>
+    </div>
 {/snippet}

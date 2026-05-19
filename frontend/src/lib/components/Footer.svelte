@@ -3,7 +3,7 @@
 </script>
 
 <footer
-    class="bg-surface-800-200 text-surface-100-900 flex w-full justify-between px-6 py-2"
+    class="bg-surface-800-200 text-surface-100-900 flex w-full flex-col items-center py-2 sm:flex-row sm:justify-between sm:px-6"
 >
     <a
         href="https://giellatekno.uit.no"

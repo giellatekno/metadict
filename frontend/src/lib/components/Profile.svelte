@@ -27,12 +27,14 @@
 </script>
 
 <Popover>
-    <Popover.Trigger class="inline-flex items-center hover:underline">
-        <Avatar class="size-10">
+    <Popover.Trigger class="mx-3 inline-flex items-center hover:underline">
+        <Avatar class="size-8 sm:size-10">
             <Avatar.Image src={user.gh_avatar_url} />
             <Avatar.Fallback>{avatar_fallbackname}</Avatar.Fallback>
         </Avatar>
-        <div class="flex w-30">{user.gh_fullname || user.gh_login_name}</div>
+        <div class="hidden sm:flex sm:w-30">
+            {user.gh_fullname || user.gh_login_name}
+        </div>
     </Popover.Trigger>
     <Portal>
         <Popover.Positioner>
@@ -41,6 +43,10 @@
             >
                 <Popover.Description>
                     <div class="flex flex-col justify-center gap-2 text-center">
+                        <div class="font-bold sm:hidden">
+                            {user.gh_fullname || user.gh_login_name}
+                        </div>
+                        <hr class="hr sm:hidden" />
                         {#if user.restricted_dicts}
                             <div class="flex flex-row justify-start gap-2">
                                 <span>{m.gt_employee()}</span>

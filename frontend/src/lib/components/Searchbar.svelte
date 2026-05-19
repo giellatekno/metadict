@@ -58,15 +58,15 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="flex w-2xl flex-col gap-2">
+<div class="flex w-full flex-col gap-2 sm:w-2xl">
     <div
-        class="input-group preset-filled-tertiary-50-950 h-12 w-full grid-cols-[auto_1fr_auto] md:h-16 md:w-2xl"
+        class="input-group preset-filled-tertiary-50-950 h-12 w-full grid-cols-[1fr_auto] sm:h-16 sm:w-2xl sm:grid-cols-[auto_1fr_auto]"
     >
-        <div class="ig-cell">
+        <div class="sm:ig-cell hidden">
             <SearchIcon class="size-6" />
         </div>
         <input
-            class="ig-input text-lg"
+            class="ig-input sm:text-lg"
             type="search"
             placeholder={m.search_placeholder()}
             bind:this={searchbox_elem}
@@ -80,8 +80,11 @@
             {m.search()}
         </button>
     </div>
-    <div class="flex justify-between">
+    <div class="hidden justify-between sm:flex">
         <SearchOptions />
         <KeyboardShortcuts />
+    </div>
+    <div class="flex justify-center sm:hidden">
+        <SearchOptions />
     </div>
 </div>

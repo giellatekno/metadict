@@ -132,7 +132,7 @@
 
 <svelte:window onkeydown={handleKeyDown} />
 
-<main class="grid w-full grid-cols-4 gap-20">
+<main class="grid w-full grid-cols-1 gap-6 sm:grid-cols-4 sm:gap-20">
     <div class="flex flex-col">
         <div
             class="card preset-filled-tertiary-50-950 flex h-fit w-full flex-col gap-1 p-4 shadow-lg"
@@ -187,7 +187,7 @@
         </div>
     </div>
 
-    <div class="row-span-3 md:col-span-3">
+    <div class="sm:col-span-3">
         {@render children?.()}
     </div>
 </main>

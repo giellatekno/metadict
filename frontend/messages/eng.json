@@ -47,6 +47,10 @@
     "howto_access_body": "If you are a worker at Giellatekno, you can get access to restricted dictionaries. Once you have been given access, click “Log in with Github” and verify by clicking your name. You should see the message “Giellatekno employee”. If you have not gotten access, logging in won't make a difference in the results you see.",
     "historical_dictionaries": "Historical dictionaries",
     "external_dictionaries": "External dictionaries",
+    "options_reset_list": "Reset list",
+    "options_move_up": "Move up",
+    "options_move_down": "Move down",
+    "options_selected_warning": "At least one language must be selected",
     "giellatekno": "Giellatekno, Centre for Sámi language technology",
     "uit": "UiT The Arctic University of Norway"
 }
