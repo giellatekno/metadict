@@ -11,7 +11,7 @@ mod timing_middleware;
 
 use axum::extract::{Path, Query, State};
 use axum::response::{IntoResponse, Redirect, Response};
-use axum::{http::HeaderMap, routing::get, Json, Router};
+use axum::{Json, Router, http::HeaderMap, routing::get};
 use listenfd::ListenFd;
 use serde_json::json;
 use std::collections::HashMap;
@@ -393,7 +393,7 @@ macro_rules! handle_can_see_closed {
             }
         };
         match jwt {
-            Some(jwt) => match jwt.refresh_if_needed(&$iat.get().await.unwrap()).await {
+            Some(jwt) => match jwt.refresh_if_needed(&$iat.get().await?).await {
                 Ok(None) => jwt.restricted_dicts(),
                 Ok(Some(new_jwt)) => {
                     $headers.insert(http::header::SET_COOKIE, new_jwt.to_cookie());
