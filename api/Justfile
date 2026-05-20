@@ -15,5 +15,8 @@ image:
 
 # tag image as gtlabcontainerregistry.azurecr.io/metadict-api and push it
 push-labacr:
-	podman tag metadict-api gtlabcontainerregistry.azurecr.io/metadict-api
-	podman push gtlabcontainerregistry.azurecr.io/metadict-api
+    podman tag metadict-api gtlabcontainerregistry.azurecr.io/metadict-api
+    podman push gtlabcontainerregistry.azurecr.io/metadict-api
+
+# Build and push. Runs "build", "image" and "push-labacr" in succession.
+bap: build image push-labacr
