@@ -1,6 +1,6 @@
 import { error } from "@sveltejs/kit";
 import { resolve } from "$app/paths";
-import { ArticleResponse } from "$lib/utils";
+import { ArticleResponse } from "$lib/schemas";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch }) => {

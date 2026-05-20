@@ -10,7 +10,7 @@
     import { externalDicts } from "$lib/external_dicts";
     import { settings } from "$lib/settings.svelte";
     import { goto } from "$app/navigation";
-    import { type LookupType } from "$lib/utils";
+    import { type LookupType } from "$lib/schemas";
 
     interface Props {
         data: LayoutData;

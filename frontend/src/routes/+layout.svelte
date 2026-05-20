@@ -4,7 +4,7 @@
     import { m } from "$lib/paraglide/messages.js";
     import Searchbar from "$lib/components/Searchbar.svelte";
     import AppBar from "$lib/components/AppBar.svelte";
-    import { User } from "$lib/utils";
+    import { User } from "$lib/schemas";
     import Footer from "$lib/components/Footer.svelte";
 
     let { children } = $props();

@@ -5,7 +5,7 @@
     import { m } from "$lib/paraglide/messages.js";
     import { resolve } from "$app/paths";
     import { BookOpenText, Info, LogInIcon } from "@lucide/svelte";
-    import type { UserType } from "$lib/utils";
+    import type { UserType } from "$lib/schemas";
     import { env } from "$env/dynamic/public";
 
     interface Props {

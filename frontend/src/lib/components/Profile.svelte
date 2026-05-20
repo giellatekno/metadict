@@ -1,7 +1,7 @@
 <script lang="ts">
     import { resolve } from "$app/paths";
     import { m } from "$lib/paraglide/messages";
-    import type { UserType } from "$lib/utils";
+    import type { UserType } from "$lib/schemas";
     import { Popover, Portal } from "@skeletonlabs/skeleton-svelte";
     import { Avatar } from "@skeletonlabs/skeleton-svelte";
     import { BadgeCheck } from "@lucide/svelte";

@@ -1,7 +1,8 @@
 import type { PageLoad } from "./$types";
 import { error, redirect } from "@sveltejs/kit";
 import { resolve } from "$app/paths";
-import { SEARCH_OPTIONS, SearchResponse } from "$lib/utils";
+import { SEARCH_OPTIONS } from "$lib/utils";
+import { SearchResponse } from "$lib/schemas";
 
 export const load: PageLoad = async ({ params, fetch }) => {
     // "all" is a frontend shorthand which expands to full lang list for the api

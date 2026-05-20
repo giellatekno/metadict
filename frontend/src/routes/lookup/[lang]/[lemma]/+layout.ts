@@ -1,5 +1,6 @@
 import { resolve } from "$app/paths";
-import { SEARCH_OPTIONS, LookupResponse } from "$lib/utils";
+import { SEARCH_OPTIONS } from "$lib/utils";
+import { LookupResponse } from "$lib/schemas";
 import { error } from "@sveltejs/kit";
 import type { LayoutLoad } from "./$types";
 
