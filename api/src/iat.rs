@@ -33,28 +33,30 @@ impl IAT {
     pub fn new() -> Self {
         Self(Arc::new(RwLock::new(None)))
     }
-
     /// Get the current IAT, as long as it hasn't expired.
     /// Create a new one if there is None.
     pub async fn get(&self) -> anyhow::Result<String> {
-        let inner = self.0.read().await;
-        match *inner {
+        let guard = self.0.read().await;
+        match *guard {
             None => {
-                drop(inner);
-                let mut inner_guard = self.0.write().await;
+                drop(guard);
+                // race?
+                let mut guard = self.0.write().await;
                 let inner = Inner::new().await?;
                 let token = inner.token.to_owned();
-                *inner_guard = Some(inner);
+                *guard = Some(inner);
                 Ok(token)
             }
             Some(ref inner) => {
                 if !inner.has_expired() {
                     Ok(inner.token.to_owned())
                 } else {
+                    drop(guard);
+                    // race?
+                    let mut guard = self.0.write().await;
                     let new_inner = Inner::new().await?;
-                    let mut inner_guard = self.0.write().await;
                     let token = new_inner.token.to_owned();
-                    *inner_guard = Some(new_inner);
+                    *guard = Some(new_inner);
                     Ok(token)
                 }
             }
