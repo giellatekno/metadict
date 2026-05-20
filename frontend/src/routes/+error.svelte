@@ -2,9 +2,9 @@
     import { page } from "$app/state";
 </script>
 
-<div class="my-8 flex flex-col items-center">
+<div class="my-8 flex w-full flex-col items-center sm:w-fit">
     <div
-        class="border-error-500 bg-tertiary-50-950 card flex max-w-xl min-w-sm flex-col items-center gap-2 border-2 p-4 text-center shadow-lg"
+        class="border-error-500 bg-tertiary-50-950 card flex w-full max-w-xl flex-col items-center gap-2 border-2 p-4 text-center shadow-lg sm:w-fit sm:min-w-sm"
     >
         <h3 class="h3 text-error-500 font-bold">
             Error {page.status}

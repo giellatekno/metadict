@@ -6,13 +6,16 @@
     import { resolve } from "$app/paths";
     import { BookOpenText, Info, LogInIcon } from "@lucide/svelte";
     import type { UserType } from "$lib/utils";
+    import { env } from "$env/dynamic/public";
 
     interface Props {
         user?: UserType;
-        redirect_uri: string;
     }
 
-    let { user, redirect_uri }: Props = $props();
+    let { user }: Props = $props();
+    let redirect_uri = encodeURIComponent(
+        env.PUBLIC_ORIGIN + resolve("/api/auth/callback"),
+    );
 </script>
 
 <AppBar class="preset-filled-surface-800-200">

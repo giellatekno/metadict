@@ -1,18 +1,29 @@
-import type { Load } from "@sveltejs/kit";
 import { error } from "@sveltejs/kit";
 import { resolve } from "$app/paths";
 import { ArticleResponse } from "$lib/utils";
+import type { PageLoad } from "./$types";
 
-export const load: Load = async ({ params, fetch }) => {
+export const load: PageLoad = async ({ params, fetch }) => {
     let { article_id } = params;
 
-    const response = await fetch(resolve(`/api/article/${article_id}`));
+    const res = await fetch(resolve(`/api/article/${article_id}`));
 
-    if (!response.ok) {
-        error(response.status, "fetch to api failed");
+    if (!res.ok) {
+        error(res.status, "fetch to api failed");
     }
 
-    const article_data = ArticleResponse.parse(await response.json());
+    let json: unknown;
+    try {
+        json = await res.json();
+    } catch {
+        error(502, "api returned non-JSON response");
+    }
 
-    return { article_data };
+    const parsed = ArticleResponse.safeParse(json);
+    if (!parsed.success) {
+        console.error(parsed.error);
+        error(502, "bad response from api");
+    }
+
+    return { article_data: parsed.data };
 };
