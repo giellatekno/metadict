@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page } from "$app/state";
-    import { langname } from "$lib/langname";
+    import { langname } from "@giellatekno/langnames";
     import { getLocale } from "$lib/paraglide/runtime.js";
     import { m } from "$lib/paraglide/messages";
     import { resolve } from "$app/paths";
@@ -21,6 +21,8 @@
 
     let lang = $derived(page.params.lang ?? "");
     let lemma = $derived(page.params.lemma ?? "");
+
+    const locale = getLocale();
 
     function getRank(iso: string) {
         const index = settings.selected_target_langs.findIndex(
@@ -145,12 +147,14 @@
             class="card preset-filled-tertiary-50-950 flex h-fit w-full flex-col gap-1 p-4 shadow-lg"
         >
             <div class="flex flex-col gap-4">
-                <h4 class="h4 font-bold">{langname(lang, getLocale())}</h4>
+                <h4 class="h4 font-bold">
+                    {langname(lang, locale, true)}
+                </h4>
                 {#each sections as section}
                     <div class="mb-4 flex flex-col gap-2">
-                        <h5 class="h5 font-bold">
+                        <h5 class="h5 flex items-center font-bold">
                             {#if section.type === "standard"}
-                                → {langname(section.id, getLocale())}
+                                → {langname(section.id, locale, true)}
                             {:else if section.type === "hst"}
                                 {m.historical_dictionaries()}
                             {:else if section.type === "ext"}

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { getLocale } from "$lib/paraglide/runtime.js";
     import { m } from "$lib/paraglide/messages.js";
-    import { langname } from "$lib/langname";
+    import { langname } from "@giellatekno/langnames";
     import { Dialog, Portal } from "@skeletonlabs/skeleton-svelte";
     import { settings, type LangConfig } from "$lib/settings.svelte";
     import { SEARCH_OPTIONS, TARGET_OPTIONS } from "$lib/utils";
@@ -12,6 +12,8 @@
         RotateCcwIcon,
         XIcon,
     } from "@lucide/svelte";
+
+    const locale = getLocale();
 
     function reset_list(listId: "search" | "target") {
         if (listId === "search") {
@@ -165,7 +167,7 @@
                 {:else if langObj.iso === "ext"}
                     {m.external_dictionaries()}
                 {:else}
-                    {langname(langObj.iso, getLocale())}
+                    {langname(langObj.iso, locale, true)}
                 {/if}
             </span>
         </label>

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { setLocale, locales } from "$lib/paraglide/runtime";
     import { Popover, Portal } from "@skeletonlabs/skeleton-svelte";
-    import { langname } from "$lib/langname";
+    import { langname } from "@giellatekno/langnames";
     import { LanguagesIcon } from "@lucide/svelte";
     import sme_flag from "$assets/flags/sme.svg";
     import nob_flag from "$assets/flags/nob.svg";
@@ -42,7 +42,7 @@
                                         alt={iso + " flag"}
                                         class="w-8 shadow-md"
                                     />
-                                    {langname(iso, iso)}
+                                    {langname(iso, iso, true)}
                                 </button>
                             </li>
                         {/each}

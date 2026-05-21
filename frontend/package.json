@@ -36,6 +36,7 @@
         "@floating-ui/dom": "^1.7.6",
         "@fontsource/noto-sans": "^5.2.10",
         "@fontsource/noto-serif": "^5.2.9",
+        "@giellatekno/langnames": "^1.1.0",
         "@lucide/svelte": "^1.16.0",
         "@tailwindcss/vite": "^4.3.0",
         "zod": "^4.4.3"
