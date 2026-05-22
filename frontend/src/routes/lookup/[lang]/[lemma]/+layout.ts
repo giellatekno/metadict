@@ -9,14 +9,11 @@ export const load: LayoutLoad = async ({ params, fetch }) => {
     if (!SEARCH_OPTIONS.includes(params.lang)) {
         error(
             400,
-            "Can only lookup one of the known langs: " +
-                SEARCH_OPTIONS.join(", "),
+            "Can only lookup one of the known langs: " + SEARCH_OPTIONS.join(", "),
         );
     }
 
-    let url = resolve(
-        `/api/lookup/${params.lang}/${encodeURIComponent(params.lemma)}`,
-    );
+    let url = resolve(`/api/lookup/${params.lang}/${encodeURIComponent(params.lemma)}`);
     const res = await fetch(url);
     if (!res.ok) {
         error(res.status, "fetch to api failed");

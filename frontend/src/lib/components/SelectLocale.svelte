@@ -42,7 +42,7 @@
                                         alt={iso + " flag"}
                                         class="w-8 shadow-md"
                                     />
-                                    {langname(iso, iso, true)}
+                                    {langname(iso, iso)}
                                 </button>
                             </li>
                         {/each}

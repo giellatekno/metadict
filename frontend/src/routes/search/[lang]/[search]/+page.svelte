@@ -18,22 +18,22 @@
     function handleKeydown(e: KeyboardEvent) {
         if (e.key === "ArrowDown") {
             e.preventDefault();
-            activeIndex =
-                activeIndex < shownLemmas.length - 1 ? activeIndex + 1 : 0;
+            activeIndex = activeIndex < shownLemmas.length - 1 ? activeIndex + 1 : 0;
         } else if (e.key === "ArrowUp") {
             e.preventDefault();
-            activeIndex =
-                activeIndex > 0 ? activeIndex - 1 : shownLemmas.length - 1;
-        } else if (
-            (e.metaKey || e.ctrlKey) &&
-            e.key === "Enter" &&
-            activeIndex !== -1
-        ) {
+            activeIndex = activeIndex > 0 ? activeIndex - 1 : shownLemmas.length - 1;
+        } else if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && activeIndex !== -1) {
             e.preventDefault();
             const target = shownLemmas[activeIndex];
-            goto(resolve('/lookup/[lang]/[lemma]', { lang: target.lang, lemma: target.lemma }), {
-                keepFocus: true,
-            });
+            goto(
+                resolve("/lookup/[lang]/[lemma]", {
+                    lang: target.lang,
+                    lemma: target.lemma,
+                }),
+                {
+                    keepFocus: true,
+                },
+            );
         }
     }
 
@@ -43,9 +43,7 @@
 
     let start = $derived((page - 1) * pageSize);
     let end = $derived(start + pageSize);
-    let shownLemmas = $derived(
-        data.lemmas ? data.lemmas.slice(start, end) : [],
-    );
+    let shownLemmas = $derived(data.lemmas ? data.lemmas.slice(start, end) : []);
     let n_results = $derived(data.lemmas ? data.lemmas.length : 0);
 </script>
 
@@ -92,14 +90,10 @@
                                 class="btn {isActive
                                     ? 'preset-filled-primary-500'
                                     : 'hover:preset-tonal'} justify-between py-3 {rounded_style}"
-                                href={resolve('/lookup/[lang]/[lemma]', { lang, lemma })}
+                                href={resolve("/lookup/[lang]/[lemma]", { lang, lemma })}
                             >
                                 {lemma}
-                                <span
-                                    class="badge preset-filled {LANG_COLORS[
-                                        lang
-                                    ]}"
-                                >
+                                <span class="badge preset-filled {LANG_COLORS[lang]}">
                                     {lang.toUpperCase()}
                                 </span>
                             </a>

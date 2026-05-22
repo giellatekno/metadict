@@ -18,9 +18,7 @@ function reconcile(defaultOptions: string[], savedConfigs: LangConfig[]) {
         return defaultOptions.map((iso) => ({ iso, enabled: true }));
     }
 
-    const validSaved = savedConfigs.filter((s) =>
-        defaultOptions.includes(s.iso),
-    );
+    const validSaved = savedConfigs.filter((s) => defaultOptions.includes(s.iso));
 
     defaultOptions.forEach((iso) => {
         if (!validSaved.find((s) => s.iso === iso)) {
@@ -42,14 +40,8 @@ function getInitialSettings(): SearchSettings {
     }
 
     return {
-        selected_search_langs: reconcile(
-            SEARCH_OPTIONS,
-            parsed?.selected_search_langs,
-        ),
-        selected_target_langs: reconcile(
-            TARGET_OPTIONS,
-            parsed?.selected_target_langs,
-        ),
+        selected_search_langs: reconcile(SEARCH_OPTIONS, parsed?.selected_search_langs),
+        selected_target_langs: reconcile(TARGET_OPTIONS, parsed?.selected_target_langs),
     };
 }
 export const settings = $state<SearchSettings>(getInitialSettings());

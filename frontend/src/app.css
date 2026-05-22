@@ -32,5 +32,5 @@
 [data-theme="pine"] {
     --heading-font-family: "Noto Sans", sans-serif;
     --base-font-family: "Noto Sans", sans-serif;
-    --anchor-font-family: "inherit";
+    --anchor-font-family: inherit;
 }

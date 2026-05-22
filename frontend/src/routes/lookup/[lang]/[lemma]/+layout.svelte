@@ -25,16 +25,13 @@
     const locale = getLocale();
 
     function getRank(iso: string) {
-        const index = settings.selected_target_langs.findIndex(
-            (l) => l.iso === iso,
-        );
+        const index = settings.selected_target_langs.findIndex((l) => l.iso === iso);
         return index === -1 ? 999 : index;
     }
 
     function is_enabled(code: string) {
         return (
-            settings.selected_target_langs.find((l) => l.iso === code)
-                ?.enabled ?? false
+            settings.selected_target_langs.find((l) => l.iso === code)?.enabled ?? false
         );
     }
 
@@ -46,9 +43,7 @@
             groups.get(d.lang2)!.push(d);
         }
         for (const [_lang2, entries] of groups) {
-            entries.sort((a, b) =>
-                a.dictionary_name.localeCompare(b.dictionary_name),
-            );
+            entries.sort((a, b) => a.dictionary_name.localeCompare(b.dictionary_name));
         }
         return groups;
     });
@@ -133,8 +128,7 @@
         } else if (e.key === "ArrowUp") {
             e.preventDefault();
             cur_article_idx =
-                (cur_article_idx - 1 + all_article_ids.length) %
-                all_article_ids.length;
+                (cur_article_idx - 1 + all_article_ids.length) % all_article_ids.length;
         }
     }
 </script>
@@ -148,13 +142,13 @@
         >
             <div class="flex flex-col gap-4">
                 <h4 class="h4 font-bold">
-                    {langname(lang, locale, true)}
+                    {langname(lang, locale)}
                 </h4>
                 {#each sections as section}
                     <div class="mb-4 flex flex-col gap-2">
                         <h5 class="h5 flex items-center font-bold">
                             {#if section.type === "standard"}
-                                → {langname(section.id, locale, true)}
+                                → {langname(section.id, locale)}
                             {:else if section.type === "hst"}
                                 {m.historical_dictionaries()}
                             {:else if section.type === "ext"}
@@ -182,15 +176,11 @@
                                 {#each section.data as dict}
                                     {@render link_button(
                                         dict.article_id.toString(),
-                                        resolve(
-                                            "/lookup/[lang]/[lemma]/[article_id]",
-                                            {
-                                                lang,
-                                                lemma,
-                                                article_id:
-                                                    dict.article_id.toString(),
-                                            },
-                                        ),
+                                        resolve("/lookup/[lang]/[lemma]/[article_id]", {
+                                            lang,
+                                            lemma,
+                                            article_id: dict.article_id.toString(),
+                                        }),
                                         dict.dictionary_displayname === ""
                                             ? dict.dictionary_name
                                             : dict.dictionary_displayname,
@@ -209,16 +199,10 @@
     </div>
 </main>
 
-{#snippet link_button(
-    id: null | string,
-    href: string,
-    label: string,
-    external = false,
-)}
+{#snippet link_button(id: null | string, href: string, label: string, external = false)}
     <a
         {id}
-        class="btn my-1 w-full justify-start transition-colors {id ===
-        cur_article
+        class="btn my-1 w-full justify-start transition-colors {id === cur_article
             ? 'preset-filled-primary-500'
             : 'preset-filled-primary-200-800'}"
         {href}

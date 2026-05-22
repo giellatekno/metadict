@@ -84,9 +84,7 @@
                             class="align-start grid grid-cols-1 gap-4 text-lg sm:grid-cols-2 sm:gap-12"
                         >
                             <div class="flex flex-col gap-2">
-                                <span
-                                    class="flex items-center justify-between font-bold"
-                                >
+                                <span class="flex items-center justify-between font-bold">
                                     {m.search_languages()}
                                     <button
                                         class="hover:preset-tonal box-content rounded-md p-2"
@@ -111,9 +109,7 @@
                                 </div>
                             </div>
                             <div class="flex flex-col gap-2">
-                                <span
-                                    class="flex items-center justify-between font-bold"
-                                >
+                                <span class="flex items-center justify-between font-bold">
                                     {m.target_languages()}
                                     <button
                                         class="hover:preset-tonal box-content rounded-md p-2"
@@ -167,7 +163,7 @@
                 {:else if langObj.iso === "ext"}
                     {m.external_dictionaries()}
                 {:else}
-                    {langname(langObj.iso, locale, true)}
+                    {langname(langObj.iso, locale)}
                 {/if}
             </span>
         </label>

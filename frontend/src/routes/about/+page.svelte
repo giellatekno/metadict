@@ -42,9 +42,7 @@
                         <span class="inline-flex items-baseline">
                             {m.open_quote()}
                             <a
-                                href={resolve(
-                                    `/search/all/${encodeURIComponent(query)}`,
-                                )}
+                                href={resolve(`/search/all/${encodeURIComponent(query)}`)}
                                 class="decoration-primary-500 underline decoration-2 underline-offset-6"
                             >
                                 {query}

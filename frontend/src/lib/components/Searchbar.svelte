@@ -13,8 +13,7 @@
     let searchbox_elem: HTMLInputElement;
 
     let search_param = $derived.by(() => {
-        if (settings.selected_search_langs.every((l) => l.enabled))
-            return "all";
+        if (settings.selected_search_langs.every((l) => l.enabled)) return "all";
 
         const active = settings.selected_search_langs
             .filter((l) => l.enabled)
@@ -29,9 +28,7 @@
     async function on_new_value(input: string) {
         if (input.trim() !== "") {
             await goto(
-                resolve(
-                    `/search/${search_param}/${encodeURIComponent(input.trim())}`,
-                ),
+                resolve(`/search/${search_param}/${encodeURIComponent(input.trim())}`),
                 { keepFocus: true },
             );
         }
@@ -73,10 +70,7 @@
             bind:value
             onkeydown={on_enter_keydown}
         />
-        <button
-            class="ig-btn preset-filled-primary-500"
-            onclick={on_searchbutton_click}
-        >
+        <button class="ig-btn preset-filled-primary-500" onclick={on_searchbutton_click}>
             {m.search()}
         </button>
     </div>

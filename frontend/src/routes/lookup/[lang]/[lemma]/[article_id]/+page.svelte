@@ -69,11 +69,7 @@
                 )}
             {/if}
             {#if dictionary_info.isbn}
-                {@render dictionary_info_group(
-                    "ISBN",
-                    dictionary_info.isbn,
-                    BookIcon,
-                )}
+                {@render dictionary_info_group("ISBN", dictionary_info.isbn, BookIcon)}
             {/if}
             {#if dictionary_info.is_ocr_read}
                 {@render dictionary_info_group(
@@ -89,11 +85,7 @@
     {/if}
 </div>
 
-{#snippet dictionary_info_group(
-    header: string,
-    content: string,
-    Icon: typeof IconType,
-)}
+{#snippet dictionary_info_group(header: string, content: string, Icon: typeof IconType)}
     <div>
         <h4 class="h4 flex flex-row items-center gap-1">
             <Icon />
