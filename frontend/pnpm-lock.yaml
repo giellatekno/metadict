@@ -31,7 +31,7 @@ importers:
         version: 4.4.3
     devDependencies:
       '@inlang/paraglide-js':
-        specifier: ^2.18.0
+        specifier: ^2.18.1
         version: 2.18.1(typescript@5.9.3)
       '@skeletonlabs/skeleton':
         specifier: ^4.15.2
@@ -55,7 +55,7 @@ importers:
         specifier: ^0.5.11
         version: 0.5.11(tailwindcss@4.3.0)
       '@types/node':
-        specifier: ^25.9.0
+        specifier: ^25.9.1
         version: 25.9.1
       prettier:
         specifier: ^3.8.3
@@ -67,7 +67,7 @@ importers:
         specifier: ^0.7.4
         version: 0.7.4(prettier-plugin-svelte@3.5.2(prettier@3.8.3)(svelte@5.55.9))(prettier@3.8.3)
       svelte:
-        specifier: ^5.55.8
+        specifier: ^5.55.9
         version: 5.55.9
       svelte-check:
         specifier: ^4.4.8
