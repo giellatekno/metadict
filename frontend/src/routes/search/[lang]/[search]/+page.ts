@@ -38,7 +38,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
             307,
             resolve("/lookup/[lang]/[lemma]", {
                 lang: parsed.data[0].lang,
-                lemma: parsed.data[0].lemma,
+                lemma: encodeURIComponent(parsed.data[0].lemma),
             }),
         );
     }
