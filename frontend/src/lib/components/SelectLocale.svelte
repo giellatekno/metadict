@@ -20,9 +20,9 @@
 </script>
 
 <Popover>
-    <Popover.Trigger class="btn text-lg hover:underline">
+    <Popover.Trigger class="btn hover:underline">
         <LanguagesIcon />
-        <span class="hidden sm:inline">{m.interface_language()}</span>
+        <span class="hidden sm:inline xl:text-lg">{m.interface_language()}</span>
     </Popover.Trigger>
     <Portal>
         <Popover.Positioner>

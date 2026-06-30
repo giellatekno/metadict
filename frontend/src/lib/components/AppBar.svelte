@@ -19,33 +19,37 @@
 </script>
 
 <AppBar class="preset-filled-surface-800-200">
-    <AppBar.Toolbar class="mx-auto w-full grid-cols-[auto_auto] sm:px-6">
+    <AppBar.Toolbar class="mx-auto w-full grid-cols-[auto_auto] sm:px-6 ">
         <AppBar.Headline>
             <a
-                class="h2 text-surface-50-950 flex gap-2 font-[Noto_Serif] font-medium"
+                class="flex items-center gap-2 font-[Noto_Serif] font-medium"
                 href={resolve("/")}
             >
                 <div
-                    class="preset-filled-surface-800-200 border-surface-contrast-800-200 flex size-12 shrink-0 items-center justify-center rounded-full border-2"
+                    class="preset-filled-surface-800-200 border-surface-contrast-800-200 flex size-10 shrink-0 items-center justify-center rounded-full border-2 xl:size-12"
                 >
-                    <BookOpenText class="size-8" />
+                    <BookOpenText class="size-6 xl:size-8" />
                 </div>
-                <span class="hidden sm:inline">{m.page_title()}</span>
+                <h2
+                    class="xl:text-surface-50-950 text-surface-50-950 hidden text-xl sm:inline xl:text-3xl"
+                >
+                    {m.page_title()}
+                </h2>
             </a>
         </AppBar.Headline>
         <AppBar.Trail>
             <div class="flex items-center gap-2 md:gap-10">
                 <SelectLocale />
 
-                <a href={resolve("/about")} class="btn text-lg hover:underline">
+                <a href={resolve("/about")} class="btn hover:underline">
                     <Info />
-                    <span class="hidden sm:inline">{m.info()}</span>
+                    <span class="hidden sm:inline xl:text-lg">{m.info()}</span>
                 </a>
                 {#if user}
                     <Profile {user}></Profile>
                 {:else}
                     <a
-                        class="btn text-lg hover:underline"
+                        class="btn hover:underline"
                         href="https://github.com/login/oauth/authorize?scope=read:user%20read:repo&client_id=Iv1.f208b6793cca35ec&redirect_uri={redirect_uri}"
                     >
                         <LogInIcon />

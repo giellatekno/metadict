@@ -55,12 +55,12 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="flex w-full flex-col gap-2 sm:w-2xl">
+<div class="flex w-full flex-col gap-2 sm:w-xl xl:w-2xl">
     <div
-        class="input-group preset-filled-tertiary-50-950 h-12 w-full grid-cols-[1fr_auto] sm:h-16 sm:w-2xl sm:grid-cols-[auto_1fr_auto]"
+        class="input-group preset-filled-tertiary-50-950 h-12 w-full grid-cols-[1fr_auto] sm:grid-cols-[auto_1fr_auto] xl:h-16 xl:w-2xl"
     >
         <div class="sm:ig-cell hidden">
-            <SearchIcon class="size-6" />
+            <SearchIcon class="size-4 xl:size-6" />
         </div>
         <input
             class="ig-input sm:text-lg"

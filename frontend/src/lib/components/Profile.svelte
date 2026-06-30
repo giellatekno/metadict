@@ -32,9 +32,9 @@
             <Avatar.Image src={user.gh_avatar_url} />
             <Avatar.Fallback>{avatar_fallbackname}</Avatar.Fallback>
         </Avatar>
-        <div class="hidden sm:flex sm:w-30">
+        <span class="hidden text-sm sm:flex sm:w-30 xl:text-base">
             {user.gh_fullname || user.gh_login_name}
-        </div>
+        </span>
     </Popover.Trigger>
     <Portal>
         <Popover.Positioner>

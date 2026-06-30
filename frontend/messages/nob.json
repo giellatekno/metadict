@@ -23,6 +23,7 @@
     "kbd_shortcuts_searchresults_navigate": "Navigere lemmatreff eller ordboksartikler",
     "kbd_shortcuts_searchresults_enter": "Gå til valgt lemma (når man blar i lemmatreff)",
     "dictionary_about": "Om denne ordboka",
+    "dictionary_title": "Tittel",
     "dictionary_authors": "Forfatter(e)",
     "dictionary_year_published": "År publisert",
     "dictionary_ocr_read": "Denne ordboken er skannet og lest med OCR. Teksten kan inneholde skrivefeil.",

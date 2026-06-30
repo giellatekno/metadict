@@ -1,8 +1,9 @@
 <script lang="ts">
     import { m } from "$lib/paraglide/messages";
     import {
-        BookIcon,
+        BookTextIcon,
         CalendarDaysIcon,
+        HashIcon,
         ScanTextIcon,
         UserIcon,
         type Icon as IconType,
@@ -15,9 +16,9 @@
     let neighbors = $derived(data.article_data.neighbors);
 </script>
 
-<div class="grid w-full grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-20">
+<div class="grid grid-cols-1 gap-6 xl:grid-cols-4">
     <div
-        class="card bg-tertiary-50-950 w-full overflow-y-auto border p-4 shadow-lg sm:col-span-2"
+        class="card bg-tertiary-50-950 w-full overflow-y-auto border p-4 shadow-lg xl:col-span-3"
     >
         {#if neighbors && neighbors.length > 1}
             {#each neighbors as neighbor, i}
@@ -27,12 +28,12 @@
                 {#if neighbor.article_number === article.article_number}
                     <div
                         id="article"
-                        class="border-primary-500 border-y-3 py-4 pl-2 text-lg sm:text-2xl"
+                        class="border-primary-500 border-y-3 py-4 pl-2 sm:text-lg xl:text-2xl"
                     >
                         {@html neighbor.rendered}
                     </div>
                 {:else}
-                    <div class="py-2 text-xs opacity-90 sm:text-sm">
+                    <div class="py-2 text-xs opacity-90 xl:text-sm">
                         {@html neighbor.rendered}
                     </div>
                 {/if}
@@ -46,14 +47,13 @@
 
     {#if dictionary_info}
         <div
-            class="card bg-tertiary-50-950 flex h-fit w-full flex-col gap-4 border p-4 shadow-lg"
+            class="card bg-tertiary-50-950 grid h-fit w-full grid-cols-2 gap-4 border p-4 shadow-lg xl:grid-cols-1"
         >
-            <div class="flex flex-col gap-2">
-                <h4 class="h4 text-surface-950-50 font-bold opacity-90">
-                    {dictionary_info.name}
-                </h4>
-                <hr class="hr" />
-            </div>
+            {@render dictionary_info_group(
+                m.dictionary_title(),
+                dictionary_info.name,
+                BookTextIcon,
+            )}
             {#if dictionary_info.author}
                 {@render dictionary_info_group(
                     m.dictionary_authors(),
@@ -69,7 +69,7 @@
                 )}
             {/if}
             {#if dictionary_info.isbn}
-                {@render dictionary_info_group("ISBN", dictionary_info.isbn, BookIcon)}
+                {@render dictionary_info_group("ISBN", dictionary_info.isbn, HashIcon)}
             {/if}
             {#if dictionary_info.is_ocr_read}
                 {@render dictionary_info_group(
@@ -86,11 +86,11 @@
 </div>
 
 {#snippet dictionary_info_group(header: string, content: string, Icon: typeof IconType)}
-    <div>
-        <h4 class="h4 flex flex-row items-center gap-1">
-            <Icon />
+    <div class="flex flex-col">
+        <h6 class="h6 flex flex-row items-center gap-1">
+            <Icon class="size-5" />
             {header}:
-        </h4>
-        <p class="text-lg opacity-80">{content}</p>
+        </h6>
+        <p class="pl-6 opacity-80">{content}</p>
     </div>
 {/snippet}

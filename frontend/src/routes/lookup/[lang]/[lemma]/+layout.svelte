@@ -135,18 +135,18 @@
 
 <svelte:window onkeydown={handleKeyDown} />
 
-<main class="grid w-full grid-cols-1 gap-6 sm:grid-cols-4 sm:gap-20">
+<main class="grid w-full grid-cols-1 gap-6 sm:grid-cols-3 xl:grid-cols-4">
     <div class="flex flex-col">
         <div
             class="card preset-filled-tertiary-50-950 flex h-fit w-full flex-col gap-1 p-4 shadow-lg"
         >
             <div class="flex flex-col gap-4">
-                <h4 class="h4 font-bold">
+                <h4 class="xl:h4 h5 font-bold">
                     {langname(lang, locale)}
                 </h4>
                 {#each sections as section}
                     <div class="mb-4 flex flex-col gap-2">
-                        <h5 class="h5 flex items-center font-bold">
+                        <h5 class="xl:h5 h6 flex items-center font-bold">
                             {#if section.type === "standard"}
                                 → {langname(section.id, locale)}
                             {:else if section.type === "hst"}
@@ -194,7 +194,7 @@
         </div>
     </div>
 
-    <div class="sm:col-span-3">
+    <div class="sm:col-span-2 xl:col-span-3">
         {@render children?.()}
     </div>
 </main>
@@ -202,7 +202,8 @@
 {#snippet link_button(id: null | string, href: string, label: string, external = false)}
     <a
         {id}
-        class="btn my-1 w-full justify-start transition-colors {id === cur_article
+        class="btn my-1 w-full justify-start text-sm transition-colors xl:text-base {id ===
+        cur_article
             ? 'preset-filled-primary-500'
             : 'preset-filled-primary-200-800'}"
         {href}
