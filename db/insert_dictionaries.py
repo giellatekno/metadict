@@ -81,7 +81,7 @@ def main():
         exit(f"Error: argument 'sql-scripts-folder': Not a directory ({path})")
 
     data = []
-    for dictionary_file in path.glob("d-*.sql*"):
+    for dictionary_file in sorted(path.glob("d-*.sql*")):
         dict_name = dictionary_file.name[2:]
         article_file = dictionary_file.with_name("a-" + dictionary_file.name[2:])
         if not article_file.exists():

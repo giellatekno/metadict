@@ -3,9 +3,7 @@ FROM debian:sid-slim
 # the api needs certificates to use tls, for contacting the facebook api
 RUN set -eux && \
     apt update && \
-    apt install -y ca-certificates
-
-RUN apt-get install -y inetutils-ping postgresql
+    apt install -y ca-certificates inetutils-ping postgresql
 
 RUN mkdir -p /app
 
