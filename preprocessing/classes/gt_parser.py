@@ -12,7 +12,7 @@ METADATA = {
         "name": "Neahttadigisánit",
     },
     ("sme-fin", "fin-sme"): {
-        "author": "Trond Trosterud",
+        "author": "Trond Trosterud & Janita Känsälä",
         "name": "Neahttadigisánit",
     },
     ("sma-mul", "nob-sma"): {

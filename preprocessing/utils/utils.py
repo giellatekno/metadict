@@ -36,7 +36,9 @@ def get_gut_root():
 
 
 def sort_alphabetically(input_list: list[Article], saami=False):
-    nordic_alphabet = " !\"«»#$%&'()*+,-./0123456789:;<=>?@[\\]^_`abcdefghijklmnopqrsštuvwxyzžæäøöå{|}~"
+    nordic_alphabet = (
+        " !\"«»#$%&'()*+,-./0123456789:;<=>?@[\\]^_`abcdefghijklmnopqrsštuvwxyzžæäøöå{|}~"
+    )
     saami_alphabet = " !\"«»#$%&'()*+,-./0123456789:;<=>?@[\\]^_`aáâäbcčdđefghiïjklmnŋopqrsštŧuvwxyzžæøöå{|}~"
 
     alphabet = saami_alphabet if saami else nordic_alphabet
