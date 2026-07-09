@@ -120,7 +120,6 @@ class SammallahtiParser(BaseParser):
     def parse_dict(self, file):
         articles = []
 
-        test_fp = open("sammallahti_lemmas.txt", "w")
         with open(file, "r") as f:
             for i, line in enumerate(f.readlines(), 1):
                 if line.strip() == "" or " gč. " in line:
@@ -139,10 +138,8 @@ class SammallahtiParser(BaseParser):
                         article_number=i,
                     )
 
-                    test_fp.write(f"{lemma}\n")
                     articles.append(a)
 
-        test_fp.close()
         return articles
 
     def to_html(self, line):
