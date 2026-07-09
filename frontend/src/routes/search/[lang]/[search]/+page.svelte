@@ -1,64 +1,58 @@
 <script lang="ts">
-    import { resolve } from "$app/paths";
-    import { Pagination } from "@skeletonlabs/skeleton-svelte";
     import type { PageProps } from "./$types";
     import { m } from "$lib/paraglide/messages";
-    import { ArrowLeftIcon, ArrowRightIcon } from "@lucide/svelte";
-    import { LANG_COLORS } from "$lib/utils";
-    import { goto } from "$app/navigation";
+    import { langname } from "@giellatekno/langnames";
+    import { getLocale } from "$lib/paraglide/runtime.js";
+    import SearchResultsTable from "$lib/components/SearchResultsTable.svelte";
+
+    const locale = getLocale();
 
     let { data }: PageProps = $props();
 
-    let activeIndex = $state(-1);
+    let allLemmas = $derived(data.lemmas ?? []);
 
-    $effect(() => {
-        if (page || shownLemmas) activeIndex = -1;
-    });
+    // Languages actually present in the result set (for the language filter)
+    let langsPresent = $derived([...new Set(allLemmas.map((l) => l.lang))].sort());
 
-    function handleKeydown(e: KeyboardEvent) {
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            activeIndex = activeIndex < shownLemmas.length - 1 ? activeIndex + 1 : 0;
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            activeIndex = activeIndex > 0 ? activeIndex - 1 : shownLemmas.length - 1;
-        } else if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && activeIndex !== -1) {
-            e.preventDefault();
-            const target = shownLemmas[activeIndex];
-            goto(
-                resolve("/lookup/[lang]/[lemma]", {
-                    lang: target.lang,
-                    lemma: target.lemma,
-                }),
-                {
-                    keepFocus: true,
-                },
-            );
-        }
-    }
-
+    // --- filter state ---
+    let filterText = $state("");
+    let langFilter = $state("all");
     let pageSize = $state(20);
 
-    let page = $state(1);
-
-    let start = $derived((page - 1) * pageSize);
-    let end = $derived(start + pageSize);
-    let shownLemmas = $derived(data.lemmas ? data.lemmas.slice(start, end) : []);
-    let n_results = $derived(data.lemmas ? data.lemmas.length : 0);
+    let filtered = $derived.by(() => {
+        const needle = filterText.trim().toLowerCase();
+        return allLemmas.filter((l) => {
+            if (langFilter !== "all" && l.lang !== langFilter) return false;
+            if (needle && !l.lemma.toLowerCase().includes(needle)) return false;
+            return true;
+        });
+    });
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
-
-<div class="flex w-full flex-col items-center gap-4 sm:w-1/4 sm:min-w-124">
-    {#if n_results > 0}
-        <div class="flex w-full items-center justify-between">
+<div class="flex w-full flex-col items-center gap-4 sm:w-2/3 sm:min-w-124 xl:w-1/2">
+    {#if allLemmas.length > 0}
+        <!-- toolbar: result count, filter, language filter, hits per page -->
+        <div class="flex w-full flex-wrap items-center gap-3">
             <div class="text-nowrap">
-                {m.search_hits({ count: n_results })}
+                {m.search_hits({ count: filtered.length })}
             </div>
+
+            <input
+                type="text"
+                class="input min-w-40 flex-1"
+                placeholder={m.search_filter_placeholder()}
+                bind:value={filterText}
+            />
+
+            <select name="lang-filter" class="select w-fit" bind:value={langFilter}>
+                <option value="all">{m.search_all_languages()}</option>
+                {#each langsPresent as lang}
+                    <option value={lang}>{langname(lang, locale)}</option>
+                {/each}
+            </select>
+
             <div class="flex flex-row items-center gap-2">
-                <label for="hits-per-page" class="">
-                    {m.search_hits_per_page()}
-                </label>
+                <label for="hits-per-page">{m.search_hits_per_page()}</label>
                 <select
                     name="hits-per-page"
                     class="select w-fit"
@@ -71,67 +65,11 @@
                 </select>
             </div>
         </div>
-        {#if n_results}
-            <div class="flex w-full flex-col gap-2">
-                <div class="card bg-tertiary-50-950 w-full shadow-lg">
-                    <div class="flex flex-col">
-                        {#each shownLemmas as { lang, lemma }, i}
-                            {@const isActive = activeIndex === i}
-                            {@const rounded_style =
-                                i === 0
-                                    ? "rounded-t-xl rounded-b-none"
-                                    : i === shownLemmas.length - 1
-                                      ? "rounded-b-xl rounded-t-none"
-                                      : "rounded-none"}
-                            {#if i !== 0}
-                                <hr class="hr border-primary-500" />
-                            {/if}
-                            <a
-                                class="btn {isActive
-                                    ? 'preset-filled-primary-500'
-                                    : 'hover:preset-tonal'} justify-between py-3 {rounded_style}"
-                                href={resolve("/lookup/[lang]/[lemma]", { lang, lemma })}
-                            >
-                                {lemma}
-                                <span class="badge preset-filled {LANG_COLORS[lang]}">
-                                    {lang.toUpperCase()}
-                                </span>
-                            </a>
-                        {/each}
-                    </div>
-                </div>
-            </div>
-            {#if n_results > 10}
-                <Pagination
-                    class="preset-filled-tertiary-50-950 flex w-fit min-w-1/2 justify-between"
-                    count={n_results}
-                    {pageSize}
-                    {page}
-                    onPageChange={(event) => (page = event.page)}
-                >
-                    <Pagination.PrevTrigger>
-                        <ArrowLeftIcon class="size-4" />
-                    </Pagination.PrevTrigger>
-                    <Pagination.Context>
-                        {#snippet children(pagination)}
-                            {#each pagination().pages as page, index (page)}
-                                {#if page.type === "page"}
-                                    <Pagination.Item {...page}>
-                                        {page.value}
-                                    </Pagination.Item>
-                                {:else}
-                                    <Pagination.Ellipsis {index}>
-                                        &#8230;
-                                    </Pagination.Ellipsis>
-                                {/if}
-                            {/each}
-                        {/snippet}
-                    </Pagination.Context>
-                    <Pagination.NextTrigger>
-                        <ArrowRightIcon class="size-4" />
-                    </Pagination.NextTrigger>
-                </Pagination>
-            {/if}
+
+        {#if filtered.length > 0}
+            <SearchResultsTable lemmas={filtered} {pageSize} />
+        {:else}
+            <span class="text-lg">{m.search_no_filtered_results()}</span>
         {/if}
     {:else}
         <span class="text-lg">{m.search_no_results()}</span>

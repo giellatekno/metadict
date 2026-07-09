@@ -4,6 +4,7 @@
     import { goto } from "$app/navigation";
     import { resolve } from "$app/paths";
     import { settings } from "$lib/settings.svelte";
+    import { SEARCH_OPTIONS } from "$lib/utils";
     import { SearchIcon } from "@lucide/svelte";
     import SearchOptions from "./SearchOptions.svelte";
     import KeyboardShortcuts from "./KeyboardShortcuts.svelte";
@@ -21,16 +22,26 @@
         return active.join(",") || "none";
     });
 
+    // Enabled target languages, restricted to real lang codes (hst/ext are
+    // handled separately and are not valid `lang2` values for the API).
+    let target_param = $derived.by(() => {
+        return settings.selected_target_langs
+            .filter((l) => l.enabled && SEARCH_OPTIONS.includes(l.iso))
+            .map((l) => l.iso)
+            .join(",");
+    });
+
     onMount(() => {
         searchbox_elem.focus();
     });
 
     async function on_new_value(input: string) {
         if (input.trim() !== "") {
-            await goto(
-                resolve(`/search/${search_param}/${encodeURIComponent(input.trim())}`),
-                { keepFocus: true },
+            const path = resolve(
+                `/search/${search_param}/${encodeURIComponent(input.trim())}`,
             );
+            const query = target_param ? `?l2=${encodeURIComponent(target_param)}` : "";
+            await goto(path + query, { keepFocus: true });
         }
     }
 

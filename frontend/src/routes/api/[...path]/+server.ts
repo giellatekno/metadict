@@ -23,15 +23,17 @@ export const GET: RequestHandler = async ({ params, request, url, fetch }) => {
     }
 
     // console.debug(`DEBUG: api call (from "${pathname}") to ${api_url}`);
-    const response = await fetch(api_url, {
-        method: request.method,
-        headers,
-        body: request.body,
-        // Don't follow the redirect, but return in from
-        // this endpoint instead
-        redirect: "manual",
-        //duplex: "half",
-    });
+    let response;
+    try {
+        response = await fetch(api_url, {
+            method: request.method,
+            headers,
+            body: request.body,
+            redirect: "manual",
+        });
+    } catch {
+        return new Response("API unavailable", { status: 503 });
+    }
 
     return response;
 };
