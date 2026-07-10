@@ -1,4 +1,5 @@
 import csv
+import re
 
 from utils.dataclasses import Article, Dictionary
 
@@ -20,6 +21,12 @@ class SkoleordbokParser(BaseParser):
         )
         self.articles = self.parse_dict(file)
 
+    def find_lemmas(self, lemma):
+        lemma = re.sub(r" \([^)]*\)", "", lemma)
+        if "(" in lemma:
+            return [re.sub(r"\([^)]*\)", "", lemma), re.sub("[()]", "", lemma)]
+        return [lemma]
+
     def parse_dict(self, file):
         articles = []
 
@@ -27,20 +34,21 @@ class SkoleordbokParser(BaseParser):
             reader = csv.DictReader(fp)
 
             for index, row in enumerate(reader, start=1):
-                lemma = row["lemma"]
+                lemmas = self.find_lemmas(row["lemma"])
                 pos = row["pos"]
                 translation = row["translation"]
-                rendered = self.to_html(lemma, pos, translation)
+                rendered = self.to_html(row["lemma"], pos, translation)
 
-                a = Article(
-                    dictionary=self.dictionary.id,
-                    lemma=lemma,
-                    pos=pos,
-                    rendered=rendered,
-                    lang=self.dictionary.lang1,
-                    article_number=index,
-                )
-                articles.append(a)
+                for lemma in lemmas:
+                    a = Article(
+                        dictionary=self.dictionary.id,
+                        lemma=lemma,
+                        pos=pos,
+                        rendered=rendered,
+                        lang=self.dictionary.lang1,
+                        article_number=index,
+                    )
+                    articles.append(a)
 
         return articles
 

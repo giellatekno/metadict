@@ -27,7 +27,6 @@ class VestParser(BaseParser):
 
         with open(file, "r") as f:
             for i, line in enumerate(f.readlines(), 1):
-
                 lemmas = self.find_lemmas(line)
                 rendered = self.to_html(line)
 
@@ -47,10 +46,12 @@ class VestParser(BaseParser):
     def find_lemmas(self, line: str):
         lemmas = []
         lemma_section = line.split("  ")[0]
-        for lemma_part in lemma_section.split("~"):
+        lemma_parts = re.split(r"~(?![^()]*\))", lemma_section)
+        for lemma_part in lemma_parts:
             lemma = re.sub(r"(\$>|<\$|%>|<%)", "", lemma_part)
-            lemma = re.sub(r" \([^\)]+\)", "", lemma)
+            lemma = re.sub(r" \([^\)]+\)?", "", lemma)
             lemma = re.sub(r";.*", "", lemma)
+            lemma = re.sub(r"[´/!]", "", lemma)
             lemma = lemma.split(",")[0].strip().replace("´", "")
 
             if "(" in lemma:

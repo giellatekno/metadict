@@ -1,4 +1,5 @@
 import csv
+import re
 
 from utils.dataclasses import Article, Dictionary
 
@@ -19,6 +20,20 @@ class QvigstadParser(BaseParser):
 
         self.articles = self.parse_dict(file)
 
+    def find_lemmas(self, lemma_string: str):
+        lemmas = []
+        for lemma in lemma_string.split(", "):
+            lemma = lemma.strip()
+            if lemma == "pl.":
+                continue
+            if "(" in lemma:
+                lemmas.extend(
+                    [re.sub(r"\([^)]*\)", "", lemma), re.sub("[()]", "", lemma)]
+                )
+            else:
+                lemmas.append(lemma)
+        return lemmas
+
     def parse_dict(self, file):
         articles = []
 
@@ -33,10 +48,7 @@ class QvigstadParser(BaseParser):
 
                 rendered = self.to_html(full_lemma, translation, pos, entry, ref)
 
-                for lemma in full_lemma.split(", "):
-                    if lemma == "pl.":
-                        continue
-
+                for lemma in self.find_lemmas(full_lemma):
                     a = Article(
                         dictionary=self.dictionary.id,
                         lemma=lemma,

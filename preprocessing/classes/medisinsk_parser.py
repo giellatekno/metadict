@@ -29,7 +29,7 @@ class MedisinskParser(BaseParser):
             reader = csv.DictReader(fp, fieldnames=fieldnames)
 
             for index, row in enumerate(reader, start=1):
-                lemma = re.sub(r"\([\)]+\)", "", row["lemma"])
+                lemma = re.sub(r"\([^)]*\)", "", row["lemma"]).strip()
                 rendered = self.to_html(row["lemma"], row["entry"])
 
                 a = Article(

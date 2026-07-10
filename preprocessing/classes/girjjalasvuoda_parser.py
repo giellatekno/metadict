@@ -1,4 +1,5 @@
 import csv
+import re
 
 from utils.dataclasses import Article, Dictionary
 
@@ -32,6 +33,7 @@ class GirjjalasvuodaParser(BaseParser):
                 reader = csv.DictReader(fp, fieldnames=fieldnames)
                 for index, row in enumerate(reader, start=1):
                     lemma = row["lemma"]
+                    lemma = re.sub(r"\([^(]*\)", "", lemma).strip()
                     entry = row["entry"]
 
                     rendered = self.to_html(lemma, entry)

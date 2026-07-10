@@ -25,6 +25,14 @@ class RuoktumetParser(BaseParser):
 
         self.articles = self.parse_dict(file)
 
+    def find_lemmas(self, lemma: str):
+        lemma = re.sub(r" \([^)]*\)", "", lemma)
+        lemma = re.sub(r"[¹²]", "", lemma)
+
+        if "(" in lemma:
+            return [re.sub(r"\([^)]*\)", "", lemma), re.sub("[()]", "", lemma)]
+        return [lemma]
+
     def parse_dict(self, file):
         articles = []
 
@@ -32,18 +40,19 @@ class RuoktumetParser(BaseParser):
             lines = f.readlines()
 
         for i, line in enumerate(lines, 1):
-            lemma = line.split()[0].replace("¹", "").replace("²", "")
+            lemmas = self.find_lemmas(line.split()[0])
             rendered = self.to_html(line.strip())
 
-            a = Article(
-                dictionary=self.dictionary.id,
-                lemma=lemma,
-                rendered=rendered,
-                lang=self.dictionary.lang1,
-                article_number=i,
-            )
+            for lemma in lemmas:
+                a = Article(
+                    dictionary=self.dictionary.id,
+                    lemma=lemma,
+                    rendered=rendered,
+                    lang=self.dictionary.lang1,
+                    article_number=i,
+                )
 
-            articles.append(a)
+                articles.append(a)
 
         return articles
 
