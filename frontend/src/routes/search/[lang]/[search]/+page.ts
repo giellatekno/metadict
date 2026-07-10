@@ -14,16 +14,18 @@ export const load: PageLoad = async ({ params, fetch, url }) => {
     const l2 = url.searchParams.get("l2");
     const l2_query = l2 ? `?l2=${encodeURIComponent(l2)}` : "";
 
-    // Double encode because SvelteKit automatically decodes path params,
-    // so a single encodeURIComponent would leave a bare % that breaks fetch
     const result = await api_fetch(
-        `search/${langs}/${encodeURIComponent(encodeURIComponent(params.search))}${l2_query}`,
+        `search/${langs}/${encodeURIComponent(params.search)}${l2_query}`,
         fetch,
         SearchResponse,
     );
 
-    // Skip the results list when there is exactly one match
-    if (result.length === 1) {
+    // Skip the results list when there is exactly one match and it is equal to the search
+    // This is to make sure you get the list if you use wildcard symbols
+    if (
+        result.length === 1 &&
+        result[0].lemma.toLowerCase() === params.search.toLowerCase()
+    ) {
         redirect(
             307,
             resolve("/lookup/[lang]/[lemma]", {

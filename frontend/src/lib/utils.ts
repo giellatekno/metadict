@@ -22,7 +22,7 @@ export async function api_fetch<T extends z.ZodTypeAny = z.ZodUnknown>(
 ): Promise<z.infer<T>> {
     let response;
     try {
-        response = await fetchFn(resolve(`/api/${path}`));
+        response = await fetchFn(resolve("/api/[...path]", { path }));
     } catch (e) {
         console.error(e);
         error(502, "Failed to communicate with API");
@@ -44,7 +44,7 @@ export async function api_fetch<T extends z.ZodTypeAny = z.ZodUnknown>(
 
     if (json.error) {
         console.error(json.error);
-        error(502, "API content contains an error");
+        error(502, `API error: "${json.error}"`);
     }
 
     try {

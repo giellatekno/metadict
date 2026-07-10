@@ -93,7 +93,7 @@
         goto(
             resolve("/lookup/[lang]/[lemma]", {
                 lang: target.lang,
-                lemma: target.lemma,
+                lemma: encodeURIComponent(target.lemma),
             }),
             { keepFocus: true },
         );
@@ -145,7 +145,7 @@
                                 <a
                                     href={resolve("/lookup/[lang]/[lemma]", {
                                         lang: row.lang,
-                                        lemma: row.lemma,
+                                        lemma: encodeURIComponent(row.lemma),
                                     })}
                                     onclick={(e) => e.stopPropagation()}
                                 >

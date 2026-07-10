@@ -37,9 +37,10 @@
 
     async function on_new_value(input: string) {
         if (input.trim() !== "") {
-            const path = resolve(
-                `/search/${search_param}/${encodeURIComponent(input.trim())}`,
-            );
+            const path = resolve("/search/[lang]/[search]", {
+                lang: search_param,
+                search: encodeURIComponent(input),
+            });
             const query = target_param ? `?l2=${encodeURIComponent(target_param)}` : "";
             await goto(path + query, { keepFocus: true });
         }

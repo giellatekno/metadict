@@ -108,7 +108,7 @@
             goto(
                 resolve("/lookup/[lang]/[lemma]/[article_id]", {
                     lang,
-                    lemma,
+                    lemma: encodeURIComponent(lemma),
                     article_id: cur_article,
                 }),
                 {
@@ -178,7 +178,7 @@
                                         dict.article_id.toString(),
                                         resolve("/lookup/[lang]/[lemma]/[article_id]", {
                                             lang,
-                                            lemma,
+                                            lemma: encodeURIComponent(lemma),
                                             article_id: dict.article_id.toString(),
                                         }),
                                         dict.dictionary_displayname === ""

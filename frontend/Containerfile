@@ -5,7 +5,6 @@ FROM docker.io/library/node:24-trixie
 
 RUN mkdir -p /app
 COPY package.json /app
-COPY package-lock.json /app
 COPY build /app/build
 
 WORKDIR /app

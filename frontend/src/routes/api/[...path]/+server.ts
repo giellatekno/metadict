@@ -1,13 +1,14 @@
 import type { RequestHandler } from "./$types";
 import { PUBLIC_API_ENDPOINT } from "$env/static/public";
 
-export const GET: RequestHandler = async ({ params, request, url, fetch }) => {
+export const GET: RequestHandler = async ({ request, url, fetch }) => {
     // const pathname = url.pathname;
-
     const api_url = new URL(PUBLIC_API_ENDPOINT);
 
     api_url.search = url.search;
-    api_url.pathname = `/${params.path}`;
+    // Use url.pathname because params.path gets decoded by sveltekit
+    // and we don't want to decode
+    api_url.pathname = url.pathname.slice(url.pathname.indexOf("/api/") + "/api".length);
 
     const headers = new Headers(request.headers);
     //headers.set("host", env.PUBLIC_API_ENDPOINT);
