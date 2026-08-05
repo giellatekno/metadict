@@ -1,1 +1,6 @@
 textfiles/
+
+*.txt
+!latin.txt
+*.doc
+*.docx
