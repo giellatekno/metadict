@@ -11,6 +11,7 @@ class RuoktumetParser(BaseParser):
 
         self.dictionary = Dictionary(
             id=dictionary_id,
+            slug=file.stem,
             name="Ruoktumet sátnegirjjáš",
             lang1=l1,
             lang2=l2,

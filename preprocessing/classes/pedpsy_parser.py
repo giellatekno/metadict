@@ -9,6 +9,7 @@ class PedPsyParser(BaseParser):
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
+            slug=file.stem,
             name="Pedagogalaš-psykologalaš sátnegirji",
             lang1="nob",
             lang2="sme",

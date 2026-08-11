@@ -9,6 +9,7 @@ class FysihkkaParser(BaseParser):
 
         self.dictionary = Dictionary(
             id=dictionary_id,
+            slug=file.stem,
             name="Fysihkka- ja kemiijatearpmat",
             lang1=l1,
             lang2=l2,
@@ -47,13 +48,13 @@ class FysihkkaParser(BaseParser):
     def to_html(self, line: str):
         # single line
         if line.find("\\") == -1:
-            return f"<p><b>{line.split('|')[0].strip()} </b>{line.split('|')[1].strip()}</p>"
+            return (
+                f"<p><b>{line.split('|')[0].strip()} </b>{line.split('|')[1].strip()}</p>"
+            )
 
         # multi line
         lines = line.split("\\")
-        html = (
-            f"<b>{lines[0].split('|')[0].strip()} </b>{lines[0].split('|')[1].strip()}"
-        )
+        html = f"<b>{lines[0].split('|')[0].strip()} </b>{lines[0].split('|')[1].strip()}"
         for l in lines[1:]:
             html += (
                 f"<br>&emsp;<b>{l.split('|')[0].strip()} </b>{l.split('|')[1].strip()}"

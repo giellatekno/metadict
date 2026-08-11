@@ -9,6 +9,7 @@ class BergslandMaggaParser(BaseParser):
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
+            slug=file.stem,
             name="Åarjelsaemien-daaroen baakoegærja",
             lang1="sma",
             lang2="nob",

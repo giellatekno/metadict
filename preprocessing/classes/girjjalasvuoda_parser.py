@@ -12,6 +12,7 @@ class GirjjalasvuodaParser(BaseParser):
 
         self.dictionary = Dictionary(
             id=dictionary_id,
+            slug=file.stem,
             name="Girjjálašvuođa tearpmat",
             lang1=l1,
             lang2=l2,

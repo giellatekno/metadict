@@ -11,6 +11,7 @@ class VestParser(BaseParser):
         name = "Nettisanakirja" if l1 == "fin" else "Neahttasátnegirji"
         self.dictionary = Dictionary(
             id=dictionary_id,
+            slug=file.stem,
             name=name,
             lang1=l1,
             lang2=l2,

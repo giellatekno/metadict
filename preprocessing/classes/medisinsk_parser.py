@@ -10,6 +10,7 @@ class MedisinskParser(BaseParser):
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
+            slug=file.stem,
             name="Medisinsk lommeparlør",
             lang1="nob",
             lang2="sme",

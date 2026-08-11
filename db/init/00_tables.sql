@@ -2,6 +2,13 @@ CREATE TABLE dictionaries (
     id SERIAL PRIMARY KEY,
     name text,
 
+    -- Stable identifier of the dictionary across regenerations. This is the
+    -- stem of the source file in preprocessing/dicts/, and thus also the name
+    -- of the generated "[a|d]-<slug>.sql" files. Used by
+    -- db/update_dictionaries.py to find the row to refresh, since the id is
+    -- assigned by the database and is not known by the preprocessing.
+    slug text UNIQUE,
+
     -- is this flexible enough? could a dictionary have more than 1 source
     -- and/or target langs?
     lang1 text,

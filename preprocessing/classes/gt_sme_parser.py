@@ -10,6 +10,7 @@ class GTSmeParser(BaseParser):
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
+            slug=file.stem,
             name="Neahttadigisánit",
             lang1="sme",
             lang2="sme",

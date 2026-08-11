@@ -10,6 +10,7 @@ class QvigstadParser(BaseParser):
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
+            slug=file.stem,
             name="Just Qvigstads lappiske ordbok fra Kaldfjorden og Vesterålen",
             lang1="sme",
             lang2="nob",

@@ -1,5 +1,4 @@
 import csv
-import re
 
 from utils.dataclasses import Article, Dictionary
 
@@ -12,6 +11,7 @@ class KintelParser(BaseParser):
         name = "Norsk-lulesamisk Ordbok" if l1 == "nob" else "Lulesamisk-norsk Ordbok"
         self.dictionary = Dictionary(
             id=dictionary_id,
+            slug=file.stem,
             name=name,
             lang1=l1,
             lang2=l2,

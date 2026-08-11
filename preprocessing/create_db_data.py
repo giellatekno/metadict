@@ -13,8 +13,15 @@ sql.
 
 Use the script "db/insert_dictionary.py" to insert these .sql files
 into a live database. Refer to that script for further information.
+
+Use --only to regenerate a subset, e.g. --only 'gt*' when only the
+giellatekno dictionaries have been updated. The other .sql files are then
+left alone, and the dictionaries they came from need not be present in
+dicts/.
 """
 
+import argparse
+import fnmatch
 import shutil
 from pathlib import Path
 
@@ -52,15 +59,40 @@ def parse_dictionary(file: Path, dictionary_id):
     return parser.get_parsed_data()
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--only",
+        metavar="GLOB",
+        default="*",
+        help="only parse dictionaries whose name matches GLOB, e.g. 'gt*'. "
+        "sql_files/ is then left in place, and only the matching files in it "
+        "are overwritten (default: parse everything, and wipe sql_files/ "
+        "first)",
+    )
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
+    parse_everything = args.only == "*"
+
     sql_folder = Path("sql_files")
-    if sql_folder.exists():
+    if parse_everything and sql_folder.exists():
         shutil.rmtree(sql_folder)
-    sql_folder.mkdir()
+    sql_folder.mkdir(exist_ok=True)
 
     dicts_dir = Path("dicts")
 
-    for dictionary_id, file in enumerate(dicts_dir.iterdir(), start=1):
+    parsed = 0
+    # sorted, so that a filtered run gives the same ids as a full one
+    for dictionary_id, file in enumerate(sorted(dicts_dir.iterdir()), start=1):
+        if not fnmatch.fnmatch(file.stem, args.only):
+            continue
+
         print(f"Parsing {file}")
         try:
             d, a = parse_dictionary(file, dictionary_id)
@@ -80,6 +112,11 @@ def main():
             for i, article in enumerate(a):
                 f.write(article.to_sql())
                 f.write(";\n" if i == last_i else ",\n")
+
+        parsed += 1
+
+    if parsed == 0:
+        exit(red(f'Error: no dictionaries in dicts/ matched "{args.only}"'))
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ class SammallahtiParser(BaseParser):
     def __init__(self, dictionary_id, file):
         self.dictionary = Dictionary(
             id=dictionary_id,
+            slug=file.stem,
             name="Sámi–Suoma Sátnegirji",
             lang1="sme",
             lang2="fin",

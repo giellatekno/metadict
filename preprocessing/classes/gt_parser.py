@@ -44,7 +44,7 @@ class GTParser(BaseParser):
         )
 
         self.dictionary = Dictionary(
-            id=dictionary_id, name=name, lang1=l1, lang2=l2, author=author
+            id=dictionary_id, slug=file.stem, name=name, lang1=l1, lang2=l2, author=author
         )
 
         self.articles = self.parse_dict(file)

@@ -41,6 +41,7 @@ def to_sqlval(val):
 @dataclass
 class Dictionary:
     id: int
+    slug: str
     name: str
     lang1: str
     lang2: str
@@ -60,6 +61,7 @@ class Dictionary:
         return dedent(f"""
             INSERT INTO
             dictionaries (
+                slug,
                 name,
                 lang1,
                 lang2,
@@ -72,6 +74,7 @@ class Dictionary:
                 isbn,
                 source
             ) VALUES (
+                {to_sqlval(self.slug)},
                 {to_sqlval(self.name)},
                 {to_sqlval(self.lang1)},
                 {to_sqlval(self.lang2)},
